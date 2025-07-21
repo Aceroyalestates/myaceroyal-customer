@@ -1,0 +1,137 @@
+<div class="flex flex-col p-8 gap-12">
+    <div class="flex pl-6 w-full items-center bg-primary rounded-lg border border-red-500 justify-between">
+        <div class="flex py-8 flex-col gap-2">
+            <h1 class="text-3xl !font-semibold !text-white">Premium Properties at Your Fingertips</h1>
+            <p class="text-white text-sm ml-4">Browse curated listings, compare with ease, and make confident property decisions.</p>
+        </div>
+        <div class="justify-end">
+            <img src="logo.png" width="200px" alt="Property Explore Image">
+        </div>
+    </div>
+
+    <div class="flex flex-col">
+       <!-- Tab Headers and Search Bar -->
+        <div class="flex flex-col md:flex-row items-center justify-between w-full space-y-4 md:space-y-0">
+            <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full md:w-auto">
+                <!-- Tab Header: Developed Properties -->
+                <h1
+                class="!text-gray-500 text-lg font-semibold cursor-pointer pb-6
+                        transition-colors duration-300 ease-in-out"
+                [ngClass]="{
+                    '!text-red-500 border-b-2 border-red-500': activeTab === 'developed',
+                    'text-gray-700 hover:text-red-500 hover:border-b-2 hover:border-red-300': activeTab !== 'developed'
+                }"
+                (click)="setActiveTab('developed')"
+                >
+                Developed Properties
+                </h1>
+
+                <!-- Tab Header: Undeveloped Properties -->
+                <h1
+                class="!text-gray-500 text-lg font-semibold cursor-pointer pb-6
+                        transition-colors duration-300 ease-in-out"
+                [ngClass]="{
+                    '!text-red-500 border-b-2 border-red-500': activeTab === 'undeveloped',
+                    'text-gray-700 hover:text-red-500 hover:border-b-2 hover:border-red-300': activeTab !== 'undeveloped'
+                }"
+                (click)="setActiveTab('undeveloped')"
+                >
+                Undeveloped Properties
+                </h1>
+            </div>
+
+            <!-- Search Bar -->
+            <app-search-bar placeholder="Search Property" />
+        </div>
+
+        <!-- Tab Content -->
+        <div>
+            <h1 class="flex text-lg !py-6 !text-gray-600">{{ activeTab | titlecase }} Properties</h1>
+        <!-- Developed Properties Content -->
+        <div *ngIf="activeTab === 'developed'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div *ngFor="let property of developedProperties"
+                class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative">
+                <div class="absolute inset-0 bg-cover bg-center brightness-70"
+                    [style.background-image]="'url(' + property.image + ')'"
+                    (error)="onImageError($event)">
+                </div>
+                <div class="relative z-10 p-4">
+                    <div class="flex flex-col gap-24">
+                        <div class="flex gap-2 items-center">
+                            @for(feature of [1, 2]; track feature) {
+                                <div class="flex border text-white !border-white rounded-full px-1 !text-[10px] items-center backdrop-blur-sm bg-black/20 gap-1 drop-shadow-md">
+                                    <app-icon name="target"></app-icon>
+                                    Smart Home
+                                </div>
+                            }
+                        </div>
+                        <div class="flex flex-col bg-white bg-opacity-90 rounded-t-lg p-4 gap-3">
+                            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                <div class="flex flex-col gap-2">
+                                    <h3 class="mb-2 text-medium font-bold text-gray-800">{{ property.title }}</h3>
+                                    <div class="flex gap-2 items-center">
+                                        <app-icon class="text-primary" name="map-pin"></app-icon>
+                                        <p class="text-gray-600 text-sm"> Lekki, Lagos </p>
+                                    </div>
+                                </div>
+                                <app-icon
+                                    [name]="'bookmark'"
+                                    class="text-primary p-1 bg-primary/10 rounded-full !text-xs"
+                                ></app-icon>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-gray-600 text-sm">{{ '20000000' | currency:'NGN':'symbol':'1.0-0' }}</h2>
+                                <p class="flex text-primary py-1 bg-primary/10 rounded-full !text-xs !px-2">Initial Deposit: <span class="font-semibold"> N5M</span> </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Undeveloped Properties Content -->
+        <div *ngIf="activeTab === 'undeveloped'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div *ngFor="let property of undevelopedProperties"
+                class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative">
+                <div class="absolute inset-0 bg-cover bg-center brightness-70"
+                    [style.background-image]="'url(' + property.image + ')'"
+                    (error)="onImageError($event)">
+                </div>
+                <div class="relative z-10 p-4">
+                    <div class="flex flex-col gap-24">
+                        <div class="flex gap-2 items-center">
+                            @for(feature of [1, 2]; track feature) {
+                                <div class="flex border text-white !border-white rounded-full px-1 !text-[10px] items-center backdrop-blur-sm bg-black/20 gap-1 drop-shadow-md">
+                                    <app-icon name="target"></app-icon>
+                                    Smart Home
+                                </div>
+                            }
+                        </div>
+                        <div class="flex flex-col bg-white bg-opacity-90 rounded-t-lg p-4 gap-3">
+                            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                                <div class="flex flex-col gap-2">
+                                    <h3 class="mb-2 text-medium font-bold text-gray-800">{{ property.title }}</h3>
+                                    <div class="flex gap-2 items-center">
+                                        <app-icon class="text-primary" name="map-pin"></app-icon>
+                                        <p class="text-gray-600 text-sm"> Lekki, Lagos </p>
+                                    </div>
+                                </div>
+                                <app-icon
+                                    [name]="'bookmark'"
+                                    class="text-primary p-1 bg-primary/10 rounded-full !text-xs"
+                                ></app-icon>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-gray-600 text-sm">{{ '20000000' | currency:'NGN':'symbol':'1.0-0' }}</h2>
+                                <p class="flex text-primary py-1 bg-primary/10 rounded-full !text-xs !px-2">Initial Deposit: <span class="font-semibold"> N5M</span> </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+  
+        
+    </div>
+</div>
