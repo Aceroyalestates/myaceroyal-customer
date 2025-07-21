@@ -12,8 +12,8 @@
         <img src="logo.png" alt="logo" />
       </a>
     </div>
-    <div class="pt-8 flex flex-col px-[30px] pb-6 gap-4">
-      <h1 class="font-medium text-sm !text-primary uppercase">Main Menu</h1>
+    <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
+      <h1 class="!font-light text-sm !text-gray-500 uppercase">Main Menu</h1>
       <ul nz-menu class="menu">
         <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon name="dashboard"></app-icon>
@@ -26,6 +26,22 @@
           >
         </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
+          <app-icon class="!text-sm" name="map"></app-icon>
+
+          <a
+            [routerLink]="['/dashboard']"
+            routerLinkActive="!bg-primary !text-[#fff]"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Explore Property</a
+          >
+        </li>
+      </ul>
+    </div>
+    <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
+      <h1 class="!font-light text-sm !text-gray-500 uppercase">Property Menu</h1>
+      <ul nz-menu class="menu">
+        
+        <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon name="property"></app-icon>
 
           <a
@@ -35,54 +51,51 @@
           >
         </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="user-round"></app-icon>
-
-          <a
-            [routerLink]="['/admin-management']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Admin Management</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="user-round"></app-icon>
-
-          <a
-            [routerLink]="['/user-management']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >User Management</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon name="purse"></app-icon>
 
           <a
             [routerLink]="['/financial-management']"
             routerLinkActive="!bg-primary !text-[#fff]"
-            >Financial Management</a
+            >Financial Transactions</a
           >
         </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="bag"></app-icon>
+          <app-icon name="clock"></app-icon>
 
           <a
             [routerLink]="['/subscription-form']"
             routerLinkActive="!bg-primary !text-[#fff]"
-            >Subsciption Form</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="bag"></app-icon>
-
-          <a
-            [routerLink]="['/realtor-management']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Realtor Management</a
+            >Inspection Schedule</a
           >
         </li>
       </ul>
     </div>
-    <div class="pt-8 flex flex-col px-[30px] pb-6 gap-0">
-      <h1 class="font-medium text-sm !text-primary uppercase mb-0">
+    <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
+      <h1 class="!font-light text-sm !text-gray-500 uppercase">Personal Menu</h1>
+      <ul nz-menu class="menu">
+        
+        <li nz-menu-item class="menu-item" nzMatchRouter>
+          <app-icon name="user"></app-icon>
+
+          <a
+            [routerLink]="['/property-management']"
+            routerLinkActive="!bg-primary !text-[#fff]"
+            >My Profile</a
+          >
+        </li>
+        <li nz-menu-item class="menu-item" nzMatchRouter>
+          <app-icon name="lock"></app-icon>
+
+          <a
+            [routerLink]="['/subscription-form']"
+            routerLinkActive="!bg-primary !text-[#fff]"
+            >Password & Security</a
+          >
+        </li>
+      </ul>
+    </div>
+    <div class="pt-8 flex flex-col pr-8 pb-6 gap-0 border-b border-gray-100 ml-8">
+      <h1 class="!font-light text-sm !text-gray-500 uppercase">
         SETTINGS
       </h1>
       <ul nz-menu class="menu">
@@ -96,6 +109,24 @@
           >
         </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
+          <app-icon name="help-circle"></app-icon>
+
+          <a
+            [routerLink]="['/faq']"
+            routerLinkActive="!bg-primary !text-[#fff]"
+            >FAQ</a
+          >
+        </li>
+        <li nz-menu-item class="menu-item" nzMatchRouter>
+          <app-icon name="phone-call"></app-icon>
+
+          <a
+            [routerLink]="['/notifications']"
+            routerLinkActive="!bg-primary !text-[#fff]"
+            >Support</a
+          >
+        </li>
+        <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon name="exit"></app-icon>
 
           <a>Sign Out</a>
@@ -105,30 +136,35 @@
   </nz-sider>
   <nz-layout>
     <nz-header>
-      <div class="app-header">
+      <div class="app-header border-b border-gray-100">
         <div class="flex items-center justify-between py-[30px] px-10 w-full">
-          <div>
+          <h1 class="!text-primary !text-xl">Welcome, {{ 'Endurance' }}!</h1>
+          <div class="flex items-center justify-between gap-4">
             <app-search-bar
               (search)="onSearch($event)"
               [placeholder]="'Search property...'"
             ></app-search-bar>
           </div>
-          <div class="flex gap-16 items-center">
+          <div class="flex gap-4 items-center">
             <app-icon
               [name]="'bell'"
+              class="text-primary p-2 bg-primary/10 rounded-full"
+            ></app-icon>
+            <app-icon
+              [name]="'message-circle'"
               class="text-primary p-2 bg-primary/10 rounded-full"
             ></app-icon>
             <div class="flex gap-2 items-center">
               <img
                 src="logo.png"
                 alt="profile"
-                class="w-10 h-10 rounded-full object-cover border border-red-500"
+                class="w-10 h-10 rounded-full object-cover border-2 border-red-500"
               />
               <div>
-                <h2 class="font-medium text-foreground mb-1 text-normal">
+                <h2 class="font-medium !text-gray-500 mb-1 text-normal">
                   Endurance
                 </h2>
-                <p class="text-small">Admin</p>
+                <p class="text-small text-gray-400">endurance&#64;gmail.com</p>
               </div>
             </div>
           </div>

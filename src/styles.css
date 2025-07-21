@@ -116,7 +116,7 @@
   }
 
   .sidebar-logo {
-    @apply pt-11 px-20 pb-8 border-b border-[#EEF2F6];
+    @apply pt-11 px-20 pb-8 border-b border-gray-100;
   }
 
   .menu-item {
