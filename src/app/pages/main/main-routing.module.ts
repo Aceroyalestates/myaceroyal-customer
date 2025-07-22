@@ -20,7 +20,8 @@ const routes: Routes = [
       },
       {
         path: 'explore',
-        component: ExploreComponent,
+        loadChildren: () =>
+          import('./explore/explore.module').then((m) => m.ExploreModule),
       },
       {
         path: 'user-management',
