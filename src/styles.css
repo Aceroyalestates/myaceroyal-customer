@@ -229,3 +229,7 @@ a {
     border-right-width: 1px;
     outline: 0;
 }
+
+.ant-menu-item-selected a {
+  color: white !important;
+}
