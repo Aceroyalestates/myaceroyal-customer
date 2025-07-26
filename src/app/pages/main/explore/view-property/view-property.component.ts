@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
@@ -30,4 +30,10 @@ export class ViewPropertyComponent {
       description: 'State-of-the-art office spaces in a prime business district. Ideal for growing businesses.',
     },
   ];
+
+  constructor(private location: Location) {}
+
+  back() {
+    this.location.back();
+  }
 }
