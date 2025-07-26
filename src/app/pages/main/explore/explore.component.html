@@ -50,7 +50,9 @@
         <!-- Developed Properties Content -->
         <div *ngIf="activeTab === 'developed'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div *ngFor="let property of developedProperties"
-                class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative">
+                class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
+                routerLink="view/{{ property.id }}"
+                >
                 <div class="absolute inset-0 bg-cover bg-center brightness-70"
                     [style.background-image]="'url(' + property.image + ')'"
                     (error)="onImageError($event)">

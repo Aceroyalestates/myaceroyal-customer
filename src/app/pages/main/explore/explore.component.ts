@@ -2,10 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-explore',
-  imports: [SharedModule, NzTabsModule, CommonModule],
+  imports: [SharedModule, NzTabsModule, CommonModule, RouterLink],
   templateUrl: './explore.component.html',
   styleUrl: './explore.component.css'
 })
