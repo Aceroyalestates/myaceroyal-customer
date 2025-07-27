@@ -1,4 +1,4 @@
-import { Person, Metric, Property, PaymentSchedule } from '../types/general';
+import { Person, Metric, Property, PaymentSchedule, InspectionSchedule } from '../types/general';
 
 export const People: Person[] = [
   { id: 1, name: 'Alice', email: 'alice@example.com', age: 30 },
@@ -85,3 +85,55 @@ export const PaymentSchedules: PaymentSchedule[] = [
     status: 'overdue',
   },
 ];
+
+export const INSPECTION_SCHEDULES: InspectionSchedule[] = [
+  {
+    id: 1,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-01',
+    realtor: 'John Doe',
+    status: 'upcoming',
+  },
+  {
+    id: 2,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-05',
+    realtor: 'Jane Smith',
+    status: 'completed',
+  },
+  {
+    id: 3,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-10',
+    realtor: 'Alice Johnson',
+    status: 'cancelled',
+  },
+  {
+    id: 4,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-15',
+    realtor: 'Bob Brown',
+    status: 'upcoming',
+  },
+  {
+    id: 5,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-20',
+    realtor: 'Charlie Davis',
+    status: 'completed',
+  },
+  {
+    id: 6,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-25',
+    realtor: 'Diana Wilson',
+    status: 'cancelled',
+  },
+  {
+    id: 7,
+    property: 'Eko Parapo Residence',
+    date: '2023-10-30',
+    realtor: 'Ethan Martinez',
+    status: 'upcoming',
+  },
+]

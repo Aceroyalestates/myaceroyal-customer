@@ -1,1 +1,46 @@
-<p>inspection works!</p>
+<main class="flex flex-col w-full">
+  <div class="flex flex-col gap-12">
+    <div class="flex gap-6">
+        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Inspection</h1>
+    </div>
+    
+    <div class="flex flex-col bg-primary rounded-lg p-6 gap-4 !text-white w-2/3">
+        <h1 class="!text-white"> Upcoming Inspection(s) </h1>
+         <div class="flex gap-8">
+            @for(inspection of [
+                { date: '12-07-2023', time: '10:00 AM', property: 'Luxury Apartment Complex' },
+                { date: '14-07-2023', time: '02:00 PM', property: 'Modern Villa' },
+                { date: '16-07-2023', time: '11:30 AM', property: 'Cozy Cottage' }
+            ]; track inspection) {
+                <div class="flex flex-col gap-2">
+                    <div class="flex gap-4">
+                        <app-icon name="home"></app-icon>
+                        <p>{{inspection.property}}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <app-icon name="calendar"></app-icon>
+                        <p>{{inspection.date}}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <app-icon name="clock"></app-icon>
+                        <p>{{inspection.time}}</p>
+                    </div>
+                </div>
+            }
+         </div>   
+    </div>
+
+    <button class="bg-primary !text-white py-3 !px-12 rounded-full w-fit">Book New Inspection</button>
+
+    <h1 class="text-xl font-semibold !text-gray-600">Inspection Schedule</h1>
+    <app-table
+      [data]="inspectionSchedules"
+      [columns]="columns"
+      [enableSorting]="true"
+      [rowLink]="getRowLink"
+      [enableSelection]="false"
+      (selectedData)="handleSelectedData($event)"
+      class="w-full"
+    />
+  </div>
+</main>

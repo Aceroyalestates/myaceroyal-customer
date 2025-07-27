@@ -11,7 +11,7 @@
           "
         >
           <th
-            class="p-4 py-2 pl-2 text-left text-[16px] font-medium text-[#4F4F4F]"
+            class="p-4 py-2 pl-2 text-left text-[16px] font-medium !text-gray-600"
             [class.cursor-pointer]="enableSorting()"
             (click)="enableSorting() && header.column.toggleSorting()"
           >
@@ -46,11 +46,10 @@
             let isFirst = first
           "
         >
-          <td class="p-2 text-sm text-gray-800">
+          <td class="p-2 text-sm text-gray-400">
             <span class="mr-7" *ngIf="enableSelection() && isFirst"
               ><input
                 type="checkbox"
-
                 [checked]="selectedRowIds().has(row.id)"
                 (change)="toggleRow(row.id)"
             /></span>

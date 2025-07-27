@@ -50,13 +50,14 @@ const routes: Routes = [
         component: ProfileComponent,
       },
       {
-        path: 'inspection-schedule',
-        component: InspectionComponent,
-      },
-      {
         path: 'explore',
         loadChildren: () =>
           import('./explore/explore.module').then((m) => m.ExploreModule),
+      },
+      {
+        path: 'inspection-schedule',
+        loadChildren: () =>
+          import('./inspection/inspection.module').then((m) => m.InspectionModule),
       },
       {
         path: 'user-management',

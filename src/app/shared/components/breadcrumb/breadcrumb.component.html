@@ -1,10 +1,14 @@
 <nav class="text-sm text-gray-500 !mb-0" aria-label="Breadcrumb">
-  <ol class="list-none p-0 inline-flex items-center space-x-1 !mb-0">
+
+  <div class="flex gap-4 items-center">
+    <app-icon name="arrow-left"></app-icon>
+    <ol class="list-none p-0 inline-flex items-center space-x-1 !mb-0">
     @if(items.length>1){
     <li
       *ngFor="let item of items; let first = first; let last = last"
       class="flex items-center !mb-0"
     >
+      <!-- <app-icon name="arrow-left"></app-icon> -->
       <ng-container *ngIf="first" class="flex items-center">
         <a
           [routerLink]="item.url"
@@ -13,7 +17,8 @@
         >
           {{ item.label }}
         </a>
-        <span class="mx-1 text-[32px] font-medium text-[#4F4F4F]">›</span>
+        <span class="mx-1 text-[32px] font-medium text-primary">›</span>
+        <!-- <app-icon class="!text-primary" name="chevron-right"></app-icon> -->
       </ng-container>
       <ng-container *ngIf="!last && !first" class="flex items-center">
         <a
@@ -43,4 +48,5 @@
     </li>
     }
   </ol>
+  </div>
 </nav>

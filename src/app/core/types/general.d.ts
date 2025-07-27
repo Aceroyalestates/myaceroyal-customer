@@ -31,3 +31,11 @@ export interface PaymentSchedule {
   amount: string;
   date: string;
 }
+
+export interface InspectionSchedule {
+  id: number;
+  property: string;
+  date: string;
+  realtor: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+}
