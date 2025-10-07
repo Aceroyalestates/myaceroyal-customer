@@ -1,119 +1,494 @@
-<div class="flex flex-col gap-4 p-6">
-  <div class="flex gap-6">
-    <app-icon (click)="back()" class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Eko Parapo Residence</h1>
+<main class="flex flex-col w-full">
+  <div class="flex gap-2 items-center mb-8">
+    <app-back class="cursor-pointer"></app-back>
+    <h1 class="!text-[#4F4F4F] text-[32px] font-medium">View Property</h1>
   </div>
 
-  <div class="flex w-full gap-4">
-    <div class="flex w-2/3">
-        <img class="rounded-lg" src="https://www.jkcement.com/wp-content/uploads/2023/08/beautiful-landscape-with-small-village-1024x575-jpg.webp" alt="">
-    </div>
-    <div class="flex w-1/3">
-      <div class="flex flex-col gap-4">
-        <img class="rounded-lg" src="https://amazingproperty.com.ng/wp-content/uploads/2015/11/Plot-C-1024x614.jpg" alt="">
-        <img class="rounded-lg" src="https://i.pinimg.com/564x/eb/9b/f9/eb9bf9dc04cff1b6ecf32e8805e76a99.jpg" alt="">
-      </div>
+  @if (loading) {
+  <div class="flex items-center justify-center py-20">
+    <div
+      class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
+    ></div>
+  </div>
+  } @else if (error) {
+  <div class="text-center py-20">
+    <p class="text-red-500 mb-4">{{ error }}</p>
+    <button
+      (click)="loadProperty(id!)"
+      class="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80"
+    >
+      Retry
+    </button>
+  </div>
+  } @else if (property) {
+  <div class="grid grid-cols-12 gap-x-6 max-h-fit mb-16">
+    <img
+      [src]="
+        property.property_images && property.property_images.length > 0
+          ? property.property_images[0].image_url
+          : 'images/property-image2.jpg'
+      "
+      [alt]="property.name"
+      class="col-span-8 w-full max-h-[465px] object-cover rounded-lg"
+    />
+    <div
+      class="flex flex-col items-center justify-between w-full max-h-full col-span-4 gap-y-6"
+    >
+      <img
+        [src]="
+          property.property_images && property.property_images.length > 1
+            ? property.property_images[1].image_url
+            : 'images/property-image3.jpg'
+        "
+        [alt]="property.name"
+        class="w-full h-[220px] object-cover rounded-lg"
+      />
+      <img
+        [src]="
+          property.property_images && property.property_images.length > 2
+            ? property.property_images[2].image_url
+            : 'images/property-image4.jpg'
+        "
+        [alt]="property.name"
+        class="w-full h-[220px] object-cover rounded-lg"
+      />
     </div>
   </div>
-  <div class="flex justify-between w-full">
-        <nz-tabset class="w-full">
-            @for(tab of ['1 Bedroom', '2 Bedroom', '3 Bedroom']; track tab) {
-                <nz-tab nzTitle={{tab}}>
-                  <div class="flex w-full items-center gap-4 my-10">
-                        <app-icon class="text-gray-500" name="map-pin"></app-icon>
-                        <p class="text-normal text-gray-500 text-xl">Lekki, Lagos</p>
-                    </div>
-                    <div class="flex flex-col gap-4">
-                        <p class="text-normal font-semibold text-gray-500 text-xl">Description</p>
-                        <p class="text-normal text-gray-500 text-xl">Nestled in the serene and secure environment of Abijo G.R.A., EKO PARAGON RESIDENCE offers unparalleled access to notable landmarks such as: 
-                        </p>
-                            <ul class="list-disc pl-6 text-gray-500">
-                                <li>Caleb British International School</li>
-                                <li>Novare Mall</li>
-                                <li>Lufasi Nature Park</li>
-                            </ul>
-                    </div>
-            </nz-tab>
-            }
-        </nz-tabset>
-        <div class="flex flex-col w-1/3 gap-2 mt-4 px-6">
-            <p class="text-[#4F4F4F] text-lg">Price</p>
-            <p class="text-primary text-2xl font-bold">₦ 50,000,000</p>
-            <p class="bg-red-50 !px-2 rounded-full text-primary w-fit text-center text-xs">
-                Initial Deposit: <span>₦ 5M</span>
+  } @if (property) {
+  <div class="flex gap-8">
+    <nz-tabset class="w-full" nzSize="large" [(nzSelectedIndex)]="selectedIndex">
+      @for (tab of property.property_units; track tab.id) {
+        <nz-tab nzTitle="{{ tab.unit_type.name || 'Unit' }}" (nzClick)="selectTab(tab)">
+        <div class="pt-4">
+          <div
+            class="flex text-[#4F4F4F] text-normal text-2xl gap-2 items-center mb-10"
+          >
+            <app-icon name="map-pin" [size]="24"></app-icon>
+            <h3 class="text-[#4F4F4F] text-normal text-2xl">
+              {{ property.location || "Location not available" }}
+            </h3>
+          </div>
+          <div class="w-full max-w-[628px] mb-10">
+            <h3 class="text-[#4F4F4F] text-normal text-2xl !mb-4">
+              Description
+            </h3>
+            <p class="text-[#7A7A7A] !text-normal text-[20px] font-normal">
+              {{ property.description || "No description available" }}
             </p>
-            <button class="bg-primary !text-white rounded-full py-2 px-4 !mt-8 cursor-pointer hover:bg-red-700">Make Purchase</button>
-            <button class="bg-white !text-primary rounded-full py-2 px-4 border border-primary !mt-4 cursor-pointer hover:bg-red-100">Book Inspection</button>
-        </div>
-    </div>
-    <div class="flex flex-col gap-4 mt-8">
-
-        <h2 class="text-xl font-semibold !text-gray-500">Amenities</h2>
-        <div class="flex gap-2 items-center">
-            @for(feature of [{name: 'Smart Home', icon: 'target'}, {name: 'Good road', icon: 'zap'}, {name: 'Portable Drinking Water', icon: 'droplet'}, {name: 'Electricity', icon: 'power'}]; track feature) {
-                <div class="flex border text-primary !border-white rounded-full px-2 !text-[10px] items-center bg-red-50 gap-2">
-                    <app-icon name={{feature.icon}}></app-icon>
-                    {{feature.name}}
-                </div>
-            }
-        </div>
-
-        <h2 class="text-xl font-semibold !text-gray-500 !mt-8">Available Units</h2>
-        <div class="flex border text-primary !border-white rounded-full p-2 items-center bg-red-50 gap-2 w-fit">
-            <app-icon class="!text-xs" name=home></app-icon>
-            5
-        </div>
-        <!-- Map component -->
-
-        <!-- Explore -->
-        
-        <div class="flex flex-col gap-6 mt-8">
-            <div class="flex justify-between">
-                <h2 class="text-xl font-semibold !text-gray-500">Explore Similar Properties</h2>
-                <div class="flex gap-4 items-center text-gray-500">
-                    <app-icon name="chevron-left"></app-icon>
-                    <app-icon name="chevron-right"></app-icon>
-                </div>
-            </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div *ngFor="let property of developedProperties"
-                class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative">
-            <div class="absolute inset-0 bg-cover bg-center brightness-70"
-                [style.background-image]="'url(' + property.image + ')'"
+            <!-- @if (property.property_features && property.property_features.length
+            > 0) {
+            <ul
+              class="list-disc text-[#4F4F4F] ps-7 !text-normal text-[20px] font-medium text-justify"
+            >
+              @for (feature of property.property_features; track
+              feature.feature_id) {
+              <li>{{ feature.feature.name }}</li>
+              }
+            </ul>
+            } @else {
+            <ul
+              class="list-disc text-[#4F4F4F] ps-7 !text-normal text-[20px] font-medium text-justify"
+            >
+              <li>Caleb British International School</li>
+              <li>⁠Novare Mall</li>
+              <li>⁠Lufasi Nature Park</li>
+            </ul>
+            } -->
+          </div>
+          <div class="w-full max-w-[628px] mb-10">
+            <h3 class="text-[#4F4F4F] text-normal text-2xl !mb-4">Amenities</h3>
+            <div class="grid grid-cols-2 items-center gap-4">
+              @for (amenity of property.property_features; track amenity.feature_id)
+              {
+                <span
+                class="flex items-center !text-medium text-primary bg-primary/10 gap-2 px-4 py-1 border border-white rounded-full"
                 >
+                    <app-icon name="airdrop" [size]="16"></app-icon>
+<!-- no wrap text -->
+                    <p class="!text-medium text-nowrap">{{ amenity?.feature?.name }}</p>
+                </span>
+              }
+              <!-- <span
+                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
+              >
+                <app-icon name="driving" [size]="16"></app-icon>
+
+                <p class="!text-medium">Good road network</p>
+              </span>
+              <span
+                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
+              >
+                <app-icon name="drop" [size]="16"></app-icon>
+
+                <p class="!text-medium">Clean Water Supply</p>
+              </span>
+              <span
+                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
+              >
+                <app-icon name="driving" [size]="16"></app-icon>
+
+                <p class="!text-medium">Electricity</p>
+              </span> -->
             </div>
-            <div class="relative z-10 p-4">
-                <div class="flex flex-col gap-24">
-                    <div class="flex gap-2 items-center">
-                        @for(feature of [1, 2]; track feature) {
-                            <div class="flex border text-white !border-white rounded-full px-1 !text-[10px] items-center backdrop-blur-sm bg-black/20 gap-1 drop-shadow-md">
-                                <app-icon name="target"></app-icon>
-                                Smart Home
-                            </div>
-                        }
-                    </div>
-                    <div class="flex flex-col bg-white bg-opacity-90 rounded-t-lg p-4 gap-3">
-                        <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                            <div class="flex flex-col gap-2">
-                                <h3 class="mb-2 text-medium font-bold text-gray-800">{{ property.title }}</h3>
-                                <div class="flex gap-2 items-center">
-                                    <app-icon class="text-primary" name="map-pin"></app-icon>
-                                    <p class="text-gray-600 text-sm"> Lekki, Lagos </p>
-                                </div>
-                            </div>
-                            <app-icon
-                                [name]="'bookmark'"
-                                class="text-primary p-1 bg-primary/10 rounded-full !text-xs"
-                            ></app-icon>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-gray-600 text-sm">{{ '20000000' | currency:'NGN':'symbol':'1.0-0' }}</h2>
-                            <p class="flex text-primary py-1 bg-primary/10 rounded-full !text-xs !px-2">Initial Deposit: <span class="font-semibold"> N5M</span> </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          <div class="w-full max-w-[628px] mb-10">
+            <h3 class="text-[#4F4F4F] text-normal text-2xl !mb-4">
+              Available Units
+            </h3>
+            <span
+              *ngIf="selectedUnit?.total_units"
+                class="flex w-fit items-center !text-medium text-primary bg-primary/10 gap-4 px-4 py-1 border border-white rounded-full"
+              >
+                <app-icon name="property" [size]="16"></app-icon>
+                <p class="!text-medium !text-[16px]">
+                  {{ selectedUnit?.total_units }}
+                </p>
+              </span>
+            <!-- <div class="flex items-center gap-4">
+              @if (property.property_units && property.property_units.length >
+              0) { @for (unit of property.property_units; track unit.id) {
+              <span
+                class="flex items-center !text-medium text-primary bg-primary/10 gap-4 px-4 py-1 border border-white rounded-full"
+              >
+                <app-icon name="property" [size]="16"></app-icon>
+                <p class="!text-medium !text-[16px]">
+                  {{ unit.unit_type.name || "Unit" }}
+                </p>
+              </span>
+              } } @else {
+              <span
+                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
+              >
+                <app-icon name="property" [size]="24"></app-icon>
+                <p class="!text-medium !text-[16px]">5</p>
+              </span>
+              }
+            </div> -->
+          </div>
         </div>
-        </div>
-        </div>
+      </nz-tab>
+      }
+    </nz-tabset>
+    <div class="flex flex-col max-h-[270px] pr-12">
+      <p class="!mb-1 text-gray-500 !text-normal text-[15px]">Price</p>
+      <h2
+        *ngIf="property.property_units && property.property_units.length > 0"
+        class="!text-primary text-normal text-[30px] whitespace-nowrap"
+      >
+      {{
+            selectedUnit?.price | currency:'₦ ':'symbol':'1.0-0'
+        }}
+      </h2>
+      <span
+        *ngIf="selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0"
+        class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 !mt-2 border border-white rounded-full whitespace-nowrap"
+      >
+        <p class="!text-medium">Initial Deposit: </p>
+
+        <p class="!text-medium">{{ selectedUnit?.property_installment_plans[0].initial_amount | currency:'₦ ':'symbol':'1.0-0' }}</p>
+      </span>
+      <button
+        type="button"
+        class="flex-1 items-center gap-3 rounded-full bg-primary py-4 px-10 text-[20px] !text-white font-medium cursor-pointer !mb-8 whitespace-nowrap !mt-12"
+        (click)="showUnitModal()"
+      >
+        Make Purchase
+      </button>
+      <button
+        (click)="bookInspection()"
+        class="flex-1 items-center gap-3 rounded-full border border-primary !text-primary hover:bg-primary hover:!text-white py-3 px-10 text-[20px] font-medium cursor-pointer whitespace-nowrap"
+      >
+        Book Inspection
+      </button>
     </div>
-</div>
+  </div>
+
+  <!-- Unit Selection Modal -->
+  <nz-modal
+      [(nzVisible)]="isUnitModalVisible"
+      nzTitle="Unit Selection"
+      (nzOnCancel)="handleCancel()"
+      (nzOnOk)="handleUnitOk()"
+      [nzOkLoading]="isLoading"
+    >
+      <div *nzModalContent>
+        
+        <div class="flex flex-col w-80">
+          <label for="unitNumber" class="mb-2 font-medium text-gray-500"
+            >Enter your preferred number of units</label
+          >
+          <nz-form-control nzErrorTip="Please select a unit type">
+            <nz-select
+              id="unitNumber"
+              [(ngModel)]="selectedUnitNumber"
+              class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              nzPlaceHolder="Select from available number of units"
+            >
+              @for (number of availableUnitNumber; track number) {
+                <nz-option [nzValue]="number" [nzLabel]="number"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+          
+        </div>
+      </div>
+      <div *nzModalFooter>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handleUnitOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedUnitNumber">Continue</button>
+      </div>
+    </nz-modal>
+
+    <!-- Plan Selection Modal -->
+    <nz-modal
+      [(nzVisible)]="isPlanModalVisible"
+      nzTitle="Plan Selection"
+      (nzOnCancel)="handleCancel()"
+      (nzOnOk)="handlePlanOk()"
+      [nzOkLoading]="isLoading"
+    >
+      <div *nzModalContent>
+        
+        <div class="flex flex-col w-80">
+          <label for="paymentPlan" class="mb-2 font-medium text-gray-500"
+            >Select your preferred payment plan</label
+          >
+          <!-- <nz-form-control nzErrorTip="Please select a unit type">
+            <nz-select
+              id="paymentPlan"
+              [(ngModel)]="selectedPlan"
+              class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              nzPlaceHolder="Select from available payment plans"
+            >
+            <nz-option [nzValue]="'1'" [nzLabel]="'Outright Payment'"></nz-option>
+              @for (plan of selectedUnit?.property_installment_plans; track plan.id) {
+                <nz-option [nzValue]="plan.id" [nzLabel]="plan.property_plan.title"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control> -->
+          <nz-radio-group [(ngModel)]="selectedPlan" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
+            <div class="flex flex-col w-full">
+                <label nz-radio [nzValue]="'1'" class="flex !items-center !mb-4 !text-primary"> 
+                  <div class="flex !items-center !gap-8"> 
+                    <span class="!text-gray-500">Outright Payment</span>
+                  </div> 
+                </label>
+                @for (plan of selectedUnit?.property_installment_plans; track plan.id) {
+                  <label nz-radio [nzValue]="plan.id" class="flex !items-center !mb-4"> 
+                    <div class="flex !items-center !gap-8"> 
+                      <span class="!text-gray-500">{{ plan.property_plan.title + ' Installments' }}</span>
+                    </div> 
+                </label>
+            }
+            </div>
+          </nz-radio-group>
+          
+        </div>
+      </div>
+      <div *nzModalFooter>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePlanOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedPlan">Continue</button>
+      </div>
+    </nz-modal>
+
+    <!-- Payment Method Modal -->
+    <nz-modal
+      [(nzVisible)]="isPaymentMethodModalVisible"
+      nzTitle="Payment Method"
+      [nzOkLoading]="isLoading"
+    >
+      <div *nzModalContent>
+        
+        <div class="flex flex-col w-80">
+          <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
+          <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
+            @if(selectedPlan === '1') {
+              {{
+                (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+              }}
+            } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
+              {{
+                (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+              }}
+            }
+          </h2>
+
+          <nz-radio-group [(ngModel)]="selectedPaymentMethod" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
+            <label nz-radio [nzValue]="1" class="flex !items-center !mb-4 !text-primary"> 
+              <div class="flex !items-center !gap-8"> 
+                <div class="p-2 bg-red-100 rounded-full">
+                  <app-icon name="home" class="!text-primary" />
+                </div> 
+                <span class="!text-gray-500">Bank Transfer </span>
+              </div> 
+            </label>
+            <label nz-radio [nzValue]="2" class="flex !items-center !mb-4"> 
+              <div class="flex !items-center !gap-8"> 
+                <div class="p-2 bg-red-100 rounded-full">
+                  <app-icon name="credit-card" class="!text-primary" />
+                </div> 
+                <span class="!text-gray-500">Pay with Paystack </span>
+              </div> 
+            </label>
+            <label nz-radio [nzValue]="3" class="flex !items-center !mb-4"> 
+              <div class="flex !items-center !gap-8"> 
+                <div class="p-2 bg-red-100 rounded-full">
+                  <app-icon name="credit-card" class="!text-primary" />
+                </div> 
+                <span class="!text-gray-500">Bank Draft </span>
+              </div> 
+            </label>
+          </nz-radio-group>
+          
+        </div>
+      </div>
+      <div *nzModalFooter>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentMethodOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedPaymentMethod">Continue</button>
+      </div>
+    </nz-modal>
+
+    <!-- Bank Transfer Modal -->
+    <nz-modal
+      [(nzVisible)]="isBankTransferModalVisible"
+      nzTitle="Bank Transfer"
+      (nzOnCancel)="handleCancel()"
+      (nzOnOk)="handleBankTransferOk()"
+      [nzOkLoading]="isLoading"
+    >
+      <div *nzModalContent>
+
+        <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
+        <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
+          @if(selectedPlan === '1') {
+            {{
+              (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+            }}
+          } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
+            {{
+              (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+            }}
+          }
+        </h2>
+
+        <p class="!text-gray-500 text-sm">Kindly make bank transfer to any of the bank account details below, Kindly note that after making payment, we would have to verify your payment before your transaction will be considered successful.</p>
+
+        <div class="flex flex-col gap-4 !text-gray-500 !mt-6">
+          <div class="flex flex-col">
+            <h1 class="!text-gray-600">Bank Name</h1>
+            <h2 class="!text-gray-400"> Zenith Bank Plc </h2>
+          </div>
+
+        <div class="flex flex-col">
+          <h1 class="!text-gray-600">Account Name</h1>
+          <h2 class="!text-gray-400"> Aceroyal Estate Homes Ltd </h2>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <h1 class="!text-gray-600">Account Number(s)</h1>
+          <div *ngFor="let accountNumber of ['101 123 4567', '101 123 4568', '101 123 4569', '101 123 4570']" class="flex flex-col justify-between items-center w-80 sm:flex-row gap-4">
+            <div class="flex items-center gap-4">
+              <span class="bg-red-100 p-2 rounded-full !text-primary">₦</span>
+              <h2 class="!text-gray-400"> {{ accountNumber }} </h2>
+            </div>
+            <button 
+              class="!text-gray-400 !bg-transparent !border-none hover:!text-primary" 
+              (click)="copyToClipboard(accountNumber)" 
+              nz-button 
+              nzType="default" 
+              nzSize="small" 
+              nzTooltipTitle="Copy to clipboard"
+              nzTooltipPlacement="top"
+            >
+              <app-icon name="copy"></app-icon>
+            </button>
+          </div>
+        </div>
+        </div>
+        
+      </div>
+      <div *nzModalFooter>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handleBankTransferOk()" [nzLoading]="isLoading" [disabled]="isLoading">Continue</button>
+      </div>
+    </nz-modal>
+
+    <!-- Bank Cheque Modal -->
+    <nz-modal
+      [(nzVisible)]="isBankChequeModalVisible"
+      nzTitle="Bank Cheque"
+      (nzOnCancel)="handleCancel()"
+      (nzOnOk)="handleBankChequeOk()"
+      [nzOkLoading]="isLoading"
+    >
+      <div *nzModalContent>
+        
+        <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
+        <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
+          @if(selectedPlan === '1') {
+            {{
+              (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+            }}
+          } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
+            {{
+              (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+            }}
+          }
+        </h2>
+
+        <p class="!text-gray-500 text-sm">Kindly note that we would need to verify and make sure that the cheque has been cleared before this can be referred to as a successful transaction.</p>
+
+        <p class="!text-gray-500 text-sm">Kindly write the cheque/Bank Draft in the name of </p>
+        <span class="text-primary">ACEROYAL ESTATE HOMES LTD. </span>
+        
+      </div>
+      <div *nzModalFooter>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handleBankChequeOk()" [nzLoading]="isLoading" [disabled]="isLoading">Continue</button>
+      </div>
+    </nz-modal>
+
+    <!-- Payment Success Modal -->
+    <nz-modal
+      [(nzVisible)]="isPaymentSuccessModalVisible"
+      nzTitle=""
+      (nzOnCancel)="handleCancel()"
+      (nzOnOk)="handlePaymentSuccessOk()"
+      [nzOkLoading]="isLoading"
+    >
+      <div *nzModalContent>
+        <div class="flex justify-center my-6 bg-red-50 p-2 rounded-full w-fit mx-auto">
+          <div class="flex justify-center items-center bg-red-100 p-4 rounded-full">
+            <app-icon name="check" class="!text-primary !text-2xl"></app-icon>
+          </div>
+        </div>
+        <h1 class="!text-gray-600 justify-center text-center text-lg font-semibold !my-4">SUCCESS</h1>
+        <div class="relative flex items-center justify-center cursor-pointer border border-gray-400 w-full rounded-lg hover:bg-gray-100 !px-4 !mb-4">
+          <input
+              type="file"
+              id="fileInput"
+              (change)="onFileSelected($event)"
+              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+              [disabled]="isLoading"
+              accept="image/*, application/pdf"
+          />
+          <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded cursor-pointer">
+              Upload your payment receipt (Image or PDF)
+          </label>
+        </div>
+        @if (selectedFile) {
+          <p class="!text-gray-500 text-sm !my-2 text-center">Selected file: {{ selectedFile.name }}</p>
+        }
+
+        <div class="flex items-center gap-4">
+          <app-icon name="info" class="!text-gray-400 !text-xl"></app-icon>
+          <p class="!text-gray-500 text-sm">Please kindly note that you need to fill our purchase form before your property allocation can be completed.</p>
+        </div>
+      </div>
+      <div *nzModalFooter>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Save Process</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Continue</button>
+      </div>
+    </nz-modal>
+
+   }
+</main>

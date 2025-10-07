@@ -90,6 +90,27 @@
         </div>
 
         <div>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="address" [nzNoColon]="true">
+                Property Address
+            </nz-form-label
+            >
+            <nz-form-control
+            nzErrorTip="Please enter property address"
+            >
+            <div class="flex justify-between">
+                <input
+                    nz-input
+                    formControlName="address"
+                    placeholder="Enter Property address"
+                    id="address"
+                    class="basis-2/3"
+                />
+            <app-icon class="!text-primary !text-sm" name="edit"></app-icon>
+            </div>
+            </nz-form-control>
+        </div>
+
+        <div>
             <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="description" [nzNoColon]="true">
                 Property Description
             </nz-form-label

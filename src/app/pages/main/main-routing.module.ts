@@ -19,12 +19,12 @@ const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard',
+        redirectTo: 'explore',
       },
-      {
-        path: 'dashboard',
-        component: DashboardComponent,
-      },
+      // {
+      //   path: 'dashboard',
+      //   component: DashboardComponent,
+      // },
       {
         path: 'faq',
         component: FaqComponent,

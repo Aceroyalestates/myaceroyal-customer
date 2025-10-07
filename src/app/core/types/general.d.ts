@@ -20,8 +20,6 @@ export interface Property {
   amenities: string;
   price: string;
   quantity: string;
-  propertyType?: string;
-  unitType?: string
 }
 
 export interface PaymentSchedule {

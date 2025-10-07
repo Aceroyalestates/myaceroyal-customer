@@ -1,0 +1,39 @@
+<div class="demo-container">
+	<h2>Loader and Error Modal Demo</h2>
+	
+	<div class="demo-section">
+		<h3>Loader Examples</h3>
+		<div class="button-group">
+			<button class="demo-btn" (click)="showLoader()">
+				Show Loader (3s)
+			</button>
+			<button class="demo-btn" (click)="showCustomLoader()">
+				Custom Loader (2s)
+			</button>
+		</div>
+	</div>
+	
+	<div class="demo-section">
+		<h3>Error Modal Examples</h3>
+		<div class="button-group">
+			<button class="demo-btn error-btn" (click)="showNetworkError()">
+				Network Error
+			</button>
+			<button class="demo-btn error-btn" (click)="showServerError()">
+				Server Error
+			</button>
+			<button class="demo-btn error-btn" (click)="showAuthError()">
+				Auth Error
+			</button>
+			<button class="demo-btn error-btn" (click)="showCustomError()">
+				Custom Error
+			</button>
+		</div>
+	</div>
+	
+	<div class="info-section">
+		<p><strong>Note:</strong> These components are automatically integrated with the HTTP interceptor.</p>
+		<p>Loaders will show automatically for POST, PUT, PATCH requests.</p>
+		<p>Error modals will show automatically for HTTP errors (4xx, 5xx).</p>
+	</div>
+</div>

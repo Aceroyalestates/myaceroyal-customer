@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ExploreComponent } from './explore.component';
 import { ViewPropertyComponent } from './view-property/view-property.component';
+import { BookInspectionComponent } from './book-inspection/book-inspection.component';
 
 const routes: Routes = [
       {
@@ -17,6 +18,10 @@ const routes: Routes = [
         path: 'view/:id',
         component: ViewPropertyComponent
       },
+      {
+        path: 'book/:id',
+        component: BookInspectionComponent
+      }
     ];
 
 @NgModule({

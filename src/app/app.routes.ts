@@ -1,11 +1,19 @@
 import { Routes } from '@angular/router';
 import { UnauthorizedComponent } from './pages/auth/unauthorized/unauthorized.component';
 import { NotFoundComponent } from './pages/auth/not-found/not-found.component';
+import { AuthGuard } from './core/guards';
 
 export const routes: Routes = [
-      {
-    path: '',
+  {
+		path: '',
+		redirectTo: 'auth/login',
+		pathMatch: 'full',
+	},
+  {
+    path: 'main',
     loadChildren: () => import('../app/pages/main/main.module').then(m => m.MainModule),
+    canActivate: [AuthGuard],
+		canActivateChild: [AuthGuard],
   },
   {
     path: 'auth',

@@ -8,6 +8,10 @@ import { IconComponent } from './components/icon/icon.component';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { PropertyCardComponent } from './components/property-card/property-card.component';
 import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
+import { BackComponent } from './components/back/back.component';
+import { ErrorModalComponent } from './components/error-modal/error-modal.component';
+import { LoaderComponent } from './components/loader/loader.component';
+import { PaginationComponent } from './components/pagination/pagination.component';
 
 @NgModule({
   declarations: [],
@@ -21,6 +25,10 @@ import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.componen
     SearchBarComponent,
     PropertyCardComponent,
     BreadcrumbComponent,
+    BackComponent,
+    LoaderComponent,
+    ErrorModalComponent,
+    PaginationComponent,
   ],
   exports: [
     ButtonComponent,
@@ -31,6 +39,10 @@ import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.componen
     SearchBarComponent,
     PropertyCardComponent,
     BreadcrumbComponent,
+    BackComponent,
+    LoaderComponent,
+    ErrorModalComponent,
+    PaginationComponent,
   ],
 })
 export class SharedModule {}

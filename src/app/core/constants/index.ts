@@ -45,8 +45,6 @@ export const Properties: Property[] = [
     location: 'Lagos-Epe Expressway, Abijo, Lagos',
     quantity: '3 Plots Available',
     amenities: 'Electricity, Pipe-borne Water, Tarred Road',
-    propertyType: 'Land',
-    unitType: 'Plot'
   },
   {
     id: 2,
@@ -56,8 +54,6 @@ export const Properties: Property[] = [
     location: 'Lagos-Epe Expressway, Abijo, Lagos',
     quantity: '3 Plots Available',
     amenities: 'Electricity, Pipe-borne Water, Tarred Road',
-    propertyType: 'Land',
-    unitType: 'Acres'
   },
 ];
 
@@ -85,6 +81,8 @@ export const PaymentSchedules: PaymentSchedule[] = [
     status: 'overdue',
   },
 ];
+
+export const PAGE_SIZE = 10;
 
 export const INSPECTION_SCHEDULES: InspectionSchedule[] = [
   {

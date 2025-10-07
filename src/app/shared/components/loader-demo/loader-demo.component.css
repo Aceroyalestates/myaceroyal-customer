@@ -1,0 +1,88 @@
+.demo-container {
+	max-width: 800px;
+	margin: 2rem auto;
+	padding: 2rem;
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.demo-container h2 {
+	color: #1f2937;
+	text-align: center;
+	margin-bottom: 2rem;
+	border-bottom: 2px solid #e5e7eb;
+	padding-bottom: 1rem;
+}
+
+.demo-section {
+	margin-bottom: 2rem;
+	padding: 1.5rem;
+	background: #f9fafb;
+	border-radius: 8px;
+}
+
+.demo-section h3 {
+	color: #374151;
+	margin-bottom: 1rem;
+	font-size: 1.125rem;
+}
+
+.button-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+
+.demo-btn {
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 8px;
+	background: #3b82f6;
+	color: white;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.demo-btn:hover {
+	background: #2563eb;
+	transform: translateY(-1px);
+}
+
+.error-btn {
+	background: #ef4444;
+}
+
+.error-btn:hover {
+	background: #dc2626;
+}
+
+.info-section {
+	margin-top: 2rem;
+	padding: 1.5rem;
+	background: #eff6ff;
+	border-radius: 8px;
+	border-left: 4px solid #3b82f6;
+}
+
+.info-section p {
+	margin: 0.5rem 0;
+	color: #1e40af;
+	font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+	.demo-container {
+		margin: 1rem;
+		padding: 1rem;
+	}
+	
+	.button-group {
+		flex-direction: column;
+	}
+	
+	.demo-btn {
+		width: 100%;
+	}
+}
