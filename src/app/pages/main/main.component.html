@@ -8,28 +8,28 @@
     [nzTrigger]="null"
   >
     <div class="sidebar-logo">
-      <a href="/dashboard">
+      <a href="/main/dashboard">
         <img src="logo.png" alt="logo" />
       </a>
     </div>
     <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
       <h1 class="!font-light text-sm !text-gray-500 uppercase">Main Menu</h1>
       <ul nz-menu class="menu">
-        <li nz-menu-item class="menu-item" nzMatchRouter>
+        <!-- <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon name="dashboard"></app-icon>
 
           <a
-            [routerLink]="['/dashboard']"
+            [routerLink]="['/main/dashboard']"
             routerLinkActive="!bg-primary !text-[#fff]"
             [routerLinkActiveOptions]="{ exact: true }"
             >Dashboard</a
           >
-        </li>
+        </li> -->
         <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon class="!text-sm" name="map"></app-icon>
 
           <a
-            [routerLink]="['/explore']"
+            [routerLink]="['/main/explore']"
             routerLinkActive="!bg-primary !text-[#fff]"
             [routerLinkActiveOptions]="{ exact: true }"
             >Explore Property</a
@@ -45,7 +45,7 @@
           <app-icon name="property"></app-icon>
 
           <a
-            [routerLink]="['/property-management']"
+            [routerLink]="['/main/property-management']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >Property Management</a
           >
@@ -54,7 +54,7 @@
           <app-icon name="purse"></app-icon>
 
           <a
-            [routerLink]="['/financial-transactions']"
+            [routerLink]="['/main/financial-transactions']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >Financial Transactions</a
           >
@@ -63,7 +63,7 @@
           <app-icon name="clock"></app-icon>
 
           <a
-            [routerLink]="['/inspection-schedule']"
+            [routerLink]="['/main/inspection-schedule']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >Inspection Schedule</a
           >
@@ -78,7 +78,7 @@
           <app-icon name="user"></app-icon>
 
           <a
-            [routerLink]="['/my-profile']"
+            [routerLink]="['/main/my-profile']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >My Profile</a
           >
@@ -87,7 +87,7 @@
           <app-icon name="lock"></app-icon>
 
           <a
-            [routerLink]="['/password-security']"
+            [routerLink]="['/main/password-security']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >Password & Security</a
           >
@@ -103,7 +103,7 @@
           <app-icon name="bell"></app-icon>
 
           <a
-            [routerLink]="['/notifications']"
+            [routerLink]="['/main/notifications']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >Notifications</a
           >
@@ -112,7 +112,7 @@
           <app-icon name="help-circle"></app-icon>
 
           <a
-            [routerLink]="['/faq']"
+            [routerLink]="['/main/faq']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >FAQ</a
           >
@@ -121,7 +121,7 @@
           <app-icon name="phone-call"></app-icon>
 
           <a
-            [routerLink]="['/support']"
+            [routerLink]="['/main/support']"
             routerLinkActive="!bg-primary !text-[#fff]"
             >Support</a
           >
@@ -138,7 +138,7 @@
     <nz-header>
       <div class="app-header border-b border-gray-100">
         <div class="flex items-center justify-between py-[30px] px-10 w-full">
-          <h1 class="!text-primary !text-xl">Welcome, {{ 'Endurance' }}!</h1>
+          <h1 class="!text-primary !text-xl">Welcome, {{ firstName }}!</h1>
           <div class="flex items-center justify-between gap-4">
             <app-search-bar
               (search)="onSearch($event)"
@@ -162,9 +162,9 @@
               />
               <div>
                 <h2 class="font-medium !text-gray-500 mb-1 text-normal">
-                  Endurance
+                  {{ firstName }}
                 </h2>
-                <p class="text-small text-gray-400">endurance&#64;gmail.com</p>
+                <p class="text-small text-gray-400">{{ loggedInUser.email }}</p>
               </div>
             </div>
           </div>

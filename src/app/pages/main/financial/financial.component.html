@@ -1,1 +1,96 @@
-<p>financial works!</p>
+<main class="flex flex-col w-full">
+  <!-- <div class="flex flex-col gap-12"> -->
+    <!-- <app-breadcrumb
+      [items]="[{ label: 'Property Management', url: '/property-management' }]"
+    ></app-breadcrumb> -->
+    <div class="flex gap-6">
+        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Financial Management</h1>
+    </div>
+    <div *ngIf="paymentScheduleDashboard" class="flex gap-4 justify-between pt-6 pb-12">
+        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
+            <p class="text-[#4F4F4F] text-lg">Total Amount Paid</p>
+            <p class="text-3xl">{{ paymentScheduleDashboard?.totalAmountPaid | currency:'NGN':'symbol':'1.0-0' }}</p>
+        </div>
+        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
+            <p class="text-[#4F4F4F] text-lg">Total Amount Due</p>
+            <p class="text-3xl">{{ paymentScheduleDashboard?.totalAmountDue | currency:'NGN':'symbol':'1.0-0' }}</p>
+        </div>
+        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
+            <p class="text-[#4F4F4F] text-lg">Remaining Balance</p>
+            <p class="text-3xl">{{ paymentScheduleDashboard?.remainingBalance | currency:'NGN':'symbol':'1.0-0' }}</p>
+        </div>
+    
+  </div>
+  <div class="flex">
+        <nz-tabset class="w-full">
+            <nz-tab nzTitle="Pending Payments">
+                <div class="flex w-full pt-12">
+                    <nz-table 
+                        nzSize="middle" 
+                        [nzData]="pendingPayments"
+                        [nzShowPagination]="false"
+                        nzWidthMode="full">
+                        <thead>
+                        <tr>
+                            <th>Installment</th>
+                            <th>Property</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (data of pendingPayments; track data.id) {
+                            <tr>
+                                <td>1/3</td>
+                                <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
+                                <td>{{ data.created_at | date:'mediumDate' }}</td>
+                                <td>{{ data.amount | currency:'₦ ':'symbol':'1.0-0' }}</td>
+                                <td>
+                                    <button (click)="pay()" class="flex px-4 bg-green-600 !text-sm !text-white rounded-full cursor-pointer hover:bg-green-700 whitespace-nowrap">Pay Now</button>
+
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </nz-table>
+                </div>
+                
+            </nz-tab>
+            <nz-tab nzTitle="Payment Completed" class="w-full">
+                <div class="flex w-full pt-12">
+                    <nz-table 
+                        nzSize="middle" 
+                        [nzData]="completedPayments"
+                        [nzShowPagination]="false">
+                        <thead>
+                        <tr>
+                            <th>Installment</th>
+                            <th>Property</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (data of completedPayments; track data.id) {
+                            <tr>
+                                <td>3/3</td>
+                                <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
+                                <td>{{ data.created_at | date:'mediumDate' }}</td>
+                                <td>{{ data.amount | currency:'₦ ':'symbol':'1.0-0' }}</td>
+                                <td>
+                                    <button (click)="downloadReceipt(data.id)" class="flex items-center px-4 bg-red-600 !text-sm !text-white rounded-full cursor-pointer hover:bg-red-700 whitespace-nowrap">
+                                        <app-icon class="text-[10px]" name="download"></app-icon> Receipt
+                                    </button>
+
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </nz-table>
+                </div>
+            </nz-tab>
+        </nz-tabset>
+    </div>
+</main>

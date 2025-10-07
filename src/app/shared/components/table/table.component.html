@@ -1,62 +1,254 @@
-<div class="overflow-x-auto w-full">
-  <table class="min-w-full divide-y-[3px] divide-[#fbfbfb]">
-    <thead class="bg-[#F9F9F9]">
-      <tr>
-        <!-- Headers -->
-        <ng-container
-          *ngFor="
-            let header of table.getHeaderGroups()[0].headers;
-            let i = index;
-            let isFirst = first
-          "
-        >
-          <th
-            class="p-4 py-2 pl-2 text-left text-[16px] font-medium !text-gray-600"
-            [class.cursor-pointer]="enableSorting()"
-            (click)="enableSorting() && header.column.toggleSorting()"
-          >
-            <span class="mr-7" *ngIf="enableSelection() && isFirst"
-              ><input
-                type="checkbox"
-                (change)="toggleAllRows()"
-                [checked]="
-                  selectedRowIds().size === table.getRowModel().rows.length
-                "
-            /></span>
-            {{ header.column.columnDef.header }}
-            <span *ngIf="enableSorting() && header.column.getIsSorted()">
-              {{ header.column.getIsSorted() === "asc" ? "🔼" : "🔽" }}
-            </span>
-          </th>
-        </ng-container>
-      </tr>
-    </thead>
+<div class="w-full bg-white rounded-lg shadow-sm" [ngClass]="{ 'dark:bg-[#222] dark:text-[#fafafa]': isDarkMode }">
+  <!-- Search and Filter Bar -->
+  <div *ngIf="showSearch || showFilters" class="p-4 border-b border-gray-200" [ngClass]="{ 'dark:bg-[#222] dark:border-[#444] dark:text-[#fafafa]': isDarkMode }">
+    <div class="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 lg:items-center lg:justify-between">
 
-    <tbody>
-      <tr
-      *ngFor="let row of table.getRowModel().rows"
-      class="hover:bg-gray-50 transition py-[14px] border-b-[3px] last:border-0 border-[#FBFBFB] cursor-pointer"
-      (click)="navigateToRow(row.original, $event)"
-    >
-        <!-- Row data -->
-        <ng-container
-          *ngFor="
-            let cell of row.getVisibleCells();
-            let i = index;
-            let isFirst = first
-          "
-        >
-          <td class="p-2 text-sm text-gray-400">
-            <span class="mr-7" *ngIf="enableSelection() && isFirst"
-              ><input
-                type="checkbox"
-                [checked]="selectedRowIds().has(row.id)"
-                (change)="toggleRow(row.id)"
-            /></span>
-            {{ cell.renderValue() }}
-          </td>
+      <!-- Search Section -->
+      <div *ngIf="showSearch" class="flex-1 max-w-md">
+        <app-search-bar
+          [placeholder]="searchPlaceholder"
+          (search)="onSearchTermChange($event)"
+          class="w-full">
+        </app-search-bar>
+      </div>
+
+      <!-- Filter Section -->
+      <div *ngIf="showFilters" class="flex flex-wrap gap-2 items-center">
+        <ng-container *ngFor="let column of columns">
+          <div *ngIf="column.filterable" class="min-w-32">
+            <nz-select
+              [ngModel]="filters[column.key]"
+              (ngModelChange)="onFilterChange(column, $event)"
+              [nzPlaceHolder]="'Filter ' + column.title"
+              nzAllowClear
+              class="w-full min-w-32">
+              <nz-option
+                *ngFor="let option of column.filterOptions"
+                [nzValue]="option.value"
+                [nzLabel]="option.label">
+              </nz-option>
+            </nz-select>
+          </div>
         </ng-container>
-      </tr>
-    </tbody>
-  </table>
+
+        <!-- Clear All Filters -->
+        <button
+          *ngIf="hasActiveFilters()"
+          nz-button
+          nzType="link"
+          nzSize="small"
+          (click)="clearAllFilters()"
+          class="text-gray-500 hover:text-gray-700">
+          <span nz-icon nzType="close"></span>
+          Clear Filters
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2">
+        <!-- Bulk Actions -->
+        <div *ngIf="showSelection && selectedRows.length > 0" class="flex items-center space-x-2">
+          <span class="text-sm text-gray-600">{{ selectedRows.length }} selected</span>
+          <nz-divider nzType="vertical"></nz-divider>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="overflow-x-auto">
+    <nz-spin [nzSpinning]="loading" class="w-full">
+      <nz-table
+        #basicTable
+        [nzData]="displayData"
+        [nzSize]="size"
+        [nzBordered]="bordered"
+        [nzShowPagination]="false"
+        class="w-full">
+
+        <!-- Table Header -->
+        <thead>
+          <tr class="bg-gray-50">
+            <!-- Selection Column -->
+            <th
+              *ngIf="showSelection"
+              class="w-12 text-center border-b border-gray-200 px-4 py-3">
+              <input
+                type="checkbox"
+                [checked]="allChecked"
+                (change)="onAllCheckedChange($event)"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </th>
+
+            <!-- Data Columns -->
+            <th
+              *ngFor="let column of columns"
+              [class]="'border-b border-gray-200 px-4 py-3 text-left font-medium text-gray-900 ' +
+                       (column.sortable ? 'cursor-pointer hover:bg-gray-100 ' : '') +
+                       (column.align === 'center' ? 'text-center ' : '') +
+                       (column.align === 'right' ? 'text-right ' : '')"
+              [style.width]="column.width"
+              (click)="onSortChange(column)">
+
+              <div class="flex items-center justify-between">
+                <span>{{ column.title }}</span>
+
+                <!-- Sort Indicators -->
+                <div *ngIf="column.sortable" class="ml-2 flex flex-col">
+                  <span
+                    nz-icon
+                    nzType="caret-up"
+                    [class]="getSortDirection(column) === 'asc' ? 'text-blue-600' : 'text-gray-400'"
+                    class="text-xs leading-none">
+                  </span>
+                  <span
+                    nz-icon
+                    nzType="caret-down"
+                    [class]="getSortDirection(column) === 'desc' ? 'text-blue-600' : 'text-gray-400'"
+                    class="text-xs leading-none">
+                  </span>
+                </div>
+              </div>
+            </th>
+
+            <!-- Actions Column -->
+            <th
+              *ngIf="actions.length > 0"
+              class="border-b border-gray-200 px-4 py-3 text-center font-medium text-gray-900 w-20">
+              Actions
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody>
+          <tr
+            *ngFor="let row of displayData; trackBy: trackByFn; let i = index"
+            [class]="'border-b border-gray-100 transition-colors ' +
+                     (enableRowClick ? 'cursor-pointer hover:bg-gray-50 ' : '') +
+                     (isRowSelected(row) ? 'bg-blue-50 ' : '')"
+            (click)="onRowClick(row)">
+
+            <!-- Selection Column -->
+            <td *ngIf="showSelection" class="w-12 text-center px-4 py-3">
+              <input
+                type="checkbox"
+                [checked]="isRowSelected(row)"
+                (change)="onRowCheckedChange(row, $event)"
+                (click)="$event.stopPropagation()"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </td>
+
+            <!-- Data Columns -->
+            <td
+              *ngFor="let column of columns"
+              [class]="'px-4 py-3 text-sm ' +
+                       (column.align === 'center' ? 'text-center ' : '') +
+                       (column.align === 'right' ? 'text-right ' : 'text-left ')"
+              [style.width]="column.width">
+
+              <!-- Status Column -->
+              <ng-container *ngIf="column.type === 'status'; else normalCell">
+                <nz-tag
+                  [nzColor]="getStatusColor(getCellValue(row, column))"
+                  class="rounded-full border-0 px-3 py-1 text-xs font-medium">
+                  {{ formatCellValue(getCellValue(row, column), column) }}
+                </nz-tag>
+              </ng-container>
+
+              <!-- Custom Cell Template -->
+              <ng-template #normalCell>
+                <ng-container *ngIf="customCellTemplate && column.type === 'custom'; else defaultCell">
+                  <ng-container
+                    *ngTemplateOutlet="customCellTemplate; context: { $implicit: getCellValue(row, column), row: row, column: column }">
+                  </ng-container>
+                </ng-container>
+
+                <!-- Default Cell -->
+                <ng-template #defaultCell>
+                  <span
+                    [class]="'text-gray-900 ' +
+                             (column.type === 'number' ? 'font-mono ' : '')"
+                    [title]="formatCellValue(getCellValue(row, column), column)">
+                    {{ formatCellValue(getCellValue(row, column), column) }}
+                  </span>
+                </ng-template>
+              </ng-template>
+            </td>
+
+            <!-- Actions Column -->
+            <td *ngIf="actions.length > 0" class="px-4 py-3 text-center">
+              <div class="flex items-center justify-center space-x-1">
+                <ng-container *ngFor="let action of actions">
+                  <button
+                    *ngIf="isActionVisible(action, row)"
+                    nz-button
+                    nzType="link"
+                    nzSize="small"
+                    [disabled]="isActionDisabled(action, row)"
+                    [title]="action.tooltip"
+                    [class]="'p-1 ' + (action.color ? 'text-' + action.color + '-600 hover:text-' + action.color + '-700' : 'text-gray-600 hover:text-gray-700')"
+                    (click)="onActionClick(action, row, $event)">
+                    <span
+                      *ngIf="action.icon"
+                      nz-icon
+                      [nzType]="action.icon"
+                      class="text-sm">
+                    </span>
+                    <span *ngIf="!action.icon" class="text-xs">{{ action.label }}</span>
+                  </button>
+                </ng-container>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty State -->
+          <tr *ngIf="displayData.length === 0 && !loading">
+            <td [colSpan]="columns.length + (showSelection ? 1 : 0) + (actions.length > 0 ? 1 : 0)"
+                class="text-center py-12">
+              <nz-empty [nzNotFoundContent]="emptyText" class="text-gray-500"></nz-empty>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="showPagination && total > 0" class="p-4 border-t border-gray-200" [ngClass]="{ 'dark:bg-[#222] dark:border-[#444] dark:text-[#fafafa]': isDarkMode }">
+    <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:items-center sm:justify-between">
+      <!-- Page Size Selector -->
+      <div class="flex items-center space-x-2">
+        <span class="text-sm text-gray-600">Show</span>
+        <nz-select
+          [ngModel]="currentPageSize"
+          (ngModelChange)="onPageSizeChange($event)"
+          class="w-20">
+          <nz-option
+            *ngFor="let size of pageSizeOptions"
+            [nzValue]="size"
+            [nzLabel]="size.toString()">
+          </nz-option>
+        </nz-select>
+        <span class="text-sm text-gray-600">entries</span>
+      </div>
+
+      <!-- Pagination Info -->
+      <div class="text-sm text-gray-600">
+        Showing {{ (currentPage - 1) * currentPageSize + 1 }} to
+        {{ Math.min(currentPage * currentPageSize, total) }} of {{ total }} entries
+      </div>
+
+      <!-- Pagination Controls -->
+      <nz-pagination
+        [nzPageIndex]="currentPage"
+        [nzPageSize]="currentPageSize"
+        [nzTotal]="total"
+        [nzShowSizeChanger]="false"
+        [nzShowQuickJumper]="true"
+        (nzPageIndexChange)="onPageChange($event)"
+        class="text-right">
+      </nz-pagination>
+    </div>
+  </div>
 </div>

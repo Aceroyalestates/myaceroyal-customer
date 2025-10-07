@@ -33,13 +33,17 @@
     <button class="bg-primary !text-white py-3 !px-12 rounded-full w-fit">Book New Inspection</button>
 
     <h1 class="text-xl font-semibold !text-gray-600">Inspection Schedule</h1>
+
+
     <app-table
       [data]="inspectionSchedules"
       [columns]="columns"
+      [actions]="actions"
+      [loading]="loading"
       [enableSorting]="true"
-      [rowLink]="getRowLink"
-      [enableSelection]="false"
-      (selectedData)="handleSelectedData($event)"
+      [enableSelection]="true"
+      (actionClick)="onTableAction($event)"
+      (rowClick)="onRowClick($event)"
       class="w-full"
     />
   </div>

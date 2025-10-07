@@ -3,6 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-icon',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './icon.component.html',
   styles: [
@@ -17,6 +18,7 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class IconComponent implements OnInit {
   @Input({ required: true }) name!: string;
+  @Input() size!: number;
   @Input() class?: string;
   @Input() type: 'fi' | 'google' | 'fa' = 'fi';
   @Input() options?: any;

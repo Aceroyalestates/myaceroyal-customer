@@ -1,0 +1,117 @@
+<div class="flex flex-col items-center justify-center h-screen w-full bg-cover bg-center bg-no-repeat" style="background-image: url('/images/login-background.jpg')">
+  <div class="absolute inset-0 bg-black/40"></div>
+  <div class="bg-white px-10 py-[157px] rounded-[10px] w-full max-w-[683px] relative z-10 max-h-11/12">
+    <div class="login-modal">
+      <div class="w-full flex flex-col items-center justify-center gap-y-3">
+        <h1 class="text-[32px] leading-[40px] font-medium">User Login</h1>
+        <p class="text-medium text-[#7A7A7A]">Enter login details below</p>
+      </div>
+
+      <div *ngIf="errorMessage" class="global-text-primary">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
+        <div class="flex flex-col gap-2">
+          <label for="email" class="text-medium text-[#4F4F4F] leading-[100%] font-medium">Username</label>
+          <input
+            type="email"
+            id="email"
+            formControlName="email"
+            class="border rounded-2xl px-6 py-[20px] text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+            [class.error]="
+              hasError('email', 'required') ||
+              hasError('email', 'minlength')
+            "
+            placeholder="Enter your email"
+            [disabled]="isLoading"
+          />
+          <div *ngIf="hasError('email', 'required')" class="text-primary">
+            email is required
+          </div>
+          <div *ngIf="hasError('email', 'minlength')" class="text-primary">
+            email must be at least 3 characters
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="password" class="text-medium text-[#4F4F4F] leading-[100%] font-medium">Password</label>
+          <div class="relative">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              class="border rounded-2xl px-6 py-[20px] text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+              [class.error]="
+                hasError('password', 'required') ||
+                hasError('password', 'minlength')
+              "
+              placeholder="Enter your password"
+              [disabled]="isLoading"
+            />
+            <button
+              type="button"
+              class="absolute right-6 top-1/2 -translate-y-1/2 z-10"
+              (click)="togglePasswordVisibility()"
+              [disabled]="isLoading"
+              [attr.aria-label]="
+                showPassword ? 'Hide password' : 'Show password'
+              "
+            >
+              <svg
+                *ngIf="!showPassword"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg
+                *ngIf="showPassword"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                ></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+          <div *ngIf="hasError('password', 'required')" class="text-primary">
+            Password is required
+          </div>
+          <div *ngIf="hasError('password', 'minlength')" class="text-primary">
+            Password must be at least 6 characters
+          </div>
+        </div>
+
+        <div class="flex w-full justify-end">
+          <a href="#" class="!text-primary">Forgot Password?</a>
+        </div>
+
+        <button
+          type="submit"
+          class="rounded-full bg-primary !text-white py-[20px] outline-0"
+          [disabled]="!loginForm.valid || isLoading"
+          [class.loading]="isLoading"
+        >
+          <span *ngIf="!isLoading">Login</span>
+          <span *ngIf="isLoading" class="loading-text">Logging in...</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

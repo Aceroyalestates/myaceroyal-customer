@@ -1,0 +1,150 @@
+<main class="flex flex-col w-full">
+  <div class="flex gap-2 items-center mb-8">
+    <app-back class="cursor-pointer"></app-back>
+    <h1 class="!text-[#4F4F4F] text-[32px] font-medium !mb-[12]">
+      Book Inspection
+    </h1>
+  </div>
+  <p class="!text-[#7A7A7A] !text-medium font-medium !mb-2">
+    Kindly fill the form below to schedule an inspection for this property.
+    Please Note the following:
+  </p>
+  <p
+    class="!text-[#7A7A7A] lowercase max-w-[760px] !text-medium !leading-6 !mb-8"
+  >
+    OUR INSPECTION DAYS ARE;
+    <span class="text-primary capitalize font-semibold mr-1"
+      >TUESDAYS, THURSDAYS AND SATURDAYS.</span
+    >
+    <span class="text-foreground capitalize font-semibold"
+      >WEDNESDAYS ONLY IS FOR LEGACY PHASE 2.</span
+    >
+    KINDLY BOOK
+    <span class="text-foreground font-semibold">24 HOURS</span> AHEAD OF TIME TO
+    ENABLE US PLAN ADEQUATELY, WE LOOK FORWARD TO A SUCCESSFUL AND STRESS-FREE
+    INSPECTION WITH YOU.
+  </p>
+  <form nz-form [formGroup]="formBasic" (ngSubmit)="submitFormBasic()">
+    <h2 class="text-[#4F4F4F] font-semibold text-[20px] leading-6 !mb-8">
+      Book Your Inspection
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+      <!-- Full Name -->
+      <div>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="full_name" [nzNoColon]="true">
+          <span class="!text-medium !text-[16px] font-medium">Full Name</span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Please enter your full name">
+          <input
+            nz-input
+            id="full_name"
+            placeholder="Enter your full name"
+            formControlName="full_name"
+          />
+        </nz-form-control>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="email" [nzNoColon]="true">
+          <span class="!text-medium !text-[16px] font-medium">Email</span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Please enter email address">
+          <input
+            nz-input
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email address"
+            id="email"
+          />
+        </nz-form-control>
+      </div>
+
+      <!-- Phone Number -->
+      <div>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="phone_number" [nzNoColon]="true">
+          <span class="!text-medium !text-[16px] font-medium">Phone Number</span>
+        </nz-form-label>
+        <nz-form-control 
+          [nzErrorTip]="getPhoneErrorMessage()"
+        >
+          <input
+            nz-input
+            type="tel"
+            formControlName="phone_number"
+            placeholder="09022334455"
+            id="phone_number"
+            maxlength="11"
+          />
+        </nz-form-control>
+      </div>
+
+
+      <!-- Appointment Date -->
+      <div>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="appointment_date" [nzNoColon]="true">
+          <span class="!text-medium !text-[16px] font-medium">Appointment Date</span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Please select appointment date">
+          <nz-date-picker
+            id="appointment_date"
+            formControlName="appointment_date"
+            nzPlaceHolder="Select date"
+            nzFormat="yyyy-MM-dd"
+            [nzDisabledDate]="disabledDate"
+            (ngModelChange)="onDateChange($event)"
+            style="width: 100%"
+          ></nz-date-picker>
+        </nz-form-control>
+      </div>
+
+      <!-- Special Requirements -->
+      <div class="md:col-span-2">
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="special_requirements" [nzNoColon]="true">
+          <span class="!text-medium !text-[16px] font-medium">Special Requirements</span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Please enter special requirements">
+          <textarea
+            nz-input
+            id="special_requirements"
+            formControlName="special_requirements"
+            placeholder="Enter any special requirements or notes..."
+            rows="3"
+            style="resize: vertical;"
+          ></textarea>
+        </nz-form-control>
+      </div>
+    </div>
+
+    <!-- Available Slots Display -->
+    @if (loading) {
+      <div class="flex justify-center py-4">
+        <nz-spin></nz-spin>
+      </div>
+    } @else if (availableSlots.length > 0) {
+      <div class="mt-6">
+        <h3 class="text-[#4F4F4F] font-semibold text-[18px] mb-4">Available Time Slots</h3>
+        <div *ngIf="availableSlots[0].display !== 'All Day'" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          @for (slot of availableSlots; track slot.time) {
+            <div class="p-2 border border-gray-300 rounded text-center text-sm">
+              {{ slot.time }} {{ slot.period }}
+            </div>
+          }
+        </div>
+        <div *ngIf="availableSlots[0].display === 'All Day'" class="p-2 border border-gray-300 rounded text-center text-sm">
+          All Day
+        </div>
+      </div>
+    }
+
+    <div class="flex items-center justify-end gap-6 my-12">
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="rounded-lg bg-primary py-3 px-10 text-[20px] !text-white font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+          Book Inspection
+      </button>
+    </div>
+  </form>
+</main>

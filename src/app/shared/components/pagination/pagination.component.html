@@ -1,0 +1,121 @@
+<div class="flex flex-col items-center justify-between gap-4 py-4 md:flex-row">
+  <!-- Pagination Info -->
+  @if (showInfo) {
+    <div class="text-sm text-gray-600">
+      <span>
+        Showing {{ startItem }} to {{ endItem }} of {{ totalItems }} results
+      </span>
+    </div>
+  }
+
+  <!-- Pagination Controls -->
+  <div class="flex items-center gap-1 flex-wrap justify-center sm:justify-start">
+    <!-- First Page -->
+    <button
+      (click)="goToFirstPage()"
+      [disabled]="!canGoPrevious"
+      class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+      title="First page"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <!-- Previous Page -->
+    <button
+      (click)="goToPreviousPage()"
+      [disabled]="!canGoPrevious"
+      class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+      title="Previous page"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <!-- First Page Number (if not visible) -->
+    @if (showFirstEllipsis) {
+      <button
+        (click)="goToPage(1)"
+        [ngClass]="{
+          'flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200': true,
+          '!bg-primary !text-white !border-primary hover:!bg-primary/80 shadow-md': currentPage === 1,
+          'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900': currentPage !== 1
+        }"
+      >
+        1
+      </button>
+      <span class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium text-gray-500">...</span>
+    }
+
+    <!-- Visible Page Numbers -->
+    @for (page of visiblePages; track page) {
+      <button
+        (click)="goToPage(page)"
+        [ngClass]="{
+          'flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200': true,
+          '!bg-primary !text-white !border-primary hover:!bg-primary/80 shadow-md': currentPage === page,
+          'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900': currentPage !== page
+        }"
+      >
+        {{ page }}
+      </button>
+    }
+
+    <!-- Last Page Number (if not visible) -->
+    @if (showLastEllipsis) {
+      <span class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium text-gray-500">...</span>
+      <button
+        (click)="goToPage(totalPages)"
+        [ngClass]="{
+          'flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200': true,
+          '!bg-primary !text-white !border-primary hover:!bg-primary/80 shadow-md': currentPage === totalPages,
+          'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:text-gray-900': currentPage !== totalPages
+        }"
+      >
+        {{ totalPages }}
+      </button>
+    }
+
+    <!-- Next Page -->
+    <button
+      (click)="goToNextPage()"
+      [disabled]="!canGoNext"
+      class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+      title="Next page"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+
+    <!-- Last Page -->
+    <button
+      (click)="goToLastPage()"
+      [disabled]="!canGoNext"
+      class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-gray-700"
+      title="Last page"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Items Per Page Selector -->
+  <div class="flex items-center gap-2">
+    <label for="items-per-page" class="text-sm text-gray-600">Items per page:</label>
+    <select
+      id="items-per-page"
+      [value]="itemsPerPage"
+      (change)="onLimitChange($event)"
+      class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 font-medium cus:ring-primary focus:border-primary bg-white cursor-pointer"
+    >
+      <option value="6">6</option>
+      <option value="12">12</option>
+      <option value="24">24</option>
+      <option value="48">48</option>
+    </select>
+  </div>
+</div>

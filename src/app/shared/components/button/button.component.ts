@@ -6,6 +6,7 @@ import { MatSpinner } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-button',
+    standalone: true,
     imports: [CommonModule, MatButton, MatSpinner],
     templateUrl: './button.component.html',
     styleUrl: './button.component.css'

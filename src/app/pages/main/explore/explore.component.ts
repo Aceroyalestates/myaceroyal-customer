@@ -1,8 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { Property } from 'src/app/core/models/properties';
+import { PaginationData } from 'src/app/shared/components/pagination/pagination.component';
+import { PropertiesService } from 'src/app/core/services/properties.service';
+import { TableAction, TableColumn } from 'src/app/shared/components/table/table.component';
 
 @Component({
   selector: 'app-explore',
@@ -12,6 +16,31 @@ import { RouterLink } from '@angular/router';
 })
 export class ExploreComponent {
   activeTab: string = 'developed'; // 'developed' or 'undeveloped'
+  properties: Property[] = [];
+  loading = false;
+  error: string | null = null;
+  lucy!: string;
+  pagination: PaginationData | null = null;
+  currentPage = 1;
+  pageSize = 12;
+
+  columns: TableColumn[] = [
+    { key: 'name', title: 'Property Name', sortable: true, type: 'text' },
+    { key: 'location', title: 'Location', sortable: true, type: 'text' },
+    { key: 'propertyType', title: 'Property Type', sortable: true, type: 'text' },
+    { key: 'unitType', title: 'Unit Type', sortable: true, type: 'text' },
+    { key: 'quantity', title: 'Listings', sortable: true, type: 'text' },
+    { key: 'price', title: 'Unit Price', sortable: true, type: 'text' },
+  ];
+
+  actions: TableAction[] = [
+    { key: 'view', label: 'View', icon: 'eye', color: 'blue', tooltip: 'View property details' },
+  ];
+
+  emptyArray: any[] = new Array(12).fill('');
+
+  getRowLink = (row: Property) => `/main/explore/view/${row.id}`;
+  selectedproperty = signal<Property[]>([]);
 
   developedProperties = [
     {
@@ -91,6 +120,19 @@ export class ExploreComponent {
     },
   ];
 
+  constructor(
+    private router: Router,
+    private propertiesService: PropertiesService
+  ) {
+    effect(() => {
+      console.log('Selected property from table: ', this.selectedproperty());
+    });
+  }
+
+  ngOnInit(): void {
+    this.loadProperties();
+  }
+
   setActiveTab(tabId: string): void {
     this.activeTab = tabId;
     console.log(`Tab changed to: ${tabId}`); // Added for debugging
@@ -100,5 +142,58 @@ export class ExploreComponent {
     const target = event.target as HTMLImageElement;
     target.onerror = null; // Prevent infinite loop if placeholder also fails
     target.src = '[https://placehold.co/400x250/CCCCCC/666666?text=Image+Error](https://placehold.co/400x250/CCCCCC/666666?text=Image+Error)';
+  }
+
+    loadProperties(page: number = 1, limit: number = this.pageSize): void {
+    this.loading = true;
+    this.error = null;
+    this.currentPage = page;
+    this.pageSize = limit;
+    
+    this.propertiesService.getProperties(page, limit, {}).subscribe({
+      next: (response) => {
+        this.properties = response.data || [];
+        this.pagination = response.pagination || null;
+        this.loading = false;
+      },
+      error: (error) => {
+        this.loading = false;
+        this.error = 'Failed to load properties';
+        console.error('Error loading properties:', error);
+      },
+    });
+  }
+
+  onPageChange(page: number): void {
+    this.loadProperties(page, this.pageSize);
+  }
+
+  onLimitChange(limit: number): void {
+    this.loadProperties(1, limit); // Reset to first page when changing limit
+  }
+
+  handleViewProperty(id: string | number) {
+    this.router.navigateByUrl(`/main/explore/view/${id}`);
+  }
+
+  handleSelectedData(selected: Property[]) {
+    this.selectedproperty.set(selected);
+    console.log(this.selectedproperty);
+  }
+
+  onTableAction(event: { action: string; row: Property }): void {
+    console.log('Table action:', event.action, 'on row:', event.row);
+    switch (event.action) {
+      case 'view':
+        this.handleViewProperty(event.row.id);
+        break;
+      default:
+        console.log('Unknown action:', event.action);
+    }
+  }
+
+  onRowClick(row: Property): void {
+    console.log('Row clicked:', row);
+    this.handleViewProperty(row.id);
   }
 }
