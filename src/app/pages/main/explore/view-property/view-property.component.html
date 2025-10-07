@@ -75,25 +75,6 @@
             <p class="text-[#7A7A7A] !text-normal text-[20px] font-normal">
               {{ property.description || "No description available" }}
             </p>
-            <!-- @if (property.property_features && property.property_features.length
-            > 0) {
-            <ul
-              class="list-disc text-[#4F4F4F] ps-7 !text-normal text-[20px] font-medium text-justify"
-            >
-              @for (feature of property.property_features; track
-              feature.feature_id) {
-              <li>{{ feature.feature.name }}</li>
-              }
-            </ul>
-            } @else {
-            <ul
-              class="list-disc text-[#4F4F4F] ps-7 !text-normal text-[20px] font-medium text-justify"
-            >
-              <li>Caleb British International School</li>
-              <li>⁠Novare Mall</li>
-              <li>⁠Lufasi Nature Park</li>
-            </ul>
-            } -->
           </div>
           <div class="w-full max-w-[628px] mb-10">
             <h3 class="text-[#4F4F4F] text-normal text-2xl !mb-4">Amenities</h3>
@@ -104,31 +85,9 @@
                 class="flex items-center !text-medium text-primary bg-primary/10 gap-2 px-4 py-1 border border-white rounded-full"
                 >
                     <app-icon name="airdrop" [size]="16"></app-icon>
-<!-- no wrap text -->
                     <p class="!text-medium text-nowrap">{{ amenity?.feature?.name }}</p>
                 </span>
               }
-              <!-- <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
-              >
-                <app-icon name="driving" [size]="16"></app-icon>
-
-                <p class="!text-medium">Good road network</p>
-              </span>
-              <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
-              >
-                <app-icon name="drop" [size]="16"></app-icon>
-
-                <p class="!text-medium">Clean Water Supply</p>
-              </span>
-              <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
-              >
-                <app-icon name="driving" [size]="16"></app-icon>
-
-                <p class="!text-medium">Electricity</p>
-              </span> -->
             </div>
           </div>
           <div class="w-full max-w-[628px] mb-10">
@@ -144,26 +103,6 @@
                   {{ selectedUnit?.total_units }}
                 </p>
               </span>
-            <!-- <div class="flex items-center gap-4">
-              @if (property.property_units && property.property_units.length >
-              0) { @for (unit of property.property_units; track unit.id) {
-              <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-4 px-4 py-1 border border-white rounded-full"
-              >
-                <app-icon name="property" [size]="16"></app-icon>
-                <p class="!text-medium !text-[16px]">
-                  {{ unit.unit_type.name || "Unit" }}
-                </p>
-              </span>
-              } } @else {
-              <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
-              >
-                <app-icon name="property" [size]="24"></app-icon>
-                <p class="!text-medium !text-[16px]">5</p>
-              </span>
-              }
-            </div> -->
           </div>
         </div>
       </nz-tab>
@@ -210,6 +149,7 @@
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handleUnitOk()"
       [nzOkLoading]="isLoading"
+      [nzMaskClosable]="false"
     >
       <div *nzModalContent>
         
@@ -245,6 +185,7 @@
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handlePlanOk()"
       [nzOkLoading]="isLoading"
+      [nzMaskClosable]="false"
     >
       <div *nzModalContent>
         
@@ -252,19 +193,6 @@
           <label for="paymentPlan" class="mb-2 font-medium text-gray-500"
             >Select your preferred payment plan</label
           >
-          <!-- <nz-form-control nzErrorTip="Please select a unit type">
-            <nz-select
-              id="paymentPlan"
-              [(ngModel)]="selectedPlan"
-              class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              nzPlaceHolder="Select from available payment plans"
-            >
-            <nz-option [nzValue]="'1'" [nzLabel]="'Outright Payment'"></nz-option>
-              @for (plan of selectedUnit?.property_installment_plans; track plan.id) {
-                <nz-option [nzValue]="plan.id" [nzLabel]="plan.property_plan.title"></nz-option>
-              }
-            </nz-select>
-          </nz-form-control> -->
           <nz-radio-group [(ngModel)]="selectedPlan" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
             <div class="flex flex-col w-full">
                 <label nz-radio [nzValue]="'1'" class="flex !items-center !mb-4 !text-primary"> 
@@ -277,8 +205,8 @@
                     <div class="flex !items-center !gap-8"> 
                       <span class="!text-gray-500">{{ plan.property_plan.title + ' Installments' }}</span>
                     </div> 
-                </label>
-            }
+                  </label>
+                }
             </div>
           </nz-radio-group>
           
@@ -294,23 +222,39 @@
     <nz-modal
       [(nzVisible)]="isPaymentMethodModalVisible"
       nzTitle="Payment Method"
+      (nzOnCancel)="handleCancel()"
+      (nzOnOk)="handlePaymentMethodOk()"
       [nzOkLoading]="isLoading"
+      [nzMaskClosable]="false"
     >
       <div *nzModalContent>
         
         <div class="flex flex-col w-80">
-          <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
-          <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
+          
             @if(selectedPlan === '1') {
-              {{
-                (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-              }}
+              <h1 for="paymentMethod" class="!mb-2 !text-gray-500"> Amount </h1>
+              <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
+                  {{
+                    (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+                  }}
+              </h2>
             } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
-              {{
-                (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-              }}
+              
+              <div class="flex flex-col w-80">
+                <label for="amountToPay" class="!mb-2 !text-gray-500">Enter amount to pay</label>
+                <input 
+                  nz-input 
+                  placeholder="Enter amount to pay" 
+                  [(ngModel)]="amountToPay" 
+                  [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', align: 'left' }" />
+              </div>
+              <h2 class="!text-gray-500 text-normal text-[10px] whitespace-nowrap !mb-6 !mt-1 !py-1 !px-2 bg-yellow-100 rounded w-fit">
+                Suggested Amount:
+                  {{
+                    (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+                  }}
+              </h2>
             }
-          </h2>
 
           <nz-radio-group [(ngModel)]="selectedPaymentMethod" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
             <label nz-radio [nzValue]="1" class="flex !items-center !mb-4 !text-primary"> 
@@ -354,6 +298,7 @@
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handleBankTransferOk()"
       [nzOkLoading]="isLoading"
+      [nzMaskClosable]="false"
     >
       <div *nzModalContent>
 
@@ -365,7 +310,7 @@
             }}
           } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
             {{
-              (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+              (amountToPay) | currency:'₦ ':'symbol':'1.0-0'
             }}
           }
         </h2>
@@ -419,6 +364,7 @@
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handleBankChequeOk()"
       [nzOkLoading]="isLoading"
+      [nzMaskClosable]="false"
     >
       <div *nzModalContent>
         
@@ -430,7 +376,7 @@
             }}
           } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
             {{
-              (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+              (amountToPay) | currency:'₦ ':'symbol':'1.0-0'
             }}
           }
         </h2>
@@ -454,6 +400,7 @@
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handlePaymentSuccessOk()"
       [nzOkLoading]="isLoading"
+      [nzMaskClosable]="false"
     >
       <div *nzModalContent>
         <div class="flex justify-center my-6 bg-red-50 p-2 rounded-full w-fit mx-auto">
@@ -489,6 +436,5 @@
         <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Continue</button>
       </div>
     </nz-modal>
-
    }
 </main>
