@@ -21,7 +21,7 @@
         </div>
     
   </div>
-  <div class="flex">
+  <div class="flex w-full">
         <nz-tabset class="w-full">
             <nz-tab nzTitle="Pending Payments">
                 <div class="flex w-full pt-12">
@@ -29,7 +29,8 @@
                         nzSize="middle" 
                         [nzData]="pendingPayments"
                         [nzShowPagination]="false"
-                        nzWidthMode="full">
+                        nzWidthMode="full"
+                        class="!w-full">
                         <thead>
                         <tr>
                             <th>Installment</th>
@@ -62,7 +63,8 @@
                     <nz-table 
                         nzSize="middle" 
                         [nzData]="completedPayments"
-                        [nzShowPagination]="false">
+                        [nzShowPagination]="false"
+                        class="!w-full">
                         <thead>
                         <tr>
                             <th>Installment</th>
