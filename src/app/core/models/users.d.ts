@@ -80,3 +80,24 @@ export interface TeamActivityLog {
     };
   };
 }
+
+export interface UserProfileResponse extends IResponse {
+  user: User;
+}
+
+export interface avatarRequest {
+  avatar: string;
+}
+
+export interface UpdateUserRequest {
+  full_name?: string;
+  phone_number?: string;
+  gender?: string;
+  date_of_birth?: string;
+  avatar?: File | null;
+  address?: string;
+  nationality_id?: string;
+  states_id?: string;
+  bank_verification_number?: string;
+  national_identity_number?: string;
+}

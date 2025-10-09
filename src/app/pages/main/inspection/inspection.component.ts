@@ -1,6 +1,8 @@
 import { Component, effect, signal } from '@angular/core';
 import { ColumnDef } from '@tanstack/table-core';
 import { INSPECTION_SCHEDULES } from 'src/app/core/constants';
+import { Appointment } from 'src/app/core/models/properties';
+import { AppointmentService } from 'src/app/core/services/appointments.service';
 import { InspectionSchedule } from 'src/app/core/types/general';
 import { TableAction, TableColumn } from 'src/app/shared/components/table/table.component';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -14,7 +16,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
 export class InspectionComponent {
 inspectionSchedules: InspectionSchedule[] = INSPECTION_SCHEDULES;
   getRowLink = (row: InspectionSchedule) => `/inspection-schedule/${row.id}`;
-  loading = false;
+  isLoading = false;
   columns: TableColumn[] = [
     {
       key: 'property',
@@ -46,12 +48,17 @@ inspectionSchedules: InspectionSchedule[] = INSPECTION_SCHEDULES;
     ];
 
   selected = signal<InspectionSchedule[]>([]);
+  appointments: Appointment[] = [];
 
-  constructor() {
+  constructor(private appointmentService: AppointmentService) {
     // Optional effect to react to selected schedule changes
     effect(() => {
       console.log('Selected schedule from table:', this.selected());
     });
+  }
+
+  ngOnInit(): void {
+    this.getAppointments();
   }
 
   handleSelectedData(selected: InspectionSchedule[]) {
@@ -72,5 +79,21 @@ inspectionSchedules: InspectionSchedule[] = INSPECTION_SCHEDULES;
       console.log('Row clicked:', row);
         // Navigate to user details
         // window.location.href = `/main/user-management/view/${row.id}/${row.property}`;
+      }
+
+      getAppointments() {
+        console.log('Fetching appointments...');
+        this.isLoading = true;
+        this.appointmentService.getAppointments().subscribe({
+          next: (response) => {
+            console.log('Fetched appointments:', response);
+            this.appointments = response.data;
+            this.isLoading = false;
+          },
+          error: (error) => {
+            this.isLoading = false;
+            console.error('Error fetching appointments:', error);
+          },
+        });
       }
 }
