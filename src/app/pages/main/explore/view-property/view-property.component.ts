@@ -15,7 +15,6 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { NzUploadChangeParam, NzUploadModule } from 'ng-zorro-antd/upload';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NgxCurrencyDirective } from "ngx-currency";
 
 
 @Component({
@@ -31,8 +30,7 @@ import { NgxCurrencyDirective } from "ngx-currency";
     NzSelectModule,
     NzButtonModule,
     NzRadioModule,
-    NzUploadModule,
-    NgxCurrencyDirective
+    NzUploadModule
   ],
   templateUrl: './view-property.component.html',
   styleUrl: './view-property.component.css'
@@ -58,8 +56,6 @@ export class ViewPropertyComponent {
   isLoading = false;
 
   selectedFile: File | null = null;
-
-  amountToPay = 0;
 
   showUnitModal(): void {
     this.isUnitModalVisible = true;
@@ -90,11 +86,7 @@ export class ViewPropertyComponent {
   handlePaymentMethodOk(): void {
     this.isLoading = true;
     console.log('Clicked OK', this.selectedPaymentMethod);
-    if (this.selectedPlan !== '1' && this.amountToPay === 0) {
-      this.message.error('Please enter an amount to pay');
-      this.isLoading = false;
-      return;
-    }
+    console.log('Typeof selectedPaymentMethod:', typeof this.selectedPaymentMethod);
     setTimeout(() => {
       this.isPaymentMethodModalVisible = false;
       this.isLoading = false;
@@ -132,7 +124,8 @@ export class ViewPropertyComponent {
     this.isLoading = true;
     console.log('Clicked OK', this.selectedPaymentMethod);
     setTimeout(() => {
-      this.handleCancel();
+      this.isPaymentSuccessModalVisible = false;
+      this.isLoading = false;
     }, 1000);
   }
 
@@ -143,12 +136,6 @@ export class ViewPropertyComponent {
     this.isBankTransferModalVisible = false;
     this.isBankChequeModalVisible = false;
     this.isPaymentSuccessModalVisible = false;
-    this.isLoading = false;
-    this.selectedUnitNumber = null;
-    this.selectedPlan = null;
-    this.selectedPaymentMethod = null;
-    this.amountToPay = 0;
-    this.selectedFile = null;
   }
 
   constructor(
