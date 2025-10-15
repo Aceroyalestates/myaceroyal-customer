@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
-import { Observable } from 'rxjs';
-import { PaymentHistoryResponse, PaymentSchedulesResponse } from '../models/payment';
+import { map, Observable } from 'rxjs';
+import { DefaultBankAccount, PaymentHistoryResponse, PaymentSchedulesResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
 
 @Injectable({
   providedIn: 'root'
@@ -23,12 +23,8 @@ export class PaymentService {
       return this.httpService.get<PaymentSchedulesResponse>('users/me/schedules/dashboard', params);
     }
 
-    //api/payments/me?method=bank_transfer&from_date=2025-01-01&to_date=2025-07-24&page=1&limit=10&sort_by=created_at&sort_order=DESC
 
     getPaymentHistory(
-      // method: string,
-      // fromDate: string,
-      // toDate: string,
       page: number = 1,
       limit: number = 10,
       sortBy: string = 'created_at',
@@ -36,9 +32,6 @@ export class PaymentService {
     ): Observable<PaymentHistoryResponse> {
       return this.httpService.get<PaymentHistoryResponse>('payments/me', {
         params: {
-          // method,
-          // from_date: fromDate,
-          // to_date: toDate,
           page: page.toString(),
           limit: limit.toString(),
           sort_by: sortBy,
@@ -46,4 +39,24 @@ export class PaymentService {
         }
       });
     }
+
+    validateCoupon(code: string, totalAmount: number): Observable<ValidateCouponResponse> {
+      return this.httpService.get<ValidateCouponResponse>(`coupons/${code}/validate?totalAmount=${totalAmount}`);
+    }
+
+    getRealtorByRefCode(refCode: string): Observable<RealtorByRefCodeResponse> {
+      return this.httpService.get<RealtorByRefCodeResponse>(`realtors/${refCode}`);
+    }
+
+    getBankAccounts(): Observable<DefaultBankAccount[]> {
+      return this.httpService.get<SettingsResponse>('settings/payments.bank_accounts').pipe(
+        map(response => response.data.parsed_value)
+      );
+    }
+
+    // api/purchases/start/offline
+    initiateOfflinePurchase(payload: StartOfflinePurchasePayload): Observable<StartOfflinePurchaseResponse> {
+      return this.httpService.post<StartOfflinePurchaseResponse>('purchases/start/offline', payload);
+    }
+
 }

@@ -20,6 +20,8 @@ const PAGE_SIZE = 10;
 export class AppointmentService {
     constructor(private httpService: HttpService) { }
 //  'https://myacero--myaceroyal-backend--bp8g7jxh9y8c.code.run/api/users/me/appointments?status=confirmed&appointment_type=inspection&start_date=2024-01-01&end_date=2024-12-31&page=1&limit=10&sortBy=appointment_date&sortOrder=DESC' \
+//  'https://myacero--myaceroyal-backend--bp8g7jxh9y8c.code.run/
+// api/users/me/appointments?status=confirmed&appointment_type=inspection&start_date=2024-01-01&end_date=2024-12-31&page=1&limit=10&sortBy=appointment_date&sortOrder=DESC' \
 
     getAppointments(
         page: number = 1,

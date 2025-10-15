@@ -23,6 +23,7 @@ export interface Property {
   property_images: PropertyImage[];
   property_units: PropertyUnit[];
   property_features: PropertyFeature[];
+  accounts: BankAccount[];
 }
 
 export interface PropertyImage {
@@ -211,4 +212,15 @@ export interface AppointmentSearchParams {
   phone?: string; // Phone number (partial matches supported)
   page?: number;
   limit?: number;
+}
+
+
+export interface BankAccount {
+  id: string;
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  account_type: string;
+  currency: string;
+  is_primary: boolean;
 }
