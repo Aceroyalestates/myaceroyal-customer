@@ -241,30 +241,17 @@
     <!-- Plan Selection Modal -->
     <nz-modal
       [(nzVisible)]="isPlanModalVisible"
-      nzTitle="Plan Selection"
+      [nzTitle]="'Plan Selection For ' + (selectedUnitNumber || 0) + ' Unit(s)'"
       (nzOnCancel)="handleCancel()"
       (nzOnOk)="handlePlanOk()"
       [nzOkLoading]="isLoading"
     >
       <div *nzModalContent>
         
-        <div class="flex flex-col w-80">
+        <div class="flex flex-col w-full">
           <label for="paymentPlan" class="mb-2 font-medium text-gray-500"
             >Select your preferred payment plan</label
           >
-          <!-- <nz-form-control nzErrorTip="Please select a unit type">
-            <nz-select
-              id="paymentPlan"
-              [(ngModel)]="selectedPlan"
-              class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              nzPlaceHolder="Select from available payment plans"
-            >
-            <nz-option [nzValue]="'1'" [nzLabel]="'Outright Payment'"></nz-option>
-              @for (plan of selectedUnit?.property_installment_plans; track plan.id) {
-                <nz-option [nzValue]="plan.id" [nzLabel]="plan.property_plan.title"></nz-option>
-              }
-            </nz-select>
-          </nz-form-control> -->
           <nz-radio-group [(ngModel)]="selectedPlan" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
             <div class="flex flex-col w-full">
                 <label nz-radio [nzValue]="'1'" class="flex !items-center !mb-4 !text-primary"> 
@@ -272,8 +259,8 @@
                     <span class="!text-gray-500">Outright Payment</span>
                   </div> 
                 </label>
-                @for (plan of selectedUnit?.property_installment_plans; track plan.id) {
-                  <label nz-radio [nzValue]="plan.id" class="flex !items-center !mb-4"> 
+                @for (plan of selectedUnit?.property_installment_plans; track plan.plan_id) {
+                  <label nz-radio [nzValue]="plan.plan_id" class="flex !items-center !mb-4"> 
                     <div class="flex !items-center !gap-8"> 
                       <span class="!text-gray-500">{{ plan.property_plan.title + ' Installments' }}</span>
                     </div> 
@@ -281,7 +268,124 @@
             }
             </div>
           </nz-radio-group>
-          
+
+          <!-- User-entered amount -->
+          <div class="flex flex-col w-full mt-4" *ngIf="selectedPlan !== '1'">
+            <label for="enteredAmount" class="mb-2 font-medium text-gray-500">Enter amount you want to pay (optional)</label>
+            <nz-form-control>
+              <input
+                nz-input
+                id="enteredAmount"
+                type="text"
+                [(ngModel)]="enteredAmount"
+                placeholder="Enter amount"
+                class="w-full"
+                [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', align: 'left' }"
+              />
+            </nz-form-control>
+            <!-- <div *ngIf="enteredAmount" class="text-gray-600 text-sm mt-2">You entered: {{ enteredAmount | currency:'₦ ':'symbol':'1.0-0' }}</div> -->
+          </div>
+
+          <div class="flex flex-col w-full mt-6">
+            <label for="couponCode" class="mb-2 font-medium text-gray-500 !mt-6"
+              >Coupon Code (Optional)</label
+            >
+            <nz-form-control>
+              <input
+                nz-input
+                id="couponCode"
+                [(ngModel)]="couponCode"
+                (ngModelChange)="onCouponCodeChange($event)"
+                placeholder="Enter coupon code"
+                type="text"
+                class="w-full"
+                [nzSize]="'large'"
+              />
+            </nz-form-control>
+
+            <div class="mt-2">
+              <nz-spin *ngIf="couponLoading"></nz-spin>
+              <div *ngIf="couponError" class="text-red-500 text-sm mt-2">{{ couponError }}</div>
+              <div *ngIf="couponResult" class="mt-3 p-3 border border-gray-300 rounded">
+                <div class="flex justify-between items-center mb-2">
+                  <div>
+                    <div class="text-gray-700 font-medium">{{ couponResult.code + ' Discount' }}</div>
+                    <div class="text-primary text-sm">{{ couponResult.discount_type === 'percent' ? (couponResult.value + '% off') : (couponResult.value | currency:'₦ ') }}</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <!-- <div class="text-gray-600">Discount:</div>
+                    <div class="text-primary font-semibold">{{ discountAmountNumber | currency:'₦ ':'symbol':'1.0-0' }}</div> -->
+                    <button nz-button nzType="default" (click)="acceptCoupon()" [disabled]="couponAccepted">{{ couponAccepted ? 'Applied' : 'Apply' }}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <label for="refCode" class="mb-2 font-medium text-gray-500"
+              >Referral Code (Optional)</label
+            >
+            <nz-form-control>
+              <input
+                nz-input
+                id="refCode"
+                [(ngModel)]="refCode"
+                (ngModelChange)="onRefCodeChange($event)"
+                placeholder="Enter referral code"
+                type="text"
+                class="w-full"
+                [nzSize]="'large'"
+              />
+            </nz-form-control>
+
+            <div class="mt-2">
+              <nz-spin *ngIf="realtorLoading"></nz-spin>
+              <div *ngIf="realtorError" class="text-red-500 text-sm mt-2">{{ realtorError }}</div>
+              <div *ngIf="realtorResult" class="mt-3 p-3 border border-gray-300 rounded flex items-center justify-between">
+                <div>
+                  <div class="text-gray-700 font-medium">{{ realtorResult.name }}</div>
+                  <div class="text-gray-500 text-sm">{{ realtorResult.email }}</div>
+                </div>
+                <div>
+                  <button nz-button nzType="default" (click)="acceptRealtor()" [disabled]="realtorAccepted">
+                    {{ realtorAccepted ? 'Accepted' : 'Accept' }}
+                  </button>
+                </div>
+              </div>
+              <!-- realtor manage switch shown when realtor accepted -->
+              <div *ngIf="realtorResult && realtorAccepted" class="mt-3 flex items-center justify-between">
+                <div class="text-gray-700">Let this realtor manage the property?</div>
+                <nz-switch [(ngModel)]="realtorManage"></nz-switch>
+              </div>
+            </div>
+
+          </div>
+          <!-- Total Amount and Initial Amount -->
+          <div class="flex w-full mt-6 justify-between gap-6">
+            <div class="flex flex-col w-full">
+              <p class="text-gray-500 text-sm">Total Amount</p>
+              <h2 class="!text-gray-600 text-normal text-[20px]" [class.line-through]="couponAccepted">
+                  {{ (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0' }}
+              </h2>
+            </div>
+            <div *ngIf="selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0 && selectedPlan !== '1'" class="flex flex-col w-full">
+              <p class="text-gray-500 text-sm">Initial Amount</p>
+              <h2 class="!text-gray-600 text-normal text-[20px]">
+                  {{
+                    (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+                  }}
+              </h2>
+            </div>
+            <div class="flex flex-col w-full" *ngIf="couponAccepted">
+              <p class="text-gray-500 text-sm">Final Amount</p>
+              <h2 class="!text-gray-600 text-normal text-[20px]">
+                  {{
+                    (finalAmount) | currency:'₦ ':'symbol':'1.0-0'
+                  }}
+              </h2>
+            </div>
+            
+
+          </div>
+
         </div>
       </div>
       <div *nzModalFooter>
@@ -303,13 +407,14 @@
           <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
             @if(selectedPlan === '1') {
               {{
-                (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+                finalAmount || totalAmount | currency:'₦ ':'symbol':'1.0-0'
               }}
             } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
               {{
-                (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+                enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
               }}
             }
+              
           </h2>
 
           <nz-radio-group [(ngModel)]="selectedPaymentMethod" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
@@ -360,50 +465,137 @@
         <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
         <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
           @if(selectedPlan === '1') {
-            {{
-              (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-            }}
-          } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
-            {{
-              (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-            }}
-          }
+              {{
+                finalAmount || totalAmount | currency:'₦ ':'symbol':'1.0-0'
+              }}
+            } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
+              {{
+                enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+              }}
+            }
         </h2>
 
         <p class="!text-gray-500 text-sm">Kindly make bank transfer to any of the bank account details below, Kindly note that after making payment, we would have to verify your payment before your transaction will be considered successful.</p>
 
-        <div class="flex flex-col gap-4 !text-gray-500 !mt-6">
-          <div class="flex flex-col">
-            <h1 class="!text-gray-600">Bank Name</h1>
-            <h2 class="!text-gray-400"> Zenith Bank Plc </h2>
-          </div>
+        @if(property.accounts && property.accounts.length > 10) {
+          @if(property.accounts.length === 1) {
+            <div class="flex flex-col gap-4 !text-gray-500 !mt-6">
+                <div class="flex flex-col">
+                  <h1 class="!text-gray-600">Bank Name</h1>
+                  <h2 class="!text-gray-400"> {{ property.accounts[0].bank_name }} ({{ property.accounts[0].account_type }}) </h2>
+                </div>
 
-        <div class="flex flex-col">
-          <h1 class="!text-gray-600">Account Name</h1>
-          <h2 class="!text-gray-400"> Aceroyal Estate Homes Ltd </h2>
-        </div>
+                <div class="flex flex-col">
+                  <h1 class="!text-gray-600">Account Name</h1>
+                  <h2 class="!text-gray-400"> {{ property.accounts[0].account_name }} </h2>
+                </div>
 
-        <div class="flex flex-col gap-2">
-          <h1 class="!text-gray-600">Account Number(s)</h1>
-          <div *ngFor="let accountNumber of ['101 123 4567', '101 123 4568', '101 123 4569', '101 123 4570']" class="flex flex-col justify-between items-center w-80 sm:flex-row gap-4">
-            <div class="flex items-center gap-4">
-              <span class="bg-red-100 p-2 rounded-full !text-primary">₦</span>
-              <h2 class="!text-gray-400"> {{ accountNumber }} </h2>
-            </div>
-            <button 
-              class="!text-gray-400 !bg-transparent !border-none hover:!text-primary" 
-              (click)="copyToClipboard(accountNumber)" 
-              nz-button 
-              nzType="default" 
-              nzSize="small" 
-              nzTooltipTitle="Copy to clipboard"
-              nzTooltipPlacement="top"
-            >
-              <app-icon name="copy"></app-icon>
-            </button>
-          </div>
-        </div>
-        </div>
+                <div class="flex flex-col gap-2">
+                    
+                    <h1 class="!text-gray-600">Account Number</h1>
+                    <div class="flex items-center gap-4">
+                      <span class="bg-red-100 p-2 rounded-full !text-primary">₦</span>
+                      <h2 class="!text-gray-400"> {{ property.accounts[0].account_number }} </h2>
+                      <button 
+                      class="!text-gray-400 !bg-transparent !border-none hover:!text-primary" 
+                      (click)="copyToClipboard(property.accounts[0].account_number)" 
+                      nz-button 
+                      nzType="default" 
+                      nzSize="small" 
+                      nzTooltipTitle="Copy to clipboard"
+                      nzTooltipPlacement="top"
+                      >
+                        <app-icon name="copy"></app-icon>
+                      </button>
+                    </div>
+                    
+                </div>
+              </div>
+          }
+          @else {
+            <nz-tabset>
+          @for(acc of property.accounts; track acc.id) {
+            <nz-tab nzTitle="{{ acc.bank_name }}">
+              <div class="flex flex-col gap-4 !text-gray-500 !mt-6">
+                <div class="flex flex-col">
+                  <h1 class="!text-gray-600">Bank Name</h1>
+                  <h2 class="!text-gray-400"> {{ acc.bank_name }} ({{ acc.account_type }}) </h2>
+                </div>
+
+                <div class="flex flex-col">
+                  <h1 class="!text-gray-600">Account Name</h1>
+                  <h2 class="!text-gray-400"> {{ acc.account_name }} </h2>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    
+                    <h1 class="!text-gray-600">Account Number</h1>
+                    <div class="flex items-center gap-4">
+                      <span class="bg-red-100 p-2 rounded-full !text-primary">₦</span>
+                      <h2 class="!text-gray-400"> {{ acc.account_number }} </h2>
+                      <button 
+                      class="!text-gray-400 !bg-transparent !border-none hover:!text-primary" 
+                      (click)="copyToClipboard(acc.account_number)" 
+                      nz-button 
+                      nzType="default" 
+                      nzSize="small" 
+                      nzTooltipTitle="Copy to clipboard"
+                      nzTooltipPlacement="top"
+                      >
+                        <app-icon name="copy"></app-icon>
+                      </button>
+                    </div>
+                    
+                </div>
+              </div>
+            </nz-tab>
+          }
+        </nz-tabset>
+          }
+        }
+        @else {
+          <nz-tabset>
+          @for(acc of defaultBankAccounts; track acc.account_number) {
+            <nz-tab nzTitle="{{ acc.bank_name }}">
+              <div class="flex flex-col gap-4 !text-gray-500 !mt-6">
+                <div class="flex flex-col">
+                  <h1 class="!text-gray-600">Bank Name</h1>
+                  <h2 class="!text-gray-400"> {{ acc.bank_name }} </h2>
+                </div>
+
+                <div class="flex flex-col">
+                  <h1 class="!text-gray-600">Account Name</h1>
+                  <h2 class="!text-gray-400"> {{ acc.account_name }} </h2>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    
+                    <h1 class="!text-gray-600">Account Number</h1>
+                    <div class="flex items-center gap-4">
+                      <span class="bg-red-100 p-2 rounded-full !text-primary">₦</span>
+                       <!-- Bank small icon -->
+                      <!-- <img [src]="acc.icon_url" alt="{{ acc.bank_name }}" class="h-8 w-8 object-contain"/> -->
+                      <h2 class="!text-gray-400"> {{ acc.account_number }} </h2>
+                      <button 
+                      class="!text-gray-400 !bg-transparent !border-none hover:!text-primary" 
+                      (click)="copyToClipboard(acc.account_number)" 
+                      nz-button 
+                      nzType="default" 
+                      nzSize="small" 
+                      nzTooltipTitle="Copy to clipboard"
+                      nzTooltipPlacement="top"
+                      >
+                        <app-icon name="copy"></app-icon>
+                      </button>
+                    </div>
+                    
+                </div>
+              </div>
+            </nz-tab>
+        }
+        </nz-tabset>
+        }
+
         
       </div>
       <div *nzModalFooter>
@@ -425,14 +617,14 @@
         <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
         <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
           @if(selectedPlan === '1') {
-            {{
-              (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-            }}
-          } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
-            {{
-              (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-            }}
-          }
+              {{
+                finalAmount || totalAmount | currency:'₦ ':'symbol':'1.0-0'
+              }}
+            } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
+              {{
+                enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
+              }}
+            }
         </h2>
 
         <p class="!text-gray-500 text-sm">Kindly note that we would need to verify and make sure that the cheque has been cleared before this can be referred to as a successful transaction.</p>
@@ -485,7 +677,7 @@
         </div>
       </div>
       <div *nzModalFooter>
-        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Save Process</button>
+        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
         <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Continue</button>
       </div>
     </nz-modal>
