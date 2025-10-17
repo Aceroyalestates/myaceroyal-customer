@@ -20,7 +20,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { DefaultBankAccount, StartOfflinePurchasePayload } from 'src/app/core/models/payment';
+import { DefaultBankAccount, StartOfflinePurchasePayload, StartOnlinePurchasePayload } from 'src/app/core/models/payment';
 import { NgxCurrencyDirective } from "ngx-currency";
 import { ImageService } from 'src/app/core/services/image.service';
 import { ImageUploadApiResponse } from 'src/app/core/models/images';
@@ -121,7 +121,21 @@ export class ViewPropertyComponent {
   handlePlanOk(): void {
     this.isLoading = true;
     console.log('Clicked OK', this.selectedPlan);
+    // validate enteredAmount if plan is not full payment
+    
     setTimeout(() => {
+      if (this.selectedPlan !== '1') {
+      const minAmount = (this.selectedUnit?.property_installment_plans && this.selectedUnit?.property_installment_plans.length > 0) ? 
+        (this.selectedUnit?.property_installment_plans[0].initial_amount * this.selectedUnitNumber!) : 0;
+      console.log('Min amount for selected plan:', minAmount);
+      console.log('User-entered amount:', this.enteredAmount);
+      if (this.enteredAmount && this.enteredAmount < minAmount) {
+        // this.notificationService.error(`Minimum amount for this plan is ${minAmount | currency:'₦ ':'symbol':'1.0-0'}`);
+        this.notificationService.error('Error', `Minimum amount for this plan is ₦ ${minAmount.toLocaleString()}`);
+        this.isLoading = false;
+        return;
+      }
+    }
       this.isPlanModalVisible = false;
       this.isLoading = false;
       this.isPaymentMethodModalVisible = true;
@@ -140,7 +154,7 @@ export class ViewPropertyComponent {
       } else if (this.selectedPaymentMethod === 3) {
         this.isBankChequeModalVisible = true;
       } else if (this.selectedPaymentMethod === 2) {
-        this.isPaymentSuccessModalVisible = true;
+        this.startOnlinePurchase();
       }
     }, 500);
   }
@@ -476,6 +490,7 @@ export class ViewPropertyComponent {
       amount_paid: this.selectedPlan === '1' ? this.finalAmount || this.totalAmount : 
         this.enteredAmount || (this.selectedUnit?.property_installment_plans[0].initial_amount * this.selectedUnitNumber!),
       proof_url: this.proofUrl,
+      realtor_can_manage: this.realtorManage
     };
 
     console.log('Initiating offline purchase with payload:', payload);
@@ -487,11 +502,56 @@ export class ViewPropertyComponent {
         this.notificationService.success('Success', 'Purchase initiated. Awaiting approval.');
         // Close all modals and reset state as needed
         this.handleCancel();
+        // navigate to subscription page
+        this.router.navigateByUrl('main/subscription');
       },
       error: (err) => {
         this.isLoading = false;
         console.error('Error initiating offline purchase:', err);
         const errMsg = err?.error?.message || 'Failed to initiate offline purchase';
+        this.notificationService.error('Error', errMsg);
+      }
+    });
+  }
+
+  startOnlinePurchase(): void {
+    if (!this.property || !this.selectedUnit || !this.selectedUnitNumber || !this.selectedPlan) {
+      this.notificationService.error('Error', 'Please select unit, quantity, and plan before proceeding');
+      return;
+    }
+    this.isLoading = true;
+
+    const payload: StartOnlinePurchasePayload = {
+      unit_id: this.selectedUnit.id.toString(),
+      quantity: this.selectedUnitNumber,
+      plan_id: this.selectedPlan === '1' ? undefined : parseInt(this.selectedPlan, 10),
+      referral_code: this.realtorAccepted ? this.refCode : undefined,
+      coupon_code: this.couponAccepted ? this.couponCode : undefined,
+      amount_paid: this.selectedPlan === '1' ? this.finalAmount || this.totalAmount : 
+        this.enteredAmount || (this.selectedUnit?.property_installment_plans[0].initial_amount * this.selectedUnitNumber!),
+      realtor_can_manage: this.realtorManage
+    };
+
+    console.log('Initiating online purchase with payload:', payload);
+
+    this.paymentService.initiateOnlinePurchase(payload).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        console.log('Online purchase initiated successfully:', res);
+        if (res && res.data && res.data.session.data.authorization_url) {
+          // Redirect user to payment gateway URL
+          // window.location.href = res.data.session.data.authorization_url;
+          window.open(res.data.session.data.authorization_url, '_blank');
+        } else {
+          this.notificationService.error('Error', 'Payment link not received');
+        }
+        // Close all modals and reset state as needed
+        this.handleCancel();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        console.error('Error initiating online purchase:', err);
+        const errMsg = err?.error?.message || 'Failed to initiate payment';
         this.notificationService.error('Error', errMsg);
       }
     });

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, Observable } from 'rxjs';
-import { DefaultBankAccount, PaymentHistoryResponse, PaymentSchedulesResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
+import { DefaultBankAccount, PaymentHistoryResponse, PaymentSchedulesResponse, PurchaseFormPayload, PurchaseFormResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
 
 @Injectable({
   providedIn: 'root'
@@ -54,9 +54,18 @@ export class PaymentService {
       );
     }
 
-    // api/purchases/start/offline
+    
     initiateOfflinePurchase(payload: StartOfflinePurchasePayload): Observable<StartOfflinePurchaseResponse> {
       return this.httpService.post<StartOfflinePurchaseResponse>('purchases/start/offline', payload);
+    }
+
+    initiateOnlinePurchase(payload: StartOnlinePurchasePayload): Observable<StartOnlinePurchaseResponse> {
+      return this.httpService.post<StartOnlinePurchaseResponse>('purchases/start/online', payload);
+    }
+
+    ///api/property-forms post
+    submitPurchaseForm(payload: PurchaseFormPayload): Observable<PurchaseFormResponse> {
+      return this.httpService.post<PurchaseFormResponse>('property-forms', payload);
     }
 
 }
