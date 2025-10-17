@@ -10,6 +10,7 @@ import { PasswordComponent } from './password/password.component';
 import { ProfileComponent } from './profile/profile.component';
 import { SupportComponent } from './support/support.component';
 import { InspectionComponent } from './inspection/inspection.component';
+import { SubscriptionComponent } from './subscription/subscription.component';
 
 const routes: Routes = [
   {
@@ -86,6 +87,10 @@ const routes: Routes = [
           import('./property-management/property-management.module').then(
             m => m.PropertyManagementModule),
       },
+      {
+        path: 'subscription',
+        component: SubscriptionComponent
+      }
     ],
   },
 ];

@@ -269,21 +269,19 @@
             </div>
           </nz-radio-group>
 
-          <!-- User-entered amount -->
           <div class="flex flex-col w-full mt-4" *ngIf="selectedPlan !== '1'">
-            <label for="enteredAmount" class="mb-2 font-medium text-gray-500">Enter amount you want to pay (optional)</label>
+            <label for="enteredAmount" class="mb-2 font-medium text-gray-500">Enter amount you want to pay</label>
             <nz-form-control>
               <input
                 nz-input
                 id="enteredAmount"
                 type="text"
                 [(ngModel)]="enteredAmount"
-                placeholder="Enter amount"
+                [placeholder]="'Minimum: ' + (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!)"
                 class="w-full"
                 [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', align: 'left' }"
               />
             </nz-form-control>
-            <!-- <div *ngIf="enteredAmount" class="text-gray-600 text-sm mt-2">You entered: {{ enteredAmount | currency:'₦ ':'symbol':'1.0-0' }}</div> -->
           </div>
 
           <div class="flex flex-col w-full mt-6">
@@ -390,7 +388,7 @@
       </div>
       <div *nzModalFooter>
         <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePlanOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedPlan">Continue</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePlanOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedPlan || (selectedPlan !== '1' && !enteredAmount)">Continue</button>
       </div>
     </nz-modal>
 
@@ -426,7 +424,8 @@
                 <span class="!text-gray-500">Bank Transfer </span>
               </div> 
             </label>
-            <label nz-radio [nzValue]="2" class="flex !items-center !mb-4"> 
+            <!-- only show paystack if amount is 100000000 or less -->
+            <label nz-radio [nzValue]="2" class="flex !items-center !mb-4" *ngIf="(selectedPlan === '1' && (finalAmount || totalAmount) <= 100000000) || (selectedPlan !== '1' && (enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!)) <= 100000000)"> 
               <div class="flex !items-center !gap-8"> 
                 <div class="p-2 bg-red-100 rounded-full">
                   <app-icon name="credit-card" class="!text-primary" />
