@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, effect, signal } from '@angular/core';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Property } from 'src/app/core/models/properties';
 import { PaginationData } from 'src/app/shared/components/pagination/pagination.component';
 import { PropertiesService } from 'src/app/core/services/properties.service';
@@ -10,7 +10,7 @@ import { TableAction, TableColumn } from 'src/app/shared/components/table/table.
 
 @Component({
   selector: 'app-explore',
-  imports: [SharedModule, NzTabsModule, CommonModule, RouterLink],
+  imports: [SharedModule, NzTabsModule, CommonModule],
   templateUrl: './explore.component.html',
   styleUrl: './explore.component.css'
 })

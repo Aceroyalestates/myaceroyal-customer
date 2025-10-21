@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 import { SharedModule } from 'src/app/shared/shared.module';
 
@@ -8,8 +8,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
   selector: 'app-property-payment',
   imports: [
     CommonModule,
-    SharedModule,
-    RouterLink
+    SharedModule
   ],
   templateUrl: './property-payment.component.html',
   styleUrl: './property-payment.component.css'
