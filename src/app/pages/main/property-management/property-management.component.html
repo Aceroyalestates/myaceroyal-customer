@@ -26,6 +26,9 @@
         <nz-tabset class="w-full">
             <nz-tab nzTitle="Saved">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
+                    <div class="flex justify-center" *ngIf="savedPayments && savedPayments.length === 0">
+                        <p class="text-gray-500">No data found.</p>
+                    </div>
                     <div *ngFor="let data of savedPayments"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative "
                         
@@ -39,6 +42,7 @@
                                     <div class="flex flex-col gap-4">
                                         <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.purchase.unit.property.name }}</h3>
                                         <h2 class="!text-primary text-lg !font-semibold">{{ data.amount_paid | currency:'NGN':'symbol':'1.0-0' }}</h2>
+
                                         <div class="flex flex-col gap-1">
                                             <div class="flex justify-between !text-gray-400">
                                                 <div class="flex gap-2 items-center !text-gray-500">
@@ -52,7 +56,7 @@
                                                     <app-icon class="!text-gray-400" name="home"></app-icon>
                                                     <p class="text-sm"> Location </p>
                                                 </div>
-                                                <p class="text-sm  !text-gray-500">{{ data.purchase.unit.property.location }}</p>
+                                                <p class="text-sm !text-gray-500">{{ data.purchase.unit.property.location }}</p>
                                             </div>
                                         </div>
 
@@ -66,63 +70,78 @@
                             </div>
                         </div>
                     </div>
+                    <nz-pagination *ngIf="savedPagination && savedPagination.total > 10" [nzPageIndex]="savedPagination.page" [nzTotal]="savedPagination.total" [nzResponsive]="true" (nzPageIndexChange)="onSavedPageChange($event)" [nzShowTotal]="rangeTemplate"></nz-pagination>
+                    <ng-template #rangeTemplate let-range="range" let-total>
+                    {{ range[0] }}-{{ range[1] }} of {{ total }} items
+                    </ng-template>
                 </div>
                 
             </nz-tab>
             <nz-tab nzTitle="Fully Paid">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
-                    <div *ngFor="let property of pendingPayments"
-                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative"
-                        routerLink="view/{{ property.id }}"
+
+                    <div class="flex justify-center" *ngIf="fullyPaidPayments && fullyPaidPayments.length === 0">
+                        <p class="text-gray-500">No data found.</p>
+                    </div>
+                    <div *ngFor="let data of fullyPaidPayments"
+                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
+                        routerLink="view/{{ data.id }}"
                         >
                         <div class="absolute inset-0 bg-cover bg-center"
-                            [style.background-image]="'url(' + property.image + ')'"
+                            [style.background-image]="'url(' + pendingPayments[0].image + ')'"
                             >
                         </div>
                         <div class="relative z-10 px-4 pb-4 pt-12">
                             <div class="flex flex-col bg-white bg-opacity-90 rounded-lg py-6 pl-6 pr-12 !font-semibold">
                                     <div class="flex flex-col gap-4">
-                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ property.title }}</h3>
-                                        <h2 class="!text-primary text-lg !font-semibold">{{ '20000000' | currency:'NGN':'symbol':'1.0-0' }}</h2>
+                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.unit.property.name }}</h3>
+                                        <h2 class="!text-primary text-lg !font-semibold">{{ data.total_price | currency:'NGN':'symbol':'1.0-0' }}</h2>
                                         <div class="flex flex-col gap-1">
                                             <div class="flex justify-between !text-gray-400">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="tag"></app-icon>
                                                     <p class="text-sm"> Number of Units </p>
                                                 </div>
-                                                <p>{{ property.units }}</p>
+                                                <p>{{ data.quatity }}</p>
                                             </div>
                                             <div class="flex justify-between">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="credit-card"></app-icon>
                                                     <p class="text-sm"> Payment Option </p>
                                                 </div>
-                                                <p class="text-sm  !text-gray-500">{{ property.paymentOption }}</p>
+                                                <p class="text-sm  !text-gray-500">{{ data.payment_method }}</p>
                                             </div>
                                             <div class="flex justify-between">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="circle"></app-icon>
                                                     <p class="text-sm"> Payment Status </p>
                                                 </div>
-                                                <p class="text-sm !text-yellow-400 !font-normal bg-yellow-50 border border-yellow-200 rounded-full !px-4">In Progress</p>
+                                                <p class="text-sm !text-yellow-400 !font-normal bg-green-50 border border-green-200 rounded-full !px-4"> Paid </p>
                                             </div>
                                         </div>
 
-                                        <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer">
+                                        <!-- <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer">
                                             Payment Schedule
-                                        </button>
+                                        </button> -->
 
                                     </div>
                                 
                             </div>
                         </div>
                     </div>
+                    <nz-pagination *ngIf="fullyPaidPagination && fullyPaidPagination.total > 10" [nzPageIndex]="fullyPaidPagination.page" [nzTotal]="fullyPaidPagination.total" [nzResponsive]="true" (nzPageIndexChange)="onFullyPaidPageChange($event)" [nzShowTotal]="rangeTemplate"></nz-pagination>
+                    <ng-template #rangeTemplate let-range="range" let-total>
+                    {{ range[0] }}-{{ range[1] }} of {{ total }} items
+                    </ng-template>
                 </div>
             </nz-tab>
             <nz-tab nzTitle="In Payment">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
+                    <div class="flex justify-center" *ngIf="inProgressPayments && inProgressPayments.length === 0">
+                        <p class="text-gray-500">No data found.</p>
+                    </div>
                     <div *ngFor="let data of inProgressPayments"
-                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative"
+                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
                         routerLink="payment/{{ data.purchase.property.id }}"
                         >
                         <div class="absolute inset-0 bg-cover bg-center"
@@ -158,15 +177,19 @@
                                             </div>
                                         </div>
 
-                                        <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer">
+                                        <!-- <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer">
                                             Payment Schedule
-                                        </button>
+                                        </button> -->
 
                                     </div>
                                 
                             </div>
                         </div>
                     </div>
+                    <nz-pagination *ngIf="inProgressPagination && inProgressPagination.total > 10" [nzPageIndex]="inProgressPagination.page" [nzTotal]="inProgressPagination.total" [nzResponsive]="true" (nzPageIndexChange)="onInProgressPageChange($event)" [nzShowTotal]="rangeTemplate"></nz-pagination>
+                    <ng-template #rangeTemplate let-range="range" let-total>
+                    {{ range[0] }}-{{ range[1] }} of {{ total }} items
+                    </ng-template>
                 </div>
             </nz-tab>
         </nz-tabset>

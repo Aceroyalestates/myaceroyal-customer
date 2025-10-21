@@ -8,11 +8,18 @@ import { ColumnDef } from '@tanstack/angular-table';
 import { Router, RouterLink } from '@angular/router';
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { PaymentHistoryItem, PaymentHistoryResponse } from 'src/app/core/models/payment';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 
 @Component({
   selector: 'app-property-management',
-  imports: [CommonModule, SharedModule, NzTabsModule, RouterLink],
+  imports: [
+    CommonModule,
+    SharedModule,
+    NzTabsModule,
+    RouterLink,
+    NzPaginationModule
+  ],
   templateUrl: './property-management.component.html',
   styleUrl: './property-management.component.css',
 })
@@ -71,8 +78,11 @@ export class PropertyManagementComponent {
   ];
   paymentHistory: any | null = null;
   inProgressPayments: PaymentHistoryItem[] | null = null;
-  fullyPaidPayments: PaymentHistoryItem[] | null = null;
+  fullyPaidPayments: any[] | null = null;
   savedPayments: any[] | null = null;
+  savedPagination: any | null = null;
+  inProgressPagination: any | null = null;
+  fullyPaidPagination: any | null = null;
   isLoading = false;
 
     constructor(
@@ -107,6 +117,7 @@ export class PropertyManagementComponent {
           console.log('Pending payments loaded:', response);
           this.paymentHistory = response;
           this.inProgressPayments = response.data.filter((payment: PaymentHistoryItem) => payment.purchase.status === 'in-progress');
+          this.inProgressPagination = response.pagination;
           // this.fullyPaidPayments = response.data.filter((payment: PaymentHistoryItem) => payment.status === 'paid');
           // this.savedPayments = response.data.filter((payment: PaymentHistoryItem) => payment.status === 'saved');
           this.isLoading = false;
@@ -124,6 +135,7 @@ export class PropertyManagementComponent {
         next: (response: any) => {
           console.log('Property forms loaded:', response);
           this.savedPayments = response.data;
+          this.savedPagination = response.pagination;
           this.isLoading = false;
         },
         error: (error: any) => {
@@ -138,11 +150,61 @@ export class PropertyManagementComponent {
       this.paymentService.getPurchases().subscribe({
         next: (response: any) => {
           console.log('Purchases loaded:', response);
-          this.savedPayments = response.data;
+          this.fullyPaidPayments = response.data.filter((purchase: any) => purchase.status === 'completed');
+          this.fullyPaidPagination = response.pagination;
           this.isLoading = false;
         },
         error: (error: any) => {
           console.error('Error loading purchases:', error);
+          this.isLoading = false;
+        }
+      });
+    }
+
+    // onSavedPageChange($event)
+    onSavedPageChange(page: number): void {
+      this.isLoading = true;
+      this.paymentService.getpropertyForms(page).subscribe({
+        next: (response: any) => {
+          console.log('Property forms loaded for page', page, ':', response);
+          this.savedPayments = response.data;
+          this.savedPagination = response.pagination;
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading property forms for page', page, ':', error);
+          this.isLoading = false;
+        }
+      });
+    }
+
+    onInProgressPageChange(page: number): void {
+      this.isLoading = true;
+      this.paymentService.getUserPayments(undefined, undefined, undefined, undefined, undefined, page).subscribe({
+        next: (response: any) => {
+          console.log('In-progress payments loaded for page', page, ':', response);
+          this.inProgressPayments = response.data.filter((payment: PaymentHistoryItem) => payment.purchase.status === 'in-progress');
+          this.inProgressPagination = response.pagination;
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading in-progress payments for page', page, ':', error);
+          this.isLoading = false;
+        }
+      });
+    }
+
+    onFullyPaidPageChange(page: number): void {
+      this.isLoading = true;
+      this.paymentService.getPurchases(page).subscribe({
+        next: (response: any) => {
+          console.log('Fully paid purchases loaded for page', page, ':', response);
+          this.fullyPaidPayments = response.data.filter((purchase: any) => purchase.status === 'completed');
+          this.fullyPaidPagination = response.pagination;
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading fully paid purchases for page', page, ':', error);
           this.isLoading = false;
         }
       });
