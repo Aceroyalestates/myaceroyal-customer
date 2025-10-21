@@ -4,52 +4,60 @@
       [items]="[{ label: 'Property Management', url: '/property-management' }]"
     ></app-breadcrumb> -->
     <div class="flex gap-6">
-        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Property Management</h1>
+        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Property Managements</h1>
     </div>
     <div class="flex gap-4 justify-between">
-        @for(stat of stats; track stat) {
-            <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-                <p class="text-[#4F4F4F] text-lg">{{stat.title}}</p>
-                <p class="text-3xl">{{ stat.value | number: '2.0-0' }}</p>
-            </div>
-        }
+        
+        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
+            <p class="text-[#4F4F4F] text-lg"> Pending Payments </p>
+            <p class="text-3xl">{{ paymentHistory?.summary.status_breakdown.pending.count | number: '2.0-0' }}</p>
+        </div>
+        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
+            <p class="text-[#4F4F4F] text-lg"> Total Payments </p>
+            <p class="text-3xl">{{ paymentHistory.summary.total_payments | number: '2.0-0' }}</p>
+        </div>
+        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
+            <p class="text-[#4F4F4F] text-lg"> Total Amounts </p>
+            <p class="text-3xl">{{ paymentHistory.summary.total_amount | currency:'NGN':'symbol':'1.0-0'  }}</p>
+        </div>
+        
     </div>
     <div class="flex">
         <nz-tabset class="w-full">
-            <nz-tab nzTitle="In Progress">
+            <nz-tab nzTitle="Saved">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
-                    <div *ngFor="let property of pendingPayments"
+                    <div *ngFor="let data of savedPayments"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative "
                         
                         >
                         <div class="absolute inset-0 bg-cover bg-center"
-                            [style.background-image]="'url(' + property.image + ')'"
+                            [style.background-image]="'url(' + data.purchase.unit.property.property_images[0].image_url + ')'"
                             >
                         </div>
                         <div class="relative z-10 px-4 pb-4 pt-12">
                             <div class="flex flex-col bg-white bg-opacity-90 rounded-lg py-6 pl-6 pr-12 !font-semibold">
                                     <div class="flex flex-col gap-4">
-                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ property.title }}</h3>
-                                        <h2 class="!text-primary text-lg !font-semibold">{{ '20000000' | currency:'NGN':'symbol':'1.0-0' }}</h2>
+                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.purchase.unit.property.name }}</h3>
+                                        <h2 class="!text-primary text-lg !font-semibold">{{ data.amount_paid | currency:'NGN':'symbol':'1.0-0' }}</h2>
                                         <div class="flex flex-col gap-1">
                                             <div class="flex justify-between !text-gray-400">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="tag"></app-icon>
-                                                    <p class="text-sm"> Number of Units </p>
+                                                    <p class="text-sm"> Units </p>
                                                 </div>
-                                                <p>{{ property.units }}</p>
+                                                <p>{{ data.purchase.quantity }}</p>
                                             </div>
                                             <div class="flex justify-between">
                                                 <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="credit-card"></app-icon>
-                                                    <p class="text-sm"> Payment Option </p>
+                                                    <app-icon class="!text-gray-400" name="home"></app-icon>
+                                                    <p class="text-sm"> Location </p>
                                                 </div>
-                                                <p class="text-sm  !text-gray-500">{{ property.paymentOption }}</p>
+                                                <p class="text-sm  !text-gray-500">{{ data.purchase.unit.property.location }}</p>
                                             </div>
                                         </div>
 
                                         <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer"
-                                        routerLink="payment/{{ property.id }}">
+                                        routerLink="payment/{{ data.purchase_id }}">
                                             Complete Form
                                         </button>
 
@@ -61,7 +69,7 @@
                 </div>
                 
             </nz-tab>
-            <nz-tab nzTitle="Pending Payments">
+            <nz-tab nzTitle="Fully Paid">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
                     <div *ngFor="let property of pendingPayments"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative"
@@ -111,42 +119,42 @@
                     </div>
                 </div>
             </nz-tab>
-            <nz-tab nzTitle="Payment Completed">
+            <nz-tab nzTitle="In Payment">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
-                    <div *ngFor="let property of pendingPayments"
+                    <div *ngFor="let data of inProgressPayments"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative"
-                        routerLink="view/{{ property.id }}"
+                        routerLink="payment/{{ data.purchase.property.id }}"
                         >
                         <div class="absolute inset-0 bg-cover bg-center"
-                            [style.background-image]="'url(' + property.image + ')'"
+                            [style.background-image]="'url(' + pendingPayments[0].image + ')'"
                             >
                         </div>
                         <div class="relative z-10 px-4 pb-4 pt-12">
                             <div class="flex flex-col bg-white bg-opacity-90 rounded-lg py-6 pl-6 pr-12 !font-semibold">
                                     <div class="flex flex-col gap-4">
-                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ property.title }}</h3>
-                                        <h2 class="!text-primary text-lg !font-semibold">{{ '20000000' | currency:'NGN':'symbol':'1.0-0' }}</h2>
+                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.purchase.property.name }}</h3>
+                                        <h2 class="!text-primary text-lg !font-semibold">{{ data.purchase.total_price | currency:'NGN':'symbol':'1.0-0' }}</h2>
                                         <div class="flex flex-col gap-1">
                                             <div class="flex justify-between !text-gray-400">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="tag"></app-icon>
                                                     <p class="text-sm"> Number of Units </p>
                                                 </div>
-                                                <p>{{ property.units }}</p>
+                                                <p>{{ data.purchase.quantity }}</p>
                                             </div>
                                             <div class="flex justify-between">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="credit-card"></app-icon>
-                                                    <p class="text-sm"> Payment Option </p>
+                                                    <p class="text-sm"> Unit Type </p>
                                                 </div>
-                                                <p class="text-sm  !text-gray-500">{{ property.paymentOption }}</p>
+                                                <p class="text-sm  !text-gray-500">{{ data.purchase.unit.type }}</p>
                                             </div>
                                             <div class="flex justify-between">
                                                 <div class="flex gap-2 items-center !text-gray-500">
                                                     <app-icon class="!text-gray-400" name="circle"></app-icon>
                                                     <p class="text-sm"> Payment Status </p>
                                                 </div>
-                                                <p class="text-sm !font-normal !text-green-400 bg-green-50 border border-green-200 rounded-full !px-4">Completed</p>
+                                                <p class="text-sm !text-yellow-400 !font-normal bg-yellow-50 border border-yellow-200 rounded-full !px-4"> {{ data.purchase.status }} </p>
                                             </div>
                                         </div>
 
