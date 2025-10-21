@@ -11,6 +11,12 @@ import { PaymentService } from 'src/app/core/services/payment.service';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+import { NzUploadModule } from 'ng-zorro-antd/upload';
+import { ImageService } from 'src/app/core/services/image.service';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { ImageUploadApiResponse } from 'src/app/core/models/images';
 
 @Component({
   selector: 'app-subscription',
@@ -25,14 +31,20 @@ import { SharedModule } from 'src/app/shared/shared.module';
     NzButtonModule, 
     NzStepsModule, 
     NzDatePickerModule, 
-    NzCheckboxModule],
+    NzCheckboxModule,
+    NzDescriptionsModule,
+    NzDividerModule,
+    NzUploadModule,
+  ],
   templateUrl: './subscription.component.html'
 })
 export class SubscriptionComponent implements OnInit {
   step = 0;
   isSubmitting = false;
+  isLoading = false;
 
   form!: FormGroup;
+  selectedFile: File | null = null;
 
   titles = [
     'Personal Details',
@@ -48,7 +60,9 @@ export class SubscriptionComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private paymentService: PaymentService,
-    private notification: NzNotificationService
+    private notification: NzNotificationService,
+    private imageService: ImageService,
+    private message: NzMessageService,
   ) {}
 
   ngOnInit(): void {
@@ -63,41 +77,62 @@ export class SubscriptionComponent implements OnInit {
         gender: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         phone: ['', Validators.required],
-        nationality: ['', Validators.required]
+        alternate_phone: [''],
+        nationality: ['', Validators.required],
+        address_line_1: ['', Validators.required],
+        address_line_2: [''],
+        marital_status: ['', Validators.required],
+        city: ['', Validators.required],
+        state: ['', Validators.required],
+        postal_code: ['', Validators.required],
+        country: ['', Validators.required],
+        passport_photo_url: [''],
+        identity_type: ['', Validators.required],
+        identity_number: ['', Validators.required],
+        identity_upload_url: ['']
       }),
 
-      nok: this.fb.group({
-        nok_first_name: ['', Validators.required],
-        nok_last_name: ['', Validators.required],
-        nok_phone: ['', Validators.required],
-        nok_relationship: ['', Validators.required]
+      next_of_kin: this.fb.group({
+        next_of_kin_name: ['', Validators.required],
+        next_of_kin_phone: ['', Validators.required],
+        next_of_kin_address: ['', Validators.required],
+        next_of_kin_relationship: ['', Validators.required],
+        emergency_contact_name: ['', Validators.required],
+        emergency_contact_relationship: ['', Validators.required],
+        emergency_contact_phone: ['', Validators.required]
       }),
 
       employment: this.fb.group({
-        employer: [''],
-        designation: [''],
-        employer_phone: ['']
+        employer_name: ['', Validators.required],
+        occupation: ['', Validators.required],
+        employer_address: ['', Validators.required],
+        monthly_income: ['', Validators.required],
+        proof_of_income_url: ['']
       }),
 
       payment: this.fb.group({
         property_id: ['', Validators.required],
-        units: [1, Validators.required],
+        units: ['', Validators.required],
         payment_plan: ['', Validators.required],
+        special_requirements: [''],
         date_of_payment: [null],
-        source_of_fund: ['']
+        source_of_fund: [''],
+        bank_statement_url: ['']
       }),
 
-      realtor: this.fb.group({
-        realtor_first_name: [''],
-        realtor_last_name: ['']
+      others: this.fb.group({
+        how_did_you_hear: [''],
+        referral_source: ['']
       }),
 
       permissions: this.fb.group({
-        realtor_consent: [false]
+        realtor_consent: [false],
+        marketing_consent: [false]
       }),
 
       terms: this.fb.group({
-        accept_declaration: [false, Validators.requiredTrue]
+        accept_declaration: [false, Validators.requiredTrue],
+        accepted_privacy_policy: [false, Validators.requiredTrue]
       })
     });
   }
@@ -107,13 +142,13 @@ export class SubscriptionComponent implements OnInit {
       case 0:
         return 'personal';
       case 1:
-        return 'nok';
+        return 'next_of_kin';
       case 2:
         return 'employment';
       case 3:
         return 'payment';
       case 4:
-        return 'realtor';
+        return 'others';
       case 5:
         return 'permissions';
       case 6:
@@ -181,7 +216,17 @@ export class SubscriptionComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    const payload = this.form.value;
+    // flatten nested groups into a single payload object
+    const fv = this.form.value as any;
+    const payload = {
+      ...(fv.personal || {}),
+      ...(fv.next_of_kin || {}),
+      ...(fv.employment || {}),
+      ...(fv.payment || {}),
+      ...(fv.others || {}),
+      ...(fv.permissions || {}),
+      ...(fv.terms || {})
+    };
     this.paymentService.submitPurchaseForm(payload).subscribe({
       next: (res) => {
         this.isSubmitting = false;
@@ -195,4 +240,73 @@ export class SubscriptionComponent implements OnInit {
       }
     });
   }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const fileType = file.type;
+
+      // Define allowed file types
+      const isImage = fileType.startsWith('image/');
+      // const isPdf = fileType === 'application/pdf';
+
+      // Validation 1: Check file type
+      if (!isImage) {
+        this.message.error('Invalid file type. Please select an Image (JPEG/PNG).');
+        input.value = ''; // Clear the input
+        this.selectedFile = null;
+        return;
+      }
+
+      // Validation 2: Check file size (e.g., max 1MB for both)
+      const maxSize = 1 * 1024 * 1024; // 1MB
+      if (file.size > maxSize) {
+          this.message.error('File size exceeds the limit (1MB max).');
+          input.value = '';
+          this.selectedFile = null;
+          return;
+      }
+      
+      // File is valid
+      this.selectedFile = file;
+      // this.message.success(`File selected: ${file.name}`);
+      this.upload();
+      
+      // Proceed with upload or other processing...
+    } else {
+      this.selectedFile = null;
+      this.message.info('No file selected.');
+    }
+  }
+
+  upload(): string | void {
+      if (!this.selectedFile) {
+        this.message.error('Please select a file to upload as proof of payment.');
+        return;
+      }
+      this.isLoading = true;
+  
+      this.imageService.uploadImage(this.selectedFile).subscribe({
+        next: (uploadRes: ImageUploadApiResponse) => {
+          console.log('Image uploaded successfully:', uploadRes);
+          const url = uploadRes.data.file.secure_url;
+          if (!url) {
+            this.message.error('Failed to get uploaded image URL.');
+            this.isLoading = false;
+            return;
+          }
+          this.message.success('Proof of payment uploaded successfully.');
+          this.isLoading = false;
+          return url;
+          
+        },
+        error: (err: any) => {
+          console.error('Image upload error', err);
+          this.message.error('Image upload failed');
+          this.isLoading = false;
+        }
+      });
+    }
 }

@@ -29,10 +29,10 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">First Name</nz-form-label>
                             <nz-form-control>
-                                                                <input nz-input formControlName="first_name" placeholder="enter your first name" />
-                                                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','first_name') && (getCtrl('personal','first_name')?.touched || getCtrl('personal','first_name')?.dirty)">
-                                                                    {{ getError('personal','first_name') }}
-                                                                </div>
+                                <input nz-input formControlName="first_name" placeholder="enter your first name" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','first_name') && (getCtrl('personal','first_name')?.touched || getCtrl('personal','first_name')?.dirty)">
+                                    {{ getError('personal','first_name') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
@@ -46,30 +46,40 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Last Name</nz-form-label>
                             <nz-form-control>
-                                                                <input nz-input formControlName="last_name" placeholder="enter your last name" />
-                                                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','last_name') && (getCtrl('personal','last_name')?.touched || getCtrl('personal','last_name')?.dirty)">
-                                                                    {{ getError('personal','last_name') }}
-                                                                </div>
+                                <input nz-input formControlName="last_name" placeholder="enter your last name" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','last_name') && (getCtrl('personal','last_name')?.touched || getCtrl('personal','last_name')?.dirty)">
+                                    {{ getError('personal','last_name') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Email</nz-form-label>
                             <nz-form-control>
-                                                                <input nz-input formControlName="email" placeholder="enter your email address" />
-                                                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','email') && (getCtrl('personal','email')?.touched || getCtrl('personal','email')?.dirty)">
-                                                                    {{ getError('personal','email') }}
-                                                                </div>
+                                <input nz-input formControlName="email" placeholder="enter your email address" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','email') && (getCtrl('personal','email')?.touched || getCtrl('personal','email')?.dirty)">
+                                    {{ getError('personal','email') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Phone</nz-form-label>
                             <nz-form-control>
-                                                                <input nz-input formControlName="phone" placeholder="Enter your phone number" />
-                                                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','phone') && (getCtrl('personal','phone')?.touched || getCtrl('personal','phone')?.dirty)">
-                                                                    {{ getError('personal','phone') }}
-                                                                </div>
+                                <input nz-input formControlName="phone" placeholder="Enter your phone number" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','phone') && (getCtrl('personal','phone')?.touched || getCtrl('personal','phone')?.dirty)">
+                                    {{ getError('personal','phone') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Alternate Phone</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input formControlName="alternate_phone" placeholder="Enter your alternate phone number" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','alternate_phone') && (getCtrl('personal','alternate_phone')?.touched || getCtrl('personal','alternate_phone')?.dirty)">
+                                    {{ getError('personal','alternate_phone') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
@@ -87,9 +97,8 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Nationality</nz-form-label>
                             <nz-form-control>
-                                <!-- <input nz-input formControlName="nationality" placeholder="Select your nationality" /> -->
                                  <nz-select formControlName="nationality" placeholder="Select your nationality">
-                                     @for (nationality of ['Nigerian', 'Ghanaian']; track nationality) {
+                                     @for (nationality of ['Nigerian']; track nationality) {
                                         <nz-option [nzValue]="nationality" [nzLabel]="nationality">{{ nationality }}</nz-option>
                                      }
                                 </nz-select>
@@ -102,29 +111,179 @@
                                 <nz-date-picker formControlName="date_of_birth" placeholder="Select your date of birth"></nz-date-picker>
                             </nz-form-control>
                         </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Marital Status</nz-form-label>
+                            <nz-form-control>
+                                 <nz-select formControlName="marital_status" placeholder="Select your marital status">
+                                     @for (status of ['Single', 'Married', 'Divorced', 'Widowed']; track status) {
+                                        <nz-option [nzValue]="status" [nzLabel]="status">{{ status }}</nz-option>
+                                     }
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Address</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input formControlName="address_line_1" placeholder="Enter your address line 1" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','address_line_1') && (getCtrl('personal','address_line_1')?.touched || getCtrl('personal','address_line_1')?.dirty)">
+                                    {{ getError('personal','address_line_1') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Address Line 2</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input formControlName="address_line_2" placeholder="Enter your address line 2" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','address_line_2') && (getCtrl('personal','address_line_2')?.touched || getCtrl('personal','address_line_2')?.dirty)">
+                                    {{ getError('personal','address_line_2') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Postal Code</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input formControlName="postal_code" placeholder="Enter your postal code" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','postal_code') && (getCtrl('personal','postal_code')?.touched || getCtrl('personal','postal_code')?.dirty)">
+                                    {{ getError('personal','postal_code') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Country</nz-form-label>
+                            <nz-form-control>
+                                 <nz-select formControlName="country" placeholder="Select your country">
+                                     @for (country of ['Nigeria', 'Ghana', 'Kenya', 'South Africa']; track country) {
+                                        <nz-option [nzValue]="country" [nzLabel]="country">{{ country }}</nz-option>
+                                     }
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">State</nz-form-label>
+                            <nz-form-control>
+                                 <nz-select formControlName="state" placeholder="Select your state">
+                                     @for (state of ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan']; track state) {
+                                        <nz-option [nzValue]="state" [nzLabel]="state">{{ state }}</nz-option>
+                                     }
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">City</nz-form-label>
+                            <nz-form-control>
+                                 <nz-select formControlName="city" placeholder="Select your city">
+                                     @for (city of ['Ikeja', 'Victoria Island', 'Lekki', 'Surulere']; track city) {
+                                        <nz-option [nzValue]="city" [nzLabel]="city">{{ city }}</nz-option>
+                                     }
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <!-- Upload passport -->
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Upload Passport</nz-form-label>
+                            <nz-form-control>
+                                <!-- <nz-upload formControlName="passport_photo_url" [nzShowUploadList]="false" [nzCustomRequest]="uploadFactory('personal','passport_photo_url')">
+                                    <button nz-button>
+                                        <i nz-icon nzType="upload"></i> Click to Upload
+                                    </button>
+                                </nz-upload> -->
+                                <input
+                                    type="file"
+                                    id="fileInput"
+                                    formControlName="passport_photo_url"
+                                    (change)="onFileSelected($event)"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                    [disabled]="isLoading"
+                                    accept="image/*"
+                                />
+                                <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded border border-gray-200 cursor-pointer">
+                                    Upload your passport photograph (Image files only)
+                                </label>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Identity Type</nz-form-label>
+                            <nz-form-control>
+                                 <nz-select formControlName="identity_type" placeholder="Select your identity type">
+                                     @for (type of ['National ID', 'Driver\'s License', 'International Passport']; track type) {
+                                        <nz-option [nzValue]="type" [nzLabel]="type">{{ type }}</nz-option>
+                                     }
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Identity Number</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input formControlName="identity_number" placeholder="Enter your identity number" />
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','identity_number') && (getCtrl('personal','identity_number')?.touched || getCtrl('personal','identity_number')?.dirty)">
+                                    {{ getError('personal','identity_number') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <!-- <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Identity Upload</nz-form-label>
+                            <nz-form-control>
+                                <nz-upload formControlName="identity_upload_url" [nzShowUploadList]="false" [nzCustomRequest]="uploadFactory('personal','identity_upload_url')">
+                                    <button nz-button>
+                                        <i nz-icon nzType="upload"></i> Click to Upload
+                                    </button>
+                                </nz-upload>
+                            </nz-form-control>
+                        </nz-form-item> -->
+
                     </div>
                 </div>
 
                 <!-- Step 2: Next of kin -->
-                <div *ngIf="step === 1" [formGroupName]="'nok'">
-                    <h3 class="text-lg font-medium mb-4">Next Of Kin Details</h3>
+                <div *ngIf="step === 1" [formGroupName]="'next_of_kin'">
+                    <h3 class="text-lg font-medium mb-4">Next Of Kin / Emergency Contact</h3>
                     <div class="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <input nz-input formControlName="nok_first_name" placeholder="enter first name" />
-                                                    <div class="text-red-500 text-sm mt-1" *ngIf="getError('nok','nok_first_name') && (getCtrl('nok','nok_first_name')?.touched || getCtrl('nok','nok_first_name')?.dirty)">{{ getError('nok','nok_first_name') }}</div>
-                                                </div>
-                                                <div>
-                                                    <input nz-input formControlName="nok_last_name" placeholder="enter last name" />
-                                                    <div class="text-red-500 text-sm mt-1" *ngIf="getError('nok','nok_last_name') && (getCtrl('nok','nok_last_name')?.touched || getCtrl('nok','nok_last_name')?.dirty)">{{ getError('nok','nok_last_name') }}</div>
-                                                </div>
-                                                <div>
-                                                    <input nz-input formControlName="nok_phone" placeholder="enter phone" />
-                                                    <div class="text-red-500 text-sm mt-1" *ngIf="getError('nok','nok_phone') && (getCtrl('nok','nok_phone')?.touched || getCtrl('nok','nok_phone')?.dirty)">{{ getError('nok','nok_phone') }}</div>
-                                                </div>
-                                                <div>
-                                                    <input nz-input formControlName="nok_relationship" placeholder="Relationship" />
-                                                    <div class="text-red-500 text-sm mt-1" *ngIf="getError('nok','nok_relationship') && (getCtrl('nok','nok_relationship')?.touched || getCtrl('nok','nok_relationship')?.dirty)">{{ getError('nok','nok_relationship') }}</div>
-                                                </div>
+                        <div>
+                            <input nz-input formControlName="next_of_kin_name" placeholder="Full name" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','next_of_kin_name') && (getCtrl('next_of_kin','next_of_kin_name')?.touched || getCtrl('next_of_kin','next_of_kin_name')?.dirty)">{{ getError('next_of_kin','next_of_kin_name') }}</div>
+                        </div>
+
+                        <div>
+                            <input nz-input formControlName="next_of_kin_phone" placeholder="Phone" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','next_of_kin_phone') && (getCtrl('next_of_kin','next_of_kin_phone')?.touched || getCtrl('next_of_kin','next_of_kin_phone')?.dirty)">{{ getError('next_of_kin','next_of_kin_phone') }}</div>
+                        </div>
+
+                        <div>
+                            <input nz-input formControlName="next_of_kin_address" placeholder="Address" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','next_of_kin_address') && (getCtrl('next_of_kin','next_of_kin_address')?.touched || getCtrl('next_of_kin','next_of_kin_address')?.dirty)">{{ getError('next_of_kin','next_of_kin_address') }}</div>
+                        </div>
+
+                        <div>
+                            <input nz-input formControlName="next_of_kin_relationship" placeholder="Relationship" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','next_of_kin_relationship') && (getCtrl('next_of_kin','next_of_kin_relationship')?.touched || getCtrl('next_of_kin','next_of_kin_relationship')?.dirty)">{{ getError('next_of_kin','next_of_kin_relationship') }}</div>
+                        </div>
+
+                        <div>
+                            <input nz-input formControlName="emergency_contact_name" placeholder="Emergency contact name" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','emergency_contact_name') && (getCtrl('next_of_kin','emergency_contact_name')?.touched || getCtrl('next_of_kin','emergency_contact_name')?.dirty)">{{ getError('next_of_kin','emergency_contact_name') }}</div>
+                        </div>
+
+                        <div>
+                            <input nz-input formControlName="emergency_contact_relationship" placeholder="Emergency contact relationship" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','emergency_contact_relationship') && (getCtrl('next_of_kin','emergency_contact_relationship')?.touched || getCtrl('next_of_kin','emergency_contact_relationship')?.dirty)">{{ getError('next_of_kin','emergency_contact_relationship') }}</div>
+                        </div>
+
+                        <div>
+                            <input nz-input formControlName="emergency_contact_phone" placeholder="Emergency contact phone" />
+                            <div class="text-red-500 text-sm mt-1" *ngIf="getError('next_of_kin','emergency_contact_phone') && (getCtrl('next_of_kin','emergency_contact_phone')?.touched || getCtrl('next_of_kin','emergency_contact_phone')?.dirty)">{{ getError('next_of_kin','emergency_contact_phone') }}</div>
+                        </div>
                     </div>
                 </div>
 
@@ -132,9 +291,15 @@
                 <div *ngIf="step === 2" [formGroupName]="'employment'">
                     <h3 class="text-lg font-medium mb-4">Employment Details</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <input nz-input formControlName="employer" placeholder="Employer/Business name" />
-                        <input nz-input formControlName="designation" placeholder="Designation" />
-                        <input nz-input formControlName="employer_phone" placeholder="Employer phone" />
+                        <input nz-input formControlName="employer_name" placeholder="Employer / Business name" />
+                        <input nz-input formControlName="occupation" placeholder="Occupation / Designation" />
+                        <input nz-input formControlName="employer_address" placeholder="Employer address" />
+                        <input nz-input formControlName="monthly_income" placeholder="Monthly income" />
+                        <!-- <nz-upload formControlName="proof_of_income_url" [nzShowUploadList]="false" [nzCustomRequest]="uploadFactory('employment','proof_of_income_url')">
+                            <button nz-button>
+                                <i nz-icon nzType="upload"></i> Upload proof of income
+                            </button>
+                        </nz-upload> -->
                     </div>
                 </div>
 
@@ -153,15 +318,36 @@
                         <input nz-input formControlName="units" type="number" placeholder="Units Purchased" />
                         <input nz-input formControlName="payment_plan" placeholder="Select payment plan" />
                         <nz-date-picker formControlName="date_of_payment"></nz-date-picker>
+                        <input nz-input formControlName="special_requirements" placeholder="Special requirements (optional)" />
+                        <input nz-input formControlName="source_of_fund" placeholder="Source of funds (optional)" />
+                        <!-- <nz-upload formControlName="bank_statement_url" [nzShowUploadList]="false" [nzCustomRequest]="uploadFactory('payment','bank_statement_url')">
+                            <button nz-button>
+                                <i nz-icon nzType="upload"></i> Upload bank statement
+                            </button>
+                        </nz-upload> -->
                     </div>
                 </div>
 
-                <!-- Step 5: Realtor's Details -->
-                <div *ngIf="step === 4" [formGroupName]="'realtor'">
-                    <h3 class="text-lg font-medium mb-4">Realtor's Details</h3>
+                <!-- Step 5: Other / Referral Details -->
+                <div *ngIf="step === 4" [formGroupName]="'others'">
+                    <h3 class="text-lg font-medium mb-4">How did you hear about us?</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <input nz-input formControlName="realtor_first_name" placeholder="enter realtor's first name" />
-                        <input nz-input formControlName="realtor_last_name" placeholder="Enter realtor's last name" />
+                        <nz-form-item>
+                            <nz-form-control>
+                                <nz-select formControlName="how_did_you_hear" placeholder="Select source">
+                                    <nz-option nzValue="Online" nzLabel="Online"></nz-option>
+                                    <nz-option nzValue="Friend" nzLabel="Friend"></nz-option>
+                                    <nz-option nzValue="Realtor" nzLabel="Realtor"></nz-option>
+                                    <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-control>
+                                <input nz-input formControlName="referral_source" placeholder="Referral code / name (optional)" />
+                            </nz-form-control>
+                        </nz-form-item>
                     </div>
                 </div>
 
@@ -169,6 +355,8 @@
                 <div *ngIf="step === 5" [formGroupName]="'permissions'">
                     <h3 class="text-lg font-medium mb-4">Permissions</h3>
                     <label nz-checkbox formControlName="realtor_consent">I hereby give consent for my realtor to manage this property</label>
+                    <br />
+                    <label nz-checkbox formControlName="marketing_consent">I agree to receive marketing communications</label>
                 </div>
 
                 <!-- Step 7: Terms -->
@@ -176,19 +364,76 @@
                     <h3 class="text-lg font-medium mb-4">Terms &amp; Conditions</h3>
                     <p class="text-sm text-gray-600 mb-4">Please read and accept our terms and conditions</p>
                     <label nz-checkbox formControlName="accept_declaration">Accept Declaration</label>
+                    <br />
+                    <label nz-checkbox formControlName="accepted_privacy_policy">I accept the privacy policy</label>
                 </div>
 
                 <!-- Step 8: Summary -->
                 <div *ngIf="step === 7">
                     <h3 class="text-lg font-medium mb-4">Summary</h3>
-                    <pre class="text-xs bg-gray-100 p-4 rounded">{{ form.value | json }}</pre>
+
+                    <nz-descriptions nzBordered [nzColumn]="1" class="mb-4">
+                        <nz-descriptions-item nzTitle="Full name">
+                            {{ form.get('personal')?.value?.title || '' }}
+                            {{ form.get('personal')?.value?.first_name || '' }}
+                            {{ form.get('personal')?.value?.middle_name || '' }}
+                            {{ form.get('personal')?.value?.last_name || '' }}
+                        </nz-descriptions-item>
+
+                        <nz-descriptions-item nzTitle="Email">{{ form.get('personal')?.value?.email || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Phone">{{ form.get('personal')?.value?.phone || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Date of birth">{{ form.get('personal')?.value?.date_of_birth ? (form.get('personal')?.value?.date_of_birth | date:'mediumDate') : '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Gender">{{ form.get('personal')?.value?.gender || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Nationality">{{ form.get('personal')?.value?.nationality || '-' }}</nz-descriptions-item>
+                    </nz-descriptions>
+
+                    <nz-divider></nz-divider>
+
+                    <nz-descriptions nzTitle="Next of Kin" nzBordered [nzColumn]="1" class="mb-4">
+                        <nz-descriptions-item nzTitle="Name">{{ form.get('next_of_kin')?.value?.next_of_kin_name || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Phone">{{ form.get('next_of_kin')?.value?.next_of_kin_phone || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Relationship">{{ form.get('next_of_kin')?.value?.next_of_kin_relationship || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Emergency contact">{{ form.get('next_of_kin')?.value?.emergency_contact_name || '-' }} ({{ form.get('next_of_kin')?.value?.emergency_contact_phone || '-' }})</nz-descriptions-item>
+                    </nz-descriptions>
+
+                    <nz-divider></nz-divider>
+
+                    <nz-descriptions nzTitle="Employment" nzBordered [nzColumn]="1" class="mb-4">
+                        <nz-descriptions-item nzTitle="Employer">{{ form.get('employment')?.value?.employer_name || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Designation">{{ form.get('employment')?.value?.occupation || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Employer address">{{ form.get('employment')?.value?.employer_address || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Monthly income">{{ form.get('employment')?.value?.monthly_income || '-' }}</nz-descriptions-item>
+                    </nz-descriptions>
+
+                    <nz-divider></nz-divider>
+
+                    <nz-descriptions nzTitle="Payment" nzBordered [nzColumn]="1" class="mb-4">
+                        <nz-descriptions-item nzTitle="Property / Land">{{ form.get('payment')?.value?.property_id || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Units">{{ form.get('payment')?.value?.units || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Payment plan">{{ form.get('payment')?.value?.payment_plan || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Date of payment">{{ form.get('payment')?.value?.date_of_payment ? (form.get('payment')?.value?.date_of_payment | date:'mediumDate') : '-' }}</nz-descriptions-item>
+                    </nz-descriptions>
+
+                    <nz-divider></nz-divider>
+
+                    <nz-descriptions nzTitle="Referral" nzBordered [nzColumn]="1" class="mb-4">
+                        <nz-descriptions-item nzTitle="Source">{{ form.get('others')?.value?.how_did_you_hear || '-' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Referral">{{ form.get('others')?.value?.referral_source || '-' }}</nz-descriptions-item>
+                    </nz-descriptions>
+
+                    <nz-divider></nz-divider>
+
+                    <nz-descriptions nzTitle="Permissions & Terms" nzBordered [nzColumn]="1">
+                        <nz-descriptions-item nzTitle="Realtor consent">{{ form.get('permissions')?.value?.realtor_consent ? 'Yes' : 'No' }}</nz-descriptions-item>
+                        <nz-descriptions-item nzTitle="Accepted terms">{{ form.get('terms')?.value?.accept_declaration ? 'Yes' : 'No' }}</nz-descriptions-item>
+                    </nz-descriptions>
                 </div>
 
                 <div class="flex justify-between mt-6">
                     <button nz-button nzType="default" (click)="prev()" [disabled]="step === 0">Back</button>
                     <div>
                         <button nz-button nzType="default" class="mr-2" (click)="next()" *ngIf="step < titles.length - 1">Continue</button>
-                        <button nz-button nzType="primary" (click)="submit()" [nzLoading]="isSubmitting" *ngIf="step === titles.length - 1" class="bg-primary border-none">Submit</button>
+                        <button nz-button nzType="primary" (click)="submit()" [nzLoading]="isSubmitting" *ngIf="step === titles.length - 1" class="!bg-primary border-none">Submit</button>
                     </div>
                 </div>
             </form>

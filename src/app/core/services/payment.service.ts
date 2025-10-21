@@ -63,9 +63,76 @@ export class PaymentService {
       return this.httpService.post<StartOnlinePurchaseResponse>('purchases/start/online', payload);
     }
 
-    ///api/property-forms post
     submitPurchaseForm(payload: PurchaseFormPayload): Observable<PurchaseFormResponse> {
       return this.httpService.post<PurchaseFormResponse>('property-forms', payload);
+    }
+
+    getUserPayments(
+      status?: string,
+      method?: string,
+      purchase_id?: string,
+      from_date?: string,
+      to_date?: string,
+      page: number = 1,
+      limit: number = 10,
+      sortBy: string = 'created_at',
+      sortOrder: 'ASC' | 'DESC' = 'DESC'
+    ): Observable<PaymentHistoryResponse> {
+      const params: any = {
+        page: page.toString(),
+        limit: limit.toString(),
+        sort_by: sortBy,
+        sort_order: sortOrder
+      };
+
+      if (status) {
+        params.status = status;
+      }
+      if (method) {
+        params.method = method;
+      }
+      if (purchase_id) {
+        params.purchase_id = purchase_id;
+      }
+      if (from_date) {
+        params.from_date = from_date;
+      }
+      if (to_date) {
+        params.to_date = to_date;
+      }
+
+      return this.httpService.get<PaymentHistoryResponse>('payments/me', { params });
+    }
+
+    getpropertyForms(
+      page: number = 1,
+      limit: number = 10,
+      sortOrder: 'ASC' | 'DESC' = 'DESC',
+      status: string = 'in_progress'
+    ): Observable<any> {
+      return this.httpService.get<any>('property-forms', {
+        params: {
+          page: page.toString(),
+          limit: limit.toString(),
+          sort_order: sortOrder
+        }
+      });
+    }
+
+    getPurchases(
+      page: number = 1,
+      limit: number = 10,
+      sortBy: string = 'created_at',
+      sortOrder: 'ASC' | 'DESC' = 'DESC'
+    ): Observable<any> {
+      return this.httpService.get<any>('purchases/me/full', {
+        params: {
+          page: page.toString(),
+          limit: limit.toString(),
+          sort_by: sortBy,
+          sort_order: sortOrder
+        }
+      });
     }
 
 }

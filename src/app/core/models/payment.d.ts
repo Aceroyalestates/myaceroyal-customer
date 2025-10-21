@@ -36,20 +36,20 @@ export interface PaymentScheduleDashboard {
   recentSchedules: PaymentSchedule[];
 }
 
-export interface PaymentHistoryResponse {
-  success: boolean;
-  message: string;
-  data: PaymentData[];
-  pagination: {
-    current_page: number;
-    per_page: number;
-    total_items: number;
-    total_pages: number;
-    has_next_page: boolean;
-    has_previous_page: boolean;
-  };
-  summary: PaymentSummary;
-}
+// export interface PaymentHistoryResponse {
+//   success: boolean;
+//   message: string;
+//   data: PaymentData[];
+//   pagination: {
+//     current_page: number;
+//     per_page: number;
+//     total_items: number;
+//     total_pages: number;
+//     has_next_page: boolean;
+//     has_previous_page: boolean;
+//   };
+//   summary: PaymentSummary;
+// }
 
 export interface PaymentSummary {
     total_payments: number;
@@ -266,67 +266,6 @@ export interface PurchaseFormPayload {
   special_requirements?: string;
 }
 
-// {
-//   "success": true,
-//   "message": "Form created",
-//   "data": {
-//     "title": "Mr",
-//     "first_name": "John",
-//     "middle_name": "Michael",
-//     "last_name": "Doe",
-//     "date_of_birth": "1985-06-15",
-//     "gender": "male",
-//     "marital_status": "married",
-//     "nationality": "Nigerian",
-//     "email": "john.doe@example.com",
-//     "phone": "+2348012345678",
-//     "alternate_phone": "+2347012345678",
-//     "address_line_1": "123 Main Street",
-//     "address_line_2": "Apartment 4B",
-//     "city": "Lagos",
-//     "state": "Lagos State",
-//     "postal_code": "100001",
-//     "country": "Nigeria",
-//     "occupation": "Software Engineer",
-//     "employer_name": "Tech Corp Limited",
-//     "employer_address": "45 Business District, Victoria Island, Lagos",
-//     "monthly_income": 500000,
-//     "emergency_contact_name": "Jane Doe",
-//     "emergency_contact_relationship": "Spouse",
-//     "emergency_contact_phone": "+2348012345679",
-//     "next_of_kin_name": "Jane Doe",
-//     "next_of_kin_relationship": "Spouse",
-//     "next_of_kin_phone": "+2348012345679",
-//     "next_of_kin_address": "123 Main Street, Lagos",
-//     "identity_type": "national_id",
-//     "identity_number": "12345678901",
-//     "identity_upload_url": "https://storage.aceroyal.com/documents/identity_123.pdf",
-//     "passport_photo_url": "https://storage.aceroyal.com/photos/passport_123.jpg",
-//     "proof_of_income_url": "https://storage.aceroyal.com/documents/income_123.pdf",
-//     "bank_statement_url": "https://storage.aceroyal.com/documents/statement_123.pdf",
-//     "accepted_terms": true,
-//     "accepted_privacy_policy": true,
-//     "marketing_consent": false,
-//     "how_did_you_hear": "referral",
-//     "referral_source": "John Smith",
-//     "special_requirements": "Ground floor unit preferred due to mobility issues",
-//     "id": "form-44e7ffbd-0ca7-4f20-8c31-6bc51c21dc83",
-//     "purchase_id": "44e7ffbd-0ca7-4f20-8c31-6bc51c21dc83",
-//     "form_status": "submitted",
-//     "submitted_at": "2024-01-18T14:30:00Z",
-//     "verified_at": "2024-01-20T10:30:00Z",
-//     "rejection_reason": "Invalid identity document provided",
-//     "admin_notes": "All documents verified successfully",
-//     "created_at": "2024-01-15T10:30:00Z",
-//     "updated_at": "2024-01-20T15:45:00Z",
-//     "purchase": {
-//       "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-//       "property_name": "Luxury Villa Estate",
-//       "unit_number": "A-101",
-//       "purchase_amount": "20000000.00"
-//     }
-//   }
-// }
 
 export interface PurchaseFormResponse {
   success: boolean;
@@ -349,3 +288,138 @@ export interface PurchaseFormResponse {
     };
   };  
 }
+
+// --- Nested Interfaces for Data Item ---
+
+/**
+ * Represents the property details within a purchase.
+ */
+export interface PropertyData {
+  id: string;
+  name: string;
+  location: string;
+}
+
+/**
+ * Represents the unit details within a purchase.
+ */
+export interface UnitData {
+  id: number;
+  name: string | null;
+  type: string;
+  price: number;
+  size: string | null;
+}
+
+/**
+ * Represents the payment plan details for the purchase.
+ */
+export interface PlanData {
+  id: number;
+  name: string;
+  duration_months: number;
+  initial_amount: number;
+  total_price: number;
+}
+
+/**
+ * Represents the purchase object related to a payment.
+ */
+export interface PurchaseData {
+  id: string;
+  quantity: number;
+  total_price: number;
+  balance_due: number;
+  status: 'in-progress' | string;
+  property: PropertyData;
+  unit: UnitData;
+  plan: PlanData | null; // Plan can be null for outright payments
+}
+
+/**
+ * Represents the structure of the `applied_to` field (appears to be a simple object, can be left as `any` or an empty object type if structure is unknown).
+ * Since the example shows an empty object `{}`, we'll define it as a key-value map for flexibility.
+ */
+export interface AppliedTo {
+  [key: string]: any;
+}
+
+
+// --- Main Data Item Interface ---
+
+/**
+ * Represents a single payment history record.
+ */
+export interface PaymentHistoryItem {
+  id: string;
+  amount: number;
+  method: string;
+  status: 'paid' | 'pending' | string; // Use union type for known statuses
+  payment_type: 'installment' | 'outright' | string;
+  payment_reference: string;
+  gateway_reference: string | null;
+  proof_url: string | null;
+  applied_to: AppliedTo;
+  error_message: string | null;
+  created_at: string; // ISO 8601 string date
+  paid_at: string | null; // ISO 8601 string date
+  approved_at: string | null; // ISO 8601 string date
+  updated_at: string; // ISO 8601 string date
+  purchase: Purchase;
+}
+
+
+// --- Root Response Metadata Interfaces ---
+
+/**
+ * Represents the pagination details.
+ */
+export interface Pagination {
+  currentPage: number;
+  perPage: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+/**
+ * Represents the count and total amount for a specific status (e.g., paid, pending).
+ */
+export interface StatusDetail {
+  count: number;
+  total_amount: number;
+}
+
+/**
+ * Represents the overall summary of payments.
+ */
+export interface Summary {
+  total_payments: number;
+  total_amount: number;
+  status_breakdown: {
+    pending: StatusDetail;
+    paid: StatusDetail;
+    [key: string]: StatusDetail; // Allow for other statuses dynamically
+  };
+  method_breakdown: {
+    bank_transfer: StatusDetail;
+    paystack: StatusDetail;
+    [key: string]: StatusDetail; // Allow for other methods dynamically
+  };
+}
+
+
+// --- Root Response Interface ---
+
+/**
+ * The root interface for the entire API response object.
+ */
+export interface PaymentHistoryResponse {
+  success: boolean;
+  message: string;
+  data: PaymentHistoryItem[];
+  pagination: Pagination;
+  summary: Summary;
+}
+
