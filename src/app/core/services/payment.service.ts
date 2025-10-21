@@ -124,6 +124,7 @@ export class PaymentService {
       limit: number = 10,
       sortBy: string = 'created_at',
       sortOrder: 'ASC' | 'DESC' = 'DESC'
+      
     ): Observable<any> {
       return this.httpService.get<any>('purchases/me/full', {
         params: {
