@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "myaceroyal-admin": {
+    "myaceroyal-customer": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/myaceroyal-admin",
+            "outputPath": "dist/myaceroyal-customer",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -107,13 +107,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "myaceroyal-admin:build:production"
+              "buildTarget": "myaceroyal-customer:build:production"
             },
             "uat": {
-              "buildTarget": "myaceroyal-admin:build:uat"
+              "buildTarget": "myaceroyal-customer:build:uat"
             },
             "development": {
-              "buildTarget": "myaceroyal-admin:build:development"
+              "buildTarget": "myaceroyal-customer:build:development"
             }
           },
           "defaultConfiguration": "development"

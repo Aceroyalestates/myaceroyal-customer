@@ -11,5 +11,5 @@ export const environment = {
   
   // Netlify specific configurations
   netlify: true,
-  deployUrl: 'https://myaceroyal-admin.netlify.app', // Update this with your actual Netlify URL
+  deployUrl: 'https://myaceroyal-customer.netlify.app', // Update this with your actual Netlify URL
 };
