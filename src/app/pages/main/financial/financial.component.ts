@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { PaymentData, PaymentScheduleDashboard, PaymentSchedulesResponse, PaymentSummary } from 'src/app/core/models/payment';
@@ -12,7 +11,6 @@ import { SharedModule } from 'src/app/shared/shared.module';
   imports: [
     CommonModule, 
     SharedModule, 
-    RouterLink,
     NzTabsModule,
     NzTableModule
   ],

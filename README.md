@@ -1,4 +1,4 @@
-# MyaceroyalAdmin
+# MyaceroyalCustomer
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
 
@@ -35,6 +35,16 @@ ng build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+## Deploying to Netlify
+
+The repository includes a `netlify.toml` with the recommended defaults:
+
+- Build command: `npm run build`
+- Publish directory: `dist/myaceroyal-customer/browser`
+- Runtime: Node.js 20
+
+When connecting the repository to Netlify, the dashboard will pick these values automatically. If you need to trigger a manual deploy, run `npm run build` locally and drag the contents of `dist/myaceroyal-customer/browser` into Netlify's deploy interface. Client-side routing is handled via `public/_redirects`, which rewrites any unknown path to `index.html`.
 
 ## Running unit tests
 
