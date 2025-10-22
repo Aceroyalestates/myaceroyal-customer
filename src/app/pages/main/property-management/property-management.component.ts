@@ -84,6 +84,7 @@ export class PropertyManagementComponent {
   inProgressPagination: any | null = null;
   fullyPaidPagination: any | null = null;
   isLoading = false;
+  inPaymentProperties: any[] = [];
 
     constructor(
       private location: Location,
@@ -152,6 +153,8 @@ export class PropertyManagementComponent {
           console.log('Purchases loaded:', response);
           this.fullyPaidPayments = response.data.filter((purchase: any) => purchase.status === 'completed');
           this.fullyPaidPagination = response.pagination;
+          this.inPaymentProperties = response.data.filter((purchase: any) => purchase.status === 'in-progress');
+          console.log('In-payment properties:', this.inPaymentProperties);
           this.isLoading = false;
         },
         error: (error: any) => {
@@ -208,6 +211,10 @@ export class PropertyManagementComponent {
           this.isLoading = false;
         }
       });
+    }
+
+    gotoPurchaseForm(purchaseId: string): void {
+      this.router.navigate([`/main/subscription/${purchaseId}`]);
     }
     
 }

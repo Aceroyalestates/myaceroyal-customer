@@ -119,12 +119,20 @@ export class PaymentService {
       });
     }
 
+    getPurchaseFormByPurchaseId(purchaseId: string): Observable<PurchaseFormResponse> {
+      return this.httpService.get<PurchaseFormResponse>(`property-forms/purchase/${purchaseId}`);
+    }
+
+    updatePurchaseForm(purchaseFormId: string, payload: Partial<PurchaseFormPayload>): Observable<PurchaseFormResponse> {
+      return this.httpService.patch<PurchaseFormResponse>(`property-forms/${purchaseFormId}`, payload);
+    }
+
     getPurchases(
       page: number = 1,
       limit: number = 10,
       sortBy: string = 'created_at',
       sortOrder: 'ASC' | 'DESC' = 'DESC'
-      
+
     ): Observable<any> {
       return this.httpService.get<any>('purchases/me/full', {
         params: {
@@ -134,6 +142,10 @@ export class PaymentService {
           sort_order: sortOrder
         }
       });
+    }
+
+    getPurchaseDetails(purchaseId: string): Observable<any> {
+      return this.httpService.get<any>(`purchases/${purchaseId}`);
     }
 
 }

@@ -41,7 +41,7 @@ export class PropertiesService {
 
     getPropertyById(id: string): Observable<Property> {
         return this.httpService
-            .get<{ data: Property }>(`properties/${id}`)
+            .get<{ data: Property }>(`properties/id/${id}`)
             .pipe(map((response) => response.data));
     }
 

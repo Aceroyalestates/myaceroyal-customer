@@ -4,7 +4,7 @@
 		<h2 class="text-2xl font-semibold">Subscription Form</h2>
 	</div>
 
-	<div class="flex flex-row">
+	<div class="flex flex-row" *ngIf="purchaseFormData">
         <nz-steps [nzCurrent]="step" nzSize="small" class="mb-6 basis-1/3" nzDirection="vertical">
 		    <nz-step *ngFor="let t of titles" [nzTitle]="t"></nz-step>
 	    </nz-steps>
@@ -116,8 +116,8 @@
                             <nz-form-label [nzSpan]="24">Marital Status</nz-form-label>
                             <nz-form-control>
                                  <nz-select formControlName="marital_status" placeholder="Select your marital status">
-                                     @for (status of ['Single', 'Married', 'Divorced', 'Widowed']; track status) {
-                                        <nz-option [nzValue]="status" [nzLabel]="status">{{ status }}</nz-option>
+                                     @for (status of ['single', 'married', 'divorced', 'widowed']; track status) {
+                                        <nz-option [nzValue]="status" [nzLabel]="status">{{ status | titlecase }}</nz-option>
                                      }
                                 </nz-select>
                             </nz-form-control>

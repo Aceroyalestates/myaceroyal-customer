@@ -16,7 +16,7 @@ const routes: Routes = [
         component: PropertyManagementComponent
       },
       {
-        path: 'payment/:id',
+        path: 'view/:id',
         component: PropertyPaymentComponent
       },
       {
