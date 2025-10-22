@@ -88,7 +88,7 @@ const routes: Routes = [
             m => m.PropertyManagementModule),
       },
       {
-        path: 'subscription',
+        path: 'subscription/:id',
         component: SubscriptionComponent
       }
     ],
