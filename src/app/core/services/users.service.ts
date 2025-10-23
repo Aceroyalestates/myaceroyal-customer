@@ -23,4 +23,8 @@ export class UsersService {
         return this.httpService.patch<UserProfileResponse>('users/me/avatar', payload);
     }
 
+    changeUserPassword(payload: any): Observable<any> {
+        return this.httpService.patch<any>('users/me/password', payload);
+    }
+
 }

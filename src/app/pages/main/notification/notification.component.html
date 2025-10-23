@@ -1,1 +1,61 @@
-<p>notification works!</p>
+<div class="min-h-screen p-6 bg-gray-50">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Notifications</h1>
+      <div class="flex items-center gap-2">
+        <button nz-button nzType="default" (click)="getNotifications()" [disabled]="isLoading">Refresh</button>
+        <button class="!bg-primary !border-none" nz-button nzType="primary" (click)="markAllAsRead()" [disabled]="isLoading || notifications.length === 0">Mark all read</button>
+      </div>
+    </div>
+
+    <nz-spin [nzSpinning]="isLoading">
+      <ng-container *ngIf="notifications?.length; else emptyState">
+        <nz-list nzBordered>
+          <nz-list-item *ngFor="let n of notifications" class="py-4">
+            <div class="flex items-start gap-4 w-full">
+              <div class="flex-shrink-0">
+                <div [ngClass]="{'bg-red-100': !n.is_read, 'bg-gray-100': n.is_read }" class="h-10 w-10 rounded-full flex items-center justify-center">
+                  <i nz-icon nzType="bell" class="text-blue-600"></i>
+                </div>
+              </div>
+
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="font-medium text-gray-900">{{ n.title }}</h3>
+                    <p class="text-sm text-gray-600">{{ n.message }}</p>
+                    <div class="text-xs text-gray-400 mt-1">{{ n.createdAt | date:'medium' }}</div>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <!-- <button nz-button nzType="link" (click)="openAction(n)" [disabled]="!n.action_link">Open</button> -->
+
+                    <button nz-button nzType="default" *ngIf="!n.is_read" (click)="markAsRead(n.id)" [disabled]="isItemLoading(n.id)">
+                      <span *ngIf="!isItemLoading(n.id)">Mark read</span>
+                      <nz-spin class="!text-primary" *ngIf="isItemLoading(n.id)" nzSimple></nz-spin>
+                    </button>
+
+                    <nz-popconfirm nzTitle="Are you sure?" (nzOnConfirm)="deleteNotification(n.id)">
+                      <button nz-button nzType="text" class="text-red-500">Delete</button>
+                    </nz-popconfirm>
+                  </div>
+                </div>
+
+                <div class="mt-2 text-xs text-gray-500">
+                  <span *ngIf="n.meta">Amount: ₦{{ n.meta?.amount_due | number }}</span>
+                  <span *ngIf="n.meta"> · Priority: {{ n.meta?.priority }}</span>
+                </div>
+              </div>
+            </div>
+          </nz-list-item>
+        </nz-list>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="py-12">
+          <nz-empty nzNotFoundImage="simple"></nz-empty>
+        </div>
+      </ng-template>
+    </nz-spin>
+  </div>
+</div>
