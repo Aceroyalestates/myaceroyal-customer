@@ -12,11 +12,13 @@ import { BackComponent } from './components/back/back.component';
 import { ErrorModalComponent } from './components/error-modal/error-modal.component';
 import { LoaderComponent } from './components/loader/loader.component';
 import { PaginationComponent } from './components/pagination/pagination.component';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @NgModule({
   declarations: [],
   imports: [
     CommonModule,
+    NzIconModule,
     ButtonComponent,
     AlertModalComponent,
     InputComponent,
@@ -31,6 +33,7 @@ import { PaginationComponent } from './components/pagination/pagination.componen
     PaginationComponent,
   ],
   exports: [
+    NzIconModule,
     ButtonComponent,
     AlertModalComponent,
     InputComponent,

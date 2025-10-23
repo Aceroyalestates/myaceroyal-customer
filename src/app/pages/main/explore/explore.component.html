@@ -38,7 +38,7 @@
       } @else { @for (property of properties; track property.id) {
       <div
         class="h-fit flex relative rounded-lg w-full cursor-pointer"
-        (click)="handleViewProperty(property.slug)"
+        (click)="handleViewProperty(property.id)"
       >
         <div class="bg-foreground w-full h-full absolute z-0 rounded-lg">
           <img

@@ -1,4 +1,5 @@
 import { Component, effect, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { ColumnDef } from '@tanstack/table-core';
 import { INSPECTION_SCHEDULES } from 'src/app/core/constants';
 import { Appointment } from 'src/app/core/models/properties';
@@ -50,7 +51,10 @@ inspectionSchedules: InspectionSchedule[] = INSPECTION_SCHEDULES;
   selected = signal<InspectionSchedule[]>([]);
   appointments: Appointment[] = [];
 
-  constructor(private appointmentService: AppointmentService) {
+  constructor(
+    private appointmentService: AppointmentService,
+    private router: Router
+  ) {
     // Optional effect to react to selected schedule changes
     effect(() => {
       console.log('Selected schedule from table:', this.selected());
@@ -96,4 +100,8 @@ inspectionSchedules: InspectionSchedule[] = INSPECTION_SCHEDULES;
           },
         });
       }
+
+      // bookInspection() {
+      //   this.router.navigateByUrl(`main/explore/book/${this.property?.id}`);
+      // }
 }

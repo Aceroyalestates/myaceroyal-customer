@@ -1,1 +1,31 @@
-<p>faq works!</p>
+<div class="min-h-screen p-6 bg-gray-50">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-semibold">Frequently Asked Questions</h1>
+      <button nz-button nzType="default" (click)="loadFaqs()" [disabled]="isLoading">Refresh</button>
+    </div>
+
+    <nz-spin [nzSpinning]="isLoading">
+      <ng-container *ngIf="faqs?.length; else empty">
+        <nz-collapse nzBordered="false">
+          <nz-collapse-panel *ngFor="let f of faqs" [nzHeader]="f.question" [nzActive]="false">
+            <div class="text-sm text-gray-700">{{ f.answer }}</div>
+            <div class="mt-3 text-xs text-gray-400">Category: {{ f.category }} · Updated: {{ f.updatedAt | date:'medium' }}</div>
+          </nz-collapse-panel>
+        </nz-collapse>
+
+        <!-- simple pagination controls (server-side) -->
+        <div class="mt-6 flex justify-center">
+          <button nz-button nzType="default" (click)="loadFaqs(1)" class="mr-2">First</button>
+          <button nz-button nzType="default" (click)="loadFaqs(1)">Page 1</button>
+        </div>
+      </ng-container>
+
+      <ng-template #empty>
+        <div class="py-12">
+          <nz-empty nzNotFoundImage="simple"></nz-empty>
+        </div>
+      </ng-template>
+    </nz-spin>
+  </div>
+</div>
