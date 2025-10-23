@@ -148,17 +148,20 @@
           <div class="flex gap-4 items-center">
             <app-icon
               [name]="'bell'"
-              class="text-primary p-2 bg-primary/10 rounded-full"
+              class="text-primary p-2 bg-primary/10 rounded-full cursor-pointer"
+              [routerLink]="['/main/notifications']"
             ></app-icon>
             <app-icon
               [name]="'message-circle'"
-              class="text-primary p-2 bg-primary/10 rounded-full"
+              class="text-primary p-2 bg-primary/10 rounded-full cursor-pointer"
+              
             ></app-icon>
             <div class="flex gap-2 items-center">
               <img
                 src="logo.png"
                 alt="profile"
-                class="w-10 h-10 rounded-full object-cover border-2 border-red-500"
+                class="w-10 h-10 rounded-full object-cover border-2 border-red-500 cursor-pointer"
+                [routerLink]="['/main/my-profile']"
               />
               <div>
                 <h2 class="font-medium !text-gray-500 mb-1 text-normal">
