@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, Observable } from 'rxjs';
-import { DefaultBankAccount, PaymentHistoryResponse, PaymentSchedulesResponse, PurchaseFormPayload, PurchaseFormResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryResponse, PaymentSchedulesResponse, PurchaseFormPayload, PurchaseFormResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
 
 @Injectable({
   providedIn: 'root'
@@ -59,8 +59,16 @@ export class PaymentService {
       return this.httpService.post<StartOfflinePurchaseResponse>('purchases/start/offline', payload);
     }
 
+    continueOfflinePurchase(payload: ContinueOfflinePurchasePayload): Observable<ContinueOfflinePurchaseResponse> {
+      return this.httpService.post<ContinueOfflinePurchaseResponse>(`payments/offline`, payload);
+    }
+
     initiateOnlinePurchase(payload: StartOnlinePurchasePayload): Observable<StartOnlinePurchaseResponse> {
       return this.httpService.post<StartOnlinePurchaseResponse>('purchases/start/online', payload);
+    }
+
+    continueOnlinePurchase(payload: ContinueOnlinePurchasePayload): Observable<ContinueOnlinePurchaseResponse> {
+      return this.httpService.post<ContinueOnlinePurchaseResponse>(`payments/online`, payload);
     }
 
     submitPurchaseForm(payload: PurchaseFormPayload): Observable<PurchaseFormResponse> {
@@ -132,7 +140,6 @@ export class PaymentService {
       limit: number = 10,
       sortBy: string = 'created_at',
       sortOrder: 'ASC' | 'DESC' = 'DESC'
-
     ): Observable<any> {
       return this.httpService.get<any>('purchases/me/full', {
         params: {
@@ -146,6 +153,10 @@ export class PaymentService {
 
     getPurchaseDetails(purchaseId: string): Observable<any> {
       return this.httpService.get<any>(`purchases/${purchaseId}`);
+    }
+
+    getUserPurchaseSchedules(purchaseId: string): Observable<any> {
+      return this.httpService.get<any>(`purchases/${purchaseId}/schedules`);
     }
 
 }

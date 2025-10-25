@@ -144,28 +144,35 @@
                   {{ selectedUnit?.total_units }}
                 </p>
               </span>
-            <!-- <div class="flex items-center gap-4">
-              @if (property.property_units && property.property_units.length >
-              0) { @for (unit of property.property_units; track unit.id) {
-              <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-4 px-4 py-1 border border-white rounded-full"
-              >
-                <app-icon name="property" [size]="16"></app-icon>
-                <p class="!text-medium !text-[16px]">
-                  {{ unit.unit_type.name || "Unit" }}
-                </p>
-              </span>
-              } } @else {
-              <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 border border-white rounded-full"
-              >
-                <app-icon name="property" [size]="24"></app-icon>
-                <p class="!text-medium !text-[16px]">5</p>
-              </span>
-              }
-            </div> -->
           </div>
+          <div class="w-full mb-10" *ngIf="selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0">
+            <h3 class="text-[#4F4F4F] text-normal text-2xl !mb-4">
+              Available Installment Plans
+            </h3>
+            <div class="flex flex-col gap-4 font-semibold !text-gray-600">
+              @for (plan of selectedUnit?.property_installment_plans; track
+              plan.plan_id) {
+                <div
+                  class="flex flex-col w-full md:w-2/3 border border-gray-200 rounded-lg p-4 gap-4 bg-white"
+                >
+                  <p class="text-gray-600 mb-1 flex justify-between">
+                    <span>Duration</span>
+                    <span>{{ plan.property_plan.title }}</span>
+                  </p>
+                  <p class="text-gray-600 mb-1 flex justify-between">
+                    <span>Initial Amount</span>
+                    <span>{{ plan.initial_amount | currency: '₦ ' : 'symbol' : '1.0-0' }}</span>
+                  </p>
+                  <p class="text-gray-600 flex justify-between">
+                    <span>Total Amount</span>
+                    <span>{{ plan.total_price | currency: '₦ ' : 'symbol' : '1.0-0' }}</span>
+                  </p>
+                </div>
+              }
         </div>
+        </div>
+        </div>
+
       </nz-tab>
       }
     </nz-tabset>
