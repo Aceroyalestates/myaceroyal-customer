@@ -196,6 +196,19 @@ export interface StartOfflinePurchaseResponse {
   };
 }
 
+export interface ContinueOfflinePurchasePayload {
+  purchase_id: string;
+  amount: number;
+  method: string;
+  proof_url: string;
+}
+
+export interface ContinueOfflinePurchaseResponse {
+  success: boolean;
+  message: string;
+  data: any;
+}
+
 export interface StartOnlinePurchasePayload {
   unit_id: number;
   plan_id?: number;
@@ -221,6 +234,24 @@ export interface StartOnlinePurchaseResponse {
       };
     };
   };
+}
+
+export interface ContinueOnlinePurchasePayload {
+  purchase_id: string;
+  amount: number;
+}
+
+export interface ContinueOnlinePurchaseResponse {
+  success: boolean;
+  message: string;
+  data: {
+    payment_id: string;
+    payment_reference: string;
+    authorization_url: string;
+    access_code: string;
+    gateway_reference: string;
+    purchase_id: string;
+  }
 }
 
 export interface PurchaseFormPayload {
