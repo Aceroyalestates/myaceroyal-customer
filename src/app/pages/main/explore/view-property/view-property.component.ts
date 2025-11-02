@@ -24,6 +24,7 @@ import { DefaultBankAccount, StartOfflinePurchasePayload, StartOnlinePurchasePay
 import { NgxCurrencyDirective } from "ngx-currency";
 import { ImageService } from 'src/app/core/services/image.service';
 import { ImageUploadApiResponse } from 'src/app/core/models/images';
+import { ImageSliderComponent, ImageSliderItem } from 'src/app/shared/components/image-slider/image-slider.component';
 
 
 
@@ -44,6 +45,7 @@ import { ImageUploadApiResponse } from 'src/app/core/models/images';
     NzSpinModule,
     NzSwitchModule,
     NgxCurrencyDirective,
+    ImageSliderComponent
   ],
   templateUrl: './view-property.component.html',
   styleUrl: './view-property.component.css'
@@ -60,6 +62,8 @@ export class ViewPropertyComponent {
   selectedPlan: any = '1';
   selectedPaymentMethod: number | null = null;
   defaultBankAccounts: DefaultBankAccount[] = [];
+  propertyImages: ImageSliderItem[] = [];
+  sliderHeight = '300px';
 
   isUnitModalVisible = false;
   isPlanModalVisible = false;
@@ -236,6 +240,12 @@ export class ViewPropertyComponent {
         this.loadProperty(this.id);
       }
     });
+    
+        // Set initial slider height based on screen size
+    this.updateSliderHeight();
+    
+    // Listen for window resize events
+    window.addEventListener('resize', this.updateSliderHeight.bind(this));
 
     // listen to referral code changes (debounced) and validate when length >= 5
       const refSub = this.refCode$
@@ -312,9 +322,15 @@ export class ViewPropertyComponent {
     this.subs.add(refSub);
     this.subs.add(couponSub);
   }
+  
+  updateSliderHeight(): void {
+    // 300px on mobile (< 768px), 550px from tablet and above
+    this.sliderHeight = window.innerWidth >= 768 ? '550px' : '300px';
+  }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    window.removeEventListener('resize', this.updateSliderHeight.bind(this));
   }
 
   back() {
@@ -335,6 +351,7 @@ export class ViewPropertyComponent {
     this.propertiesService.getPropertyById(id).subscribe({
       next: (property) => {
         this.property = property;
+        this.preparePropertyImages();
         this.loading = false;
         console.log('Property loaded:', property);
         if (property.property_units && property.property_units.length > 0) {
@@ -591,5 +608,49 @@ export class ViewPropertyComponent {
       return;
     }
     this.startOfflinePurchase();
+  }
+
+  private preparePropertyImages(): void {
+    if (!this.property) {
+      this.propertyImages = [];
+      return;
+    }
+
+    // If property has images, use them
+    if (this.property.property_images && this.property.property_images.length > 0) {
+      this.propertyImages = this.property.property_images.map((img, index) => ({
+        src: img.image_url,
+        alt: `${this.property?.name} - Image ${index + 1}`,
+        title: `${this.property?.name} - Image ${index + 1}`
+      }));
+    } else {
+      // Fallback to default images
+      this.propertyImages = [
+        {
+          src: 'images/property-image2.jpg',
+          alt: `${this.property.name} - Property Image`,
+          title: `${this.property.name} - Property Image`
+        },
+        {
+          src: 'images/property-image3.jpg',
+          alt: `${this.property.name} - Property Image`,
+          title: `${this.property.name} - Property Image`
+        },
+        {
+          src: 'images/property-image4.jpg',
+          alt: `${this.property.name} - Property Image`,
+          title: `${this.property.name} - Property Image`
+        }
+      ];
+    }
+  }
+
+  onImageChange(index: number): void {
+    console.log('Image changed to index:', index);
+  }
+
+  onImageClick(image: ImageSliderItem): void {
+    console.log('Image clicked:', image);
+    // You can implement a lightbox or modal here if needed
   }
 }

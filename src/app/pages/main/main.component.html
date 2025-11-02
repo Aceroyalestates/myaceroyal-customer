@@ -1,11 +1,11 @@
 <nz-layout class="app-layout">
+  <!-- nzCollapsible nzBreakpoint="lg" [nzCollapsedWidth]="0" -->
   <nz-sider
     class="menu-sidebar"
     nzCollapsible
-    nzWidth="256px"
-    nzBreakpoint="md"
+    [nzCollapsedWidth]="0"
+    nzBreakpoint="lg"
     [(nzCollapsed)]="isCollapsed"
-    [nzTrigger]="null"
   >
     <div class="sidebar-logo">
       <a href="/main/dashboard">
@@ -135,15 +135,16 @@
     </div>
   </nz-sider>
   <nz-layout>
+    <!-- Make -->
     <nz-header>
       <div class="app-header border-b border-gray-100">
         <div class="flex items-center justify-between py-[30px] px-10 w-full">
           <h1 class="!text-primary !text-xl">Welcome, {{ firstName }}!</h1>
           <div class="flex items-center justify-between gap-4">
-            <app-search-bar
+            <!-- <app-search-bar
               (search)="onSearch($event)"
               [placeholder]="'Search property...'"
-            ></app-search-bar>
+            ></app-search-bar> -->
           </div>
           <div class="flex gap-4 items-center">
             <app-icon

@@ -1,8 +1,3 @@
-<div *ngIf="isLoading" class="loader-overlay">
-	<div class="loader-container">
-		<div class="spinner"></div>
-		<div *ngIf="message" class="loader-message">
-			{{ message }}
-		</div>
-	</div>
+<div *ngIf="isLoading" class="fixed inset-0 bg-black/15 bg-opacity-30 flex items-center justify-center z-[9999]">
+	<div class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
 </div>

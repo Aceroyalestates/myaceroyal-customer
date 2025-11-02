@@ -30,6 +30,9 @@ export class PasswordComponent {
   showOld = false;
   showNew = false;
   showConfirm = false;
+	showOldPassword = false;
+	showNewPassword = false;
+	showConfirmPassword = false;
 
   constructor(
     private userService: UsersService,
@@ -40,7 +43,7 @@ export class PasswordComponent {
   ) {
     this.passwordForm = this.fb.group({
       old_password: ['', [Validators.required]],
-      new_password: ['', [Validators.required, Validators.minLength(8)]],
+      new_password: ['', [Validators.required, Validators.minLength(6)]],
       confirm_password: ['', [Validators.required]]
     })
   }
@@ -86,5 +89,22 @@ export class PasswordComponent {
       }
     })
   }
+
+  toggleOldPasswordVisibility(): void {
+		this.showOldPassword = !this.showOldPassword;
+	}
+
+  toggleNewPasswordVisibility(): void {
+		this.showNewPassword = !this.showNewPassword;
+	}
+
+  toggleConfirmPasswordVisibility(): void {
+		this.showConfirmPassword = !this.showConfirmPassword;
+	}
+
+  hasError(controlName: string, errorType: string): boolean {
+		const control = this.passwordForm.get(controlName);
+		return control ? control.hasError(errorType) && control.touched : false;
+	}
 
 }

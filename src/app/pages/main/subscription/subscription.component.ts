@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -67,6 +67,7 @@ export class SubscriptionComponent implements OnInit {
     private imageService: ImageService,
     private message: NzMessageService,
     private route: ActivatedRoute,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -144,6 +145,10 @@ export class SubscriptionComponent implements OnInit {
 
     // load server data after form exists
     this.getPurchaseForm();
+  }
+
+  back() {
+    this.location.back();
   }
 
   private stepGroupName(index: number) {

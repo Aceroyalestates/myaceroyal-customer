@@ -21,7 +21,7 @@
     </button>
   </div>
   } @else if (property) {
-  <div class="grid grid-cols-12 gap-x-6 max-h-fit mb-16">
+  <!-- <div class="grid grid-cols-12 gap-x-6 max-h-fit mb-16">
     <img
       [src]="
         property.property_images && property.property_images.length > 0
@@ -53,8 +53,25 @@
         class="w-full h-[220px] object-cover rounded-lg"
       />
     </div>
+  </div> -->
+  
+
+  <div class="mb-8 md:mb-16">
+    <app-image-slider
+      [images]="propertyImages"
+      [showIndicators]="true"
+      [showNavigation]="true"
+      [showImageCounter]="true"
+      [height]="sliderHeight"
+      [objectFit]="'cover'"
+      [borderRadius]="'8px'"
+      [enableKeyboardNavigation]="true"
+      [enableSwipeNavigation]="true"
+      (imageChange)="onImageChange($event)"
+      (imageClick)="onImageClick($event)"
+    ></app-image-slider>
   </div>
-  } @if (property) {
+} @if (property) {
   <div class="flex gap-8">
     <nz-tabset class="w-full" nzSize="large" [(nzSelectedIndex)]="selectedIndex">
       @for (tab of property.property_units; track tab.id) {
