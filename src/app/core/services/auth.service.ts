@@ -13,8 +13,20 @@ export interface IUser {
   id: string;
   full_name: string;
   email: string;
+  phone_number: string;
+  avatar: string;
   role_id: number;
   is_verified: boolean;
+  gender: string;
+  date_of_birth: string;
+  referral_code: string;
+  role: {
+    id: number;
+    name: string;
+    label: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 export interface ILoginResponse {

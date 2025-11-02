@@ -21,6 +21,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ImageService } from 'src/app/core/services/image.service';
 import { ImageUploadApiResponse } from 'src/app/core/models/images';
+import { ImageSliderComponent, ImageSliderItem } from 'src/app/shared/components/image-slider/image-slider.component';
 
 @Component({
   selector: 'app-property-payment',
@@ -38,7 +39,8 @@ import { ImageUploadApiResponse } from 'src/app/core/models/images';
     NzSelectModule,
     NzButtonModule,
     NzRadioModule,
-    NzTabsModule
+    NzTabsModule,
+    ImageSliderComponent
   ],
   templateUrl: './property-payment.component.html',
   styleUrl: './property-payment.component.css'
@@ -63,6 +65,9 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   schedules: any[] = [];
   property: any = null;
   purchaseSummary: any = null;
+  propertyImages: ImageSliderItem[] = [];
+  sliderHeight = '300px';
+
 
   constructor(
     private route: ActivatedRoute,
@@ -80,6 +85,26 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     this.getPurchaseDetails(this.id!);
     this.getUserSchedules(this.id!);
     this.getDefaultBankAccounts();
+    
+    // Set initial slider height based on screen size
+    this.updateSliderHeight();
+    
+    // Listen for window resize events
+    window.addEventListener('resize', this.updateSliderHeight.bind(this));
+  }
+
+  updateSliderHeight(): void {
+    // 300px on mobile (< 768px), 550px from tablet and above
+    this.sliderHeight = window.innerWidth >= 768 ? '550px' : '300px';
+  }
+
+  onImageChange(index: number): void {
+    console.log('Image changed to index:', index);
+  }
+
+  onImageClick(image: ImageSliderItem): void {
+    console.log('Image clicked:', image);
+    // You can implement a lightbox or modal here if needed
   }
 
   showPaymentMethodModal(schedule: any): void {
@@ -164,6 +189,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
         console.log('Purchase details:', response);
         this.propertyPurchaseDetails = response.data;
         this.images = response.data.unit.property.property_images.map((img: any) => ({ src: img.image_url }));
+        this.preparePropertyImages();
       },
       error: (error) => {
         console.error('Error fetching purchase details:', error);
@@ -358,6 +384,42 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
         }
       });
     }
+
+    private preparePropertyImages(): void {
+    if (!this.propertyPurchaseDetails || !this.propertyPurchaseDetails.unit || !this.propertyPurchaseDetails.unit.property) {
+      this.propertyImages = [];
+      return;
+    }
+
+    // If property has images, use them
+    if (this.propertyPurchaseDetails.unit.property.property_images && this.propertyPurchaseDetails.unit.property.property_images.length > 0) {
+      this.propertyImages = this.propertyPurchaseDetails.unit.property.property_images.map((img: any, index: number) => ({
+        src: img.image_url,
+        alt: `${this.propertyPurchaseDetails.unit.property.name} - Image ${index + 1}`,
+        title: `${this.propertyPurchaseDetails.unit.property.name} - Image ${index + 1}`
+      }));
+      console.log('Prepared property images:', this.propertyImages);
+    } else {
+      // Fallback to default images
+      this.propertyImages = [
+        {
+          src: 'images/property-image2.jpg',
+          alt: `${this.property.name} - Property Image`,
+          title: `${this.property.name} - Property Image`
+        },
+        {
+          src: 'images/property-image3.jpg',
+          alt: `${this.property.name} - Property Image`,
+          title: `${this.property.name} - Property Image`
+        },
+        {
+          src: 'images/property-image4.jpg',
+          alt: `${this.property.name} - Property Image`,
+          title: `${this.property.name} - Property Image`
+        }
+      ];
+    }
+  }
 
   onClickImage(): void {
     this.nzImageService.preview(this.images, { nzZoom: 1.5, nzRotate: 0 });

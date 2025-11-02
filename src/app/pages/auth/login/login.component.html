@@ -1,24 +1,24 @@
-<div class="flex flex-col items-center justify-center h-screen w-full bg-cover bg-center bg-no-repeat" style="background-image: url('/images/login-background.jpg')">
+<div class="flex flex-col items-center justify-center min-h-screen w-full bg-cover bg-center bg-no-repeat px-4 sm:px-6 md:px-8" style="background-image: url('/images/login-background.jpg')">
   <div class="absolute inset-0 bg-black/40"></div>
-  <div class="bg-white px-10 py-[157px] rounded-[10px] w-full max-w-[683px] relative z-10 max-h-11/12">
+  <div class="bg-white px-4 sm:px-6 md:px-10 py-8 sm:py-16 md:py-[157px] rounded-[10px] w-full max-w-[90%] sm:max-w-[500px] md:max-w-[683px] relative z-10 my-4">
     <div class="login-modal">
       <div class="w-full flex flex-col items-center justify-center gap-y-3">
-        <h1 class="text-[32px] leading-[40px] font-medium">User Login</h1>
-        <p class="text-medium text-[#7A7A7A]">Enter login details below</p>
+        <h1 class="text-2xl sm:text-3xl md:text-[32px] leading-tight md:leading-[40px] font-medium text-center">User Login</h1>
+        <p class="text-sm sm:text-medium text-[#7A7A7A] text-center">Enter login details below</p>
       </div>
 
-      <div *ngIf="errorMessage" class="global-text-primary">
+      <div *ngIf="errorMessage" class="global-text-primary mt-4">
         {{ errorMessage }}
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-8">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 sm:gap-6 md:gap-8 mt-6">
         <div class="flex flex-col gap-2">
-          <label for="email" class="text-medium text-[#4F4F4F] leading-[100%] font-medium">Username</label>
+          <label for="email" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Username</label>
           <input
             type="email"
             id="email"
             formControlName="email"
-            class="border rounded-2xl px-6 py-[20px] text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+            class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[20px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
             [class.error]="
               hasError('email', 'required') ||
               hasError('email', 'minlength')
@@ -26,22 +26,22 @@
             placeholder="Enter your email"
             [disabled]="isLoading"
           />
-          <div *ngIf="hasError('email', 'required')" class="text-primary">
+          <div *ngIf="hasError('email', 'required')" class="text-primary text-xs sm:text-sm">
             email is required
           </div>
-          <div *ngIf="hasError('email', 'minlength')" class="text-primary">
+          <div *ngIf="hasError('email', 'minlength')" class="text-primary text-xs sm:text-sm">
             email must be at least 3 characters
           </div>
         </div>
 
         <div class="flex flex-col gap-2">
-          <label for="password" class="text-medium text-[#4F4F4F] leading-[100%] font-medium">Password</label>
+          <label for="password" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Password</label>
           <div class="relative">
             <input
               [type]="showPassword ? 'text' : 'password'"
               id="password"
               formControlName="password"
-              class="border rounded-2xl px-6 py-[20px] text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+              class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[20px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
               [class.error]="
                 hasError('password', 'required') ||
                 hasError('password', 'minlength')
@@ -51,7 +51,7 @@
             />
             <button
               type="button"
-              class="absolute right-6 top-1/2 -translate-y-1/2 z-10"
+              class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
               (click)="togglePasswordVisibility()"
               [disabled]="isLoading"
               [attr.aria-label]="
@@ -60,8 +60,7 @@
             >
               <svg
                 *ngIf="!showPassword"
-                width="20"
-                height="20"
+                class="w-4 h-4 sm:w-5 sm:h-5"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -74,8 +73,7 @@
               </svg>
               <svg
                 *ngIf="showPassword"
-                width="20"
-                height="20"
+                class="w-4 h-4 sm:w-5 sm:h-5"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -90,21 +88,21 @@
               </svg>
             </button>
           </div>
-          <div *ngIf="hasError('password', 'required')" class="text-primary">
+          <div *ngIf="hasError('password', 'required')" class="text-primary text-xs sm:text-sm">
             Password is required
           </div>
-          <div *ngIf="hasError('password', 'minlength')" class="text-primary">
+          <div *ngIf="hasError('password', 'minlength')" class="text-primary text-xs sm:text-sm">
             Password must be at least 6 characters
           </div>
         </div>
 
         <div class="flex w-full justify-end">
-          <a href="#" class="!text-primary">Forgot Password?</a>
+          <a href="#" class="!text-primary text-sm sm:text-base">Forgot Password?</a>
         </div>
 
         <button
           type="submit"
-          class="rounded-full bg-primary !text-white py-[20px] outline-0"
+          class="rounded-full bg-primary !text-white py-3 sm:py-[20px] outline-0 text-sm sm:text-base font-medium"
           [disabled]="!loginForm.valid || isLoading"
           [class.loading]="isLoading"
         >

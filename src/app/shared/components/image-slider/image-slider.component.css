@@ -1,0 +1,244 @@
+.image-slider-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.slider-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+  border-radius: inherit;
+}
+
+.image-container:hover .slider-image {
+  transform: scale(1.02);
+}
+
+.image-counter {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+/* Navigation Buttons */
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.nav-button:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.nav-button-prev {
+  left: 16px;
+}
+
+.nav-button-next {
+  right: 16px;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Indicators */
+.indicators {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.indicator.active {
+  background-color: white;
+  border-color: white;
+  transform: scale(1.2);
+}
+
+/* No Images State */
+.no-images {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: inherit;
+}
+
+.no-images-content {
+  text-align: center;
+  color: #6c757d;
+}
+
+.no-images-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.no-images-text {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-button {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .nav-button-prev {
+    left: 8px;
+  }
+  
+  .nav-button-next {
+    right: 8px;
+  }
+  
+  .indicators {
+    bottom: 12px;
+    gap: 6px;
+  }
+  
+  .indicator {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .image-counter {
+    top: 12px;
+    right: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-button {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .nav-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .indicators {
+    bottom: 8px;
+    gap: 4px;
+  }
+  
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Touch/Swipe Support */
+.image-container {
+  touch-action: pan-y;
+}
+
+/* Animation for smooth transitions */
+.slider-image {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Loading state */
+.slider-image[src=""] {
+  background-color: #e9ecef;
+  background-image: linear-gradient(45deg, transparent 25%, rgba(255,255,255,.2) 25%, rgba(255,255,255,.2) 50%, transparent 50%, transparent 75%, rgba(255,255,255,.2) 75%, rgba(255,255,255,.2));
+  background-size: 20px 20px;
+  animation: loading 1s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 20px;
+  }
+}
