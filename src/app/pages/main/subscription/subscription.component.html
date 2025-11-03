@@ -13,12 +13,17 @@
             <form nz-form [formGroup]="form">
                 <!-- Step 1: Personal -->
                 <div *ngIf="step === 0" [formGroupName]="'personal'">
-                    <h3 class="text-lg font-medium mb-4">Personal Details</h3>
+                    <h3 class="text-lg font-medium !mb-4">Personal Details</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Title</nz-form-label>
                             <nz-form-control>
-                                <nz-select formControlName="title">
+                                <nz-select 
+                                    formControlName="title"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    nzPlaceHolder="Select title"
+                                    >
                                     <nz-option nzValue="Mr" nzLabel="Mr"></nz-option>
                                     <nz-option nzValue="Mrs" nzLabel="Mrs"></nz-option>
                                     <nz-option nzValue="Ms" nzLabel="Ms"></nz-option>
@@ -29,7 +34,7 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">First Name</nz-form-label>
                             <nz-form-control>
-                                <input nz-input formControlName="first_name" placeholder="enter your first name" />
+                                <input nz-input formControlName="first_name" placeholder="Enter your first name" />
                                 <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','first_name') && (getCtrl('personal','first_name')?.touched || getCtrl('personal','first_name')?.dirty)">
                                     {{ getError('personal','first_name') }}
                                 </div>
@@ -39,14 +44,14 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Middle Name</nz-form-label>
                             <nz-form-control>
-                                <input nz-input formControlName="middle_name" placeholder="enter your Middle name" />
+                                <input nz-input formControlName="middle_name" placeholder="Enter your middle name" />
                             </nz-form-control>
                         </nz-form-item>
 
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Last Name</nz-form-label>
                             <nz-form-control>
-                                <input nz-input formControlName="last_name" placeholder="enter your last name" />
+                                <input nz-input formControlName="last_name" placeholder="Enter your last name" />
                                 <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','last_name') && (getCtrl('personal','last_name')?.touched || getCtrl('personal','last_name')?.dirty)">
                                     {{ getError('personal','last_name') }}
                                 </div>
@@ -56,7 +61,7 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Email</nz-form-label>
                             <nz-form-control>
-                                <input nz-input formControlName="email" placeholder="enter your email address" />
+                                <input nz-input formControlName="email" placeholder="Enter your email address" />
                                 <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','email') && (getCtrl('personal','email')?.touched || getCtrl('personal','email')?.dirty)">
                                     {{ getError('personal','email') }}
                                 </div>
@@ -86,7 +91,12 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Gender</nz-form-label>
                             <nz-form-control>
-                                <nz-select formControlName="gender" placeholder="Select your gender">
+                                <nz-select 
+                                    formControlName="gender" 
+                                    nzPlaceHolder="Select your gender"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
                                      @for (gender of ['Male', 'Female', 'Other']; track gender) {
                                         <nz-option [nzValue]="gender" [nzLabel]="gender">{{ gender }}</nz-option>
                                      }
@@ -97,9 +107,15 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Nationality</nz-form-label>
                             <nz-form-control>
-                                 <nz-select formControlName="nationality" placeholder="Select your nationality">
-                                     @for (nationality of ['Nigerian']; track nationality) {
-                                        <nz-option [nzValue]="nationality" [nzLabel]="nationality">{{ nationality }}</nz-option>
+                                 <nz-select 
+                                    formControlName="nationality" 
+                                    nzPlaceHolder="Select your nationality"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    (ngModelChange)="selectedNation($event)"
+                                    >
+                                     @for (nationality of nationalities; track nationality.id) {
+                                        <nz-option [nzValue]="nationality.id" [nzLabel]="nationality.name">{{ nationality.name }}</nz-option>
                                      }
                                 </nz-select>
                             </nz-form-control>
@@ -108,16 +124,27 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Date of Birth</nz-form-label>
                             <nz-form-control>
-                                <nz-date-picker formControlName="date_of_birth" placeholder="Select your date of birth"></nz-date-picker>
+                                <nz-date-picker
+                                    formControlName="date_of_birth" 
+                                    placeholder="Select your date of birth"
+                                    class="w-full rounded"
+                                    [nzDisabledDate]="disabledDate"
+                                    [nzSize]="'large'"
+                                    ></nz-date-picker>
                             </nz-form-control>
                         </nz-form-item>
 
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Marital Status</nz-form-label>
                             <nz-form-control>
-                                 <nz-select formControlName="marital_status" placeholder="Select your marital status">
-                                     @for (status of ['single', 'married', 'divorced', 'widowed']; track status) {
-                                        <nz-option [nzValue]="status" [nzLabel]="status">{{ status | titlecase }}</nz-option>
+                                 <nz-select 
+                                    formControlName="marital_status" 
+                                    nzPlaceHolder="Select your marital status"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
+                                     @for (status of [{value: 'single', label: 'Single'}, {value: 'married', label: 'Married'}, {value: 'divorced', label: 'Divorced'}, {value: 'widowed', label: 'Widowed'}]; track status.value) {
+                                        <nz-option [nzValue]="status.value" [nzLabel]="status.label">{{ status.label }}</nz-option>
                                      }
                                 </nz-select>
                             </nz-form-control>
@@ -156,7 +183,12 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Country</nz-form-label>
                             <nz-form-control>
-                                 <nz-select formControlName="country" placeholder="Select your country">
+                                 <nz-select 
+                                    formControlName="country" 
+                                    nzPlaceHolder="Select country"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
                                      @for (country of ['Nigeria', 'Ghana', 'Kenya', 'South Africa']; track country) {
                                         <nz-option [nzValue]="country" [nzLabel]="country">{{ country }}</nz-option>
                                      }
@@ -167,9 +199,14 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">State</nz-form-label>
                             <nz-form-control>
-                                 <nz-select formControlName="state" placeholder="Select your state">
-                                     @for (state of ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan']; track state) {
-                                        <nz-option [nzValue]="state" [nzLabel]="state">{{ state }}</nz-option>
+                                 <nz-select 
+                                    formControlName="state" 
+                                    nzPlaceHolder="Select state"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
+                                     @for (state of states; track state.id) {
+                                        <nz-option [nzValue]="state.id" [nzLabel]="state.name">{{ state.name }}</nz-option>
                                      }
                                 </nz-select>
                             </nz-form-control>
@@ -178,7 +215,12 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">City</nz-form-label>
                             <nz-form-control>
-                                 <nz-select formControlName="city" placeholder="Select your city">
+                                 <nz-select 
+                                    formControlName="city" 
+                                    nzPlaceHolder="Select your city"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
                                      @for (city of ['Ikeja', 'Victoria Island', 'Lekki', 'Surulere']; track city) {
                                         <nz-option [nzValue]="city" [nzLabel]="city">{{ city }}</nz-option>
                                      }
@@ -214,7 +256,12 @@
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Identity Type</nz-form-label>
                             <nz-form-control>
-                                 <nz-select formControlName="identity_type" placeholder="Select your identity type">
+                                 <nz-select 
+                                    formControlName="identity_type" 
+                                    nzPlaceHolder="Select your identity type"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
                                      @for (type of ['National ID', 'Driver\'s License', 'International Passport']; track type) {
                                         <nz-option [nzValue]="type" [nzLabel]="type">{{ type }}</nz-option>
                                      }
@@ -334,7 +381,12 @@
                     <div class="grid grid-cols-2 gap-4">
                         <nz-form-item>
                             <nz-form-control>
-                                <nz-select formControlName="how_did_you_hear" placeholder="Select source">
+                                <nz-select 
+                                    formControlName="how_did_you_hear" 
+                                    placeholder="Select source"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
                                     <nz-option nzValue="Online" nzLabel="Online"></nz-option>
                                     <nz-option nzValue="Friend" nzLabel="Friend"></nz-option>
                                     <nz-option nzValue="Realtor" nzLabel="Realtor"></nz-option>
@@ -432,7 +484,7 @@
                 <div class="flex justify-between mt-6">
                     <button nz-button nzType="default" (click)="prev()" [disabled]="step === 0">Back</button>
                     <div>
-                        <button nz-button nzType="default" class="mr-2" (click)="next()" *ngIf="step < titles.length - 1">Continue</button>
+                        <button nz-button nzType="default" class="mr-2 !text-gray-500 border-gray-300" (click)="next()" *ngIf="step < titles.length - 1">Continue</button>
                         <button nz-button nzType="primary" (click)="submit()" [nzLoading]="isSubmitting" *ngIf="step === titles.length - 1" class="!bg-primary border-none">Submit</button>
                     </div>
                 </div>

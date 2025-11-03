@@ -18,6 +18,8 @@ import { ImageService } from 'src/app/core/services/image.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ImageUploadApiResponse } from 'src/app/core/models/images';
 import { ActivatedRoute } from '@angular/router';
+import { differenceInCalendarDays } from 'date-fns';
+import { NationalityService } from 'src/app/core/services/nationality.service';
 
 @Component({
   selector: 'app-subscription',
@@ -43,11 +45,13 @@ export class SubscriptionComponent implements OnInit {
   step = 0;
   isSubmitting = false;
   isLoading = false;
-
+//http://localhost:4200/main/subscription/2f37b1e8-00ac-46a4-a769-2c4fccf144f8
   form!: FormGroup;
   selectedFile: File | null = null;
   purchaseId: string | null = null;
   purchaseFormData: any = null;
+  nationalities: any[] = [{id: 1, name: 'Nigeria'}];
+  states: any[] = [];
 
   titles = [
     'Personal Details',
@@ -60,6 +64,12 @@ export class SubscriptionComponent implements OnInit {
     'Summary'
   ];
 
+  today = new Date();
+
+    disabledDate = (current: Date): boolean =>
+    // Can not select days before today and today
+    differenceInCalendarDays(current, this.today) > 0;
+
   constructor(
     private fb: FormBuilder,
     private paymentService: PaymentService,
@@ -67,7 +77,8 @@ export class SubscriptionComponent implements OnInit {
     private imageService: ImageService,
     private message: NzMessageService,
     private route: ActivatedRoute,
-    private location: Location
+    private location: Location,
+    private nationalityService: NationalityService
   ) {}
 
   ngOnInit(): void {
@@ -145,6 +156,8 @@ export class SubscriptionComponent implements OnInit {
 
     // load server data after form exists
     this.getPurchaseForm();
+
+    // this.getNationalityList();
   }
 
   back() {
@@ -431,7 +444,7 @@ export class SubscriptionComponent implements OnInit {
           },
 
           payment: {
-            property_id: d.purchase?.unit?.property?.id ?? d.property_id ?? '',
+            property_id: d.purchase?.unit?.property?.name ?? d.property_id ?? '',
             units: d.purchase?.quantity ?? d.quantity ?? '',
             payment_plan: d.purchase?.payment_method ?? d.payment_plan ?? '',
             special_requirements: d.special_requirements ?? '',
@@ -483,4 +496,33 @@ export class SubscriptionComponent implements OnInit {
       }
     });
   }
+
+  getNationalityList() {
+    this.nationalityService.getNationalities().subscribe({
+      next: (res: any) => {
+        this.nationalities = res.data || [];
+      },
+      error: (err: any) => {
+        console.error('Failed to load nationalities', err);
+      }
+    });
+  }
+
+  getStatesByNationalityId(nationalityId: string) {
+    this.nationalityService.getStatesByNationalityId(nationalityId).subscribe({
+      next: (res: any) => {
+        console.log({ statesRes: res });
+        this.states = res.data.states || [];
+      },
+      error: (err: any) => {
+        console.error('Failed to load states', err);
+      }
+    });
+  }
+
+  selectedNation(value: any): void {
+    console.log({value});
+    this.getStatesByNationalityId(value);
+  }
+
 }
