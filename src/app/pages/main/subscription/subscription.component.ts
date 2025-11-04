@@ -47,7 +47,10 @@ export class SubscriptionComponent implements OnInit {
   isLoading = false;
 //http://localhost:4200/main/subscription/2f37b1e8-00ac-46a4-a769-2c4fccf144f8
   form!: FormGroup;
-  selectedFile: File | null = null;
+  selectedPassportFile: File | null = null;
+  selectedIdentityFile: File | null = null;
+  selectedBankFile: File | null = null;
+  selectedIncomeFile: File | null = null;
   purchaseId: string | null = null;
   purchaseFormData: any = null;
   nationalities: any[] = [{id: 1, name: 'Nigeria'}];
@@ -100,10 +103,10 @@ export class SubscriptionComponent implements OnInit {
         address_line_1: ['', Validators.required],
         address_line_2: [''],
         marital_status: ['', Validators.required],
-        city: ['', Validators.required],
+        // city: ['', Validators.required],
         state: ['', Validators.required],
         postal_code: ['', Validators.required],
-        country: ['', Validators.required],
+        // country: ['', Validators.required],
         passport_photo_url: [''],
         identity_type: ['', Validators.required],
         identity_number: ['', Validators.required],
@@ -321,7 +324,7 @@ export class SubscriptionComponent implements OnInit {
     ctrl.updateValueAndValidity();
   }
 
-  onFileSelected(event: Event): void {
+  onPassportFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
@@ -330,7 +333,7 @@ export class SubscriptionComponent implements OnInit {
       if (!isImage) {
         this.message.error('Invalid file type. Please select an Image (JPEG/PNG).');
         input.value = '';
-        this.selectedFile = null;
+        this.selectedPassportFile = null;
         return;
       }
 
@@ -338,21 +341,108 @@ export class SubscriptionComponent implements OnInit {
       if (file.size > maxSize) {
         this.message.error('File size exceeds the limit (1MB max).');
         input.value = '';
-        this.selectedFile = null;
+        this.selectedPassportFile = null;
         return;
       }
 
-      this.selectedFile = file;
-      this.upload();
+      this.selectedPassportFile = file;
+      this.upload(file, 'passport');
     } else {
-      this.selectedFile = null;
+      this.selectedPassportFile = null;
       this.message.info('No file selected.');
     }
   }
 
-  upload(): void {
-    if (!this.selectedFile) {
-      this.message.error('Please select a file to upload as proof of payment.');
+  onIdentityFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const fileType = file.type;
+      const isImage = fileType.startsWith('image/');
+      if (!isImage) {
+        this.message.error('Invalid file type. Please select an Image (JPEG/PNG).');
+        input.value = '';
+        this.selectedIdentityFile = null;
+        return;
+      }
+
+      const maxSize = 1 * 1024 * 1024; // 1MB
+      if (file.size > maxSize) {
+        this.message.error('File size exceeds the limit (1MB max).');
+        input.value = '';
+        this.selectedIdentityFile = null;
+        return;
+      }
+
+      this.selectedIdentityFile = file;
+      this.upload(file, 'identity');
+    } else {
+      this.selectedIdentityFile = null;
+      this.message.info('No file selected.');
+    }
+  }
+
+  onIncomeFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const fileType = file.type;
+      const isImage = fileType.startsWith('image/');
+      if (!isImage) {
+        this.message.error('Invalid file type. Please select an Image (JPEG/PNG).');
+        input.value = '';
+        this.selectedIncomeFile = null;
+        return;
+      }
+
+      const maxSize = 1 * 1024 * 1024; // 1MB
+      if (file.size > maxSize) {
+        this.message.error('File size exceeds the limit (1MB max).');
+        input.value = '';
+        this.selectedIncomeFile = null;
+        return;
+      }
+
+      this.selectedIncomeFile = file;
+      this.upload(file, 'income');
+    } else {
+      this.selectedIncomeFile = null;
+      this.message.info('No file selected.');
+    }
+  }
+
+  onBankFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const fileType = file.type;
+      const isImage = fileType.startsWith('image/');
+      if (!isImage) {
+        this.message.error('Invalid file type. Please select an Image (JPEG/PNG).');
+        input.value = '';
+        this.selectedBankFile = null;
+        return;
+      }
+
+      const maxSize = 1 * 1024 * 1024; // 1MB
+      if (file.size > maxSize) {
+        this.message.error('File size exceeds the limit (1MB max).');
+        input.value = '';
+        this.selectedBankFile = null;
+        return;
+      }
+
+      this.selectedBankFile = file;
+      this.upload(file, 'bank');
+    } else {
+      this.selectedBankFile = null;
+      this.message.info('No file selected.');
+    }
+  }
+
+  upload(file: File, type: string): void {
+    if (!file) {
+      this.message.error('Please select a file to upload.');
       return;
     }
     this.isLoading = true;
@@ -360,21 +450,29 @@ export class SubscriptionComponent implements OnInit {
     const loadingRef = this.message.loading('Uploading...', { nzDuration: 0 });
     const loadingId = String((loadingRef as any).messageId);
 
-    this.imageService.uploadImage(this.selectedFile).subscribe({
+    this.imageService.uploadImage(file).subscribe({
       next: (uploadRes: ImageUploadApiResponse) => {
         const url = uploadRes?.data?.file?.secure_url;
         if (!url) {
-          this.message.error('Failed to get uploaded image URL.');
+          this.message.error('Failed to upload file.');
           if (loadingId) this.message.remove(loadingId as string);
           this.isLoading = false;
           return;
         }
 
-        // set uploaded URL into payment.bank_statement_url dynamically
-        this.setFormControlValue('payment', 'bank_statement_url', url);
+        // set uploaded URL into appropriate form control dynamically
+        if (type === 'passport') {
+          this.setFormControlValue('personal', 'passport_photo_url', url);
+        } else if (type === 'identity') {
+          this.setFormControlValue('personal', 'identity_upload_url', url);
+        } else if (type === 'bank') {
+          this.setFormControlValue('payment', 'bank_statement_url', url);
+        } else if (type === 'income') {
+          this.setFormControlValue('employment', 'proof_of_income_url', url);
+        }
 
         if (loadingId) this.message.remove(loadingId as string);
-        this.message.success('Proof of payment uploaded successfully.');
+        this.message.success('File uploaded successfully.');
         this.isLoading = false;
       },
       error: (err: any) => {
