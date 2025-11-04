@@ -85,6 +85,7 @@ export class PropertyManagementComponent {
   fullyPaidPagination: any | null = null;
   isLoading = false;
   inPaymentProperties: any[] = [];
+  emptyArray: any[] = new Array(12).fill('');
 
     constructor(
       private location: Location,

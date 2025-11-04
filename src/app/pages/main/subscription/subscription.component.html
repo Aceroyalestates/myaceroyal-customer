@@ -4,7 +4,16 @@
 		<h2 class="text-2xl font-semibold">Subscription Form</h2>
 	</div>
 
-	<div class="flex flex-row" *ngIf="purchaseFormData">
+    @if (isLoading) {
+    <div class="flex items-center justify-center py-20">
+        <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"
+        ></div>
+    </div>
+    }
+
+	@else {
+        <div class="flex flex-row" *ngIf="purchaseFormData">
         <nz-steps [nzCurrent]="step" nzSize="small" class="mb-6 basis-1/3" nzDirection="vertical">
 		    <nz-step *ngFor="let t of titles" [nzTitle]="t"></nz-step>
 	    </nz-steps>
@@ -28,6 +37,9 @@
                                     <nz-option nzValue="Mrs" nzLabel="Mrs"></nz-option>
                                     <nz-option nzValue="Ms" nzLabel="Ms"></nz-option>
                                 </nz-select>
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','title') && (getCtrl('personal','title')?.touched || getCtrl('personal','title')?.dirty)">
+                                    {{ getError('personal','title') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
@@ -101,6 +113,44 @@
                                         <nz-option [nzValue]="gender" [nzLabel]="gender">{{ gender }}</nz-option>
                                      }
                                 </nz-select>
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','gender') && (getCtrl('personal','gender')?.touched || getCtrl('personal','gender')?.dirty)">
+                                    {{ getError('personal','gender') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Date of Birth</nz-form-label>
+                            <nz-form-control>
+                                <nz-date-picker
+                                    formControlName="date_of_birth" 
+                                    placeholder="Select your date of birth"
+                                    class="w-full rounded"
+                                    [nzDisabledDate]="disabledDate"
+                                    [nzSize]="'large'"
+                                    ></nz-date-picker>
+                                    <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','date_of_birth') && (getCtrl('personal','date_of_birth')?.touched || getCtrl('personal','date_of_birth')?.dirty)">
+                                    {{ getError('personal','date_of_birth') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Marital Status</nz-form-label>
+                            <nz-form-control>
+                                 <nz-select 
+                                    formControlName="marital_status" 
+                                    nzPlaceHolder="Select your marital status"
+                                    [nzSize]="'large'" 
+                                    class="rounded"
+                                    >
+                                     @for (status of [{value: 'single', label: 'Single'}, {value: 'married', label: 'Married'}, {value: 'divorced', label: 'Divorced'}, {value: 'widowed', label: 'Widowed'}]; track status.value) {
+                                        <nz-option [nzValue]="status.value" [nzLabel]="status.label">{{ status.label }}</nz-option>
+                                     }
+                                </nz-select>
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','marital_status') && (getCtrl('personal','marital_status')?.touched || getCtrl('personal','marital_status')?.dirty)">
+                                    {{ getError('personal','marital_status') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
@@ -118,33 +168,23 @@
                                         <nz-option [nzValue]="nationality.id" [nzLabel]="nationality.name">{{ nationality.name }}</nz-option>
                                      }
                                 </nz-select>
+                                <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','nationality') && (getCtrl('personal','nationality')?.touched || getCtrl('personal','nationality')?.dirty)">
+                                    {{ getError('personal','nationality') }}
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
                         <nz-form-item>
-                            <nz-form-label [nzSpan]="24">Date of Birth</nz-form-label>
-                            <nz-form-control>
-                                <nz-date-picker
-                                    formControlName="date_of_birth" 
-                                    placeholder="Select your date of birth"
-                                    class="w-full rounded"
-                                    [nzDisabledDate]="disabledDate"
-                                    [nzSize]="'large'"
-                                    ></nz-date-picker>
-                            </nz-form-control>
-                        </nz-form-item>
-
-                        <nz-form-item>
-                            <nz-form-label [nzSpan]="24">Marital Status</nz-form-label>
+                            <nz-form-label [nzSpan]="24">State</nz-form-label>
                             <nz-form-control>
                                  <nz-select 
-                                    formControlName="marital_status" 
-                                    nzPlaceHolder="Select your marital status"
+                                    formControlName="state" 
+                                    nzPlaceHolder="Select state"
                                     [nzSize]="'large'" 
                                     class="rounded"
                                     >
-                                     @for (status of [{value: 'single', label: 'Single'}, {value: 'married', label: 'Married'}, {value: 'divorced', label: 'Divorced'}, {value: 'widowed', label: 'Widowed'}]; track status.value) {
-                                        <nz-option [nzValue]="status.value" [nzLabel]="status.label">{{ status.label }}</nz-option>
+                                     @for (state of states; track state.id) {
+                                        <nz-option [nzValue]="state.id" [nzLabel]="state.name">{{ state.name }}</nz-option>
                                      }
                                 </nz-select>
                             </nz-form-control>
@@ -180,7 +220,7 @@
                             </nz-form-control>
                         </nz-form-item>
 
-                        <nz-form-item>
+                        <!-- <nz-form-item>
                             <nz-form-label [nzSpan]="24">Country</nz-form-label>
                             <nz-form-control>
                                  <nz-select 
@@ -194,25 +234,9 @@
                                      }
                                 </nz-select>
                             </nz-form-control>
-                        </nz-form-item>
+                        </nz-form-item> -->
 
-                        <nz-form-item>
-                            <nz-form-label [nzSpan]="24">State</nz-form-label>
-                            <nz-form-control>
-                                 <nz-select 
-                                    formControlName="state" 
-                                    nzPlaceHolder="Select state"
-                                    [nzSize]="'large'" 
-                                    class="rounded"
-                                    >
-                                     @for (state of states; track state.id) {
-                                        <nz-option [nzValue]="state.id" [nzLabel]="state.name">{{ state.name }}</nz-option>
-                                     }
-                                </nz-select>
-                            </nz-form-control>
-                        </nz-form-item>
-
-                        <nz-form-item>
+                        <!-- <nz-form-item>
                             <nz-form-label [nzSpan]="24">City</nz-form-label>
                             <nz-form-control>
                                  <nz-select 
@@ -226,30 +250,34 @@
                                      }
                                 </nz-select>
                             </nz-form-control>
-                        </nz-form-item>
+                        </nz-form-item> -->
 
                         <!-- Upload passport -->
 
                         <nz-form-item>
                             <nz-form-label [nzSpan]="24">Upload Passport</nz-form-label>
                             <nz-form-control>
-                                <!-- <nz-upload formControlName="passport_photo_url" [nzShowUploadList]="false" [nzCustomRequest]="uploadFactory('personal','passport_photo_url')">
-                                    <button nz-button>
-                                        <i nz-icon nzType="upload"></i> Click to Upload
-                                    </button>
-                                </nz-upload> -->
                                 <input
-                                    type="file"
-                                    id="fileInput"
-                                    formControlName="passport_photo_url"
-                                    (change)="onFileSelected($event)"
-                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                                    [disabled]="isLoading"
-                                    accept="image/*"
+                                        type="file"
+                                        id="fileInput"
+                                        formControlName="passport_photo_url"
+                                        (change)="onPassportFileSelected($event)"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                        [disabled]="isLoading"
+                                        accept="image/*"
                                 />
-                                <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded border border-gray-200 cursor-pointer">
-                                    Upload your passport photograph (Image files only)
-                                </label>
+                                <div class="mt-2">
+                                    <ng-container *ngIf="getCtrl('personal','passport_photo_url')?.value; else showUploadLabel">
+                                        <div class="flex items-center gap-3">
+                                            <label for="fileInput" class="text-sm text-gray-600 cursor-pointer">Uploaded photo — <span class="underline">Click to change</span></label>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #showUploadLabel>
+                                        <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded border border-gray-200 cursor-pointer">
+                                            {{ 'Click to upload your passport photograph (Image files only)' }}
+                                        </label>
+                                    </ng-template>
+                                </div>
                             </nz-form-control>
                         </nz-form-item>
 
@@ -275,6 +303,33 @@
                                 <input nz-input formControlName="identity_number" placeholder="Enter your identity number" />
                                 <div class="text-red-500 text-sm mt-1" *ngIf="getError('personal','identity_number') && (getCtrl('personal','identity_number')?.touched || getCtrl('personal','identity_number')?.dirty)">
                                     {{ getError('personal','identity_number') }}
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Identity Upload</nz-form-label>
+                            <nz-form-control>
+                                <input
+                                        type="file"
+                                        id="fileInput"
+                                        formControlName="identity_upload_url"
+                                        (change)="onIdentityFileSelected($event)"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                        [disabled]="isLoading"
+                                        accept="image/*"
+                                />
+                                <div class="mt-2">
+                                    <ng-container *ngIf="getCtrl('personal','identity_upload_url')?.value; else showUploadLabel">
+                                        <div class="flex items-center gap-3">
+                                            <label for="fileInput" class="text-sm text-gray-600 cursor-pointer">Uploaded — <span class="underline">Click to change</span></label>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #showUploadLabel>
+                                        <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded border border-gray-200 cursor-pointer">
+                                            {{ 'Click to upload your identity document' }}
+                                        </label>
+                                    </ng-template>
                                 </div>
                             </nz-form-control>
                         </nz-form-item>
@@ -342,11 +397,34 @@
                         <input nz-input formControlName="occupation" placeholder="Occupation / Designation" />
                         <input nz-input formControlName="employer_address" placeholder="Employer address" />
                         <input nz-input formControlName="monthly_income" placeholder="Monthly income" />
-                        <!-- <nz-upload formControlName="proof_of_income_url" [nzShowUploadList]="false" [nzCustomRequest]="uploadFactory('employment','proof_of_income_url')">
-                            <button nz-button>
-                                <i nz-icon nzType="upload"></i> Upload proof of income
-                            </button>
-                        </nz-upload> -->
+                        
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Upload Proof of Income</nz-form-label>
+                            <nz-form-control>
+                                <input
+                                        type="file"
+                                        id="fileInput"
+                                        formControlName="proof_of_income_url"
+                                        (change)="onIncomeFileSelected($event)"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                        [disabled]="isLoading"
+                                        accept="image/*"
+                                />
+                                <div class="mt-2">
+                                    <ng-container *ngIf="getCtrl('employment','proof_of_income_url')?.value; else showUploadLabel">
+                                        <div class="flex items-center gap-3">
+                                            <label for="fileInput" class="text-sm text-gray-600 cursor-pointer">Uploaded — <span class="underline">Click to change</span></label>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #showUploadLabel>
+                                        <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded border border-gray-200 cursor-pointer">
+                                            {{ 'Click to upload your proof of income' }}
+                                        </label>
+                                    </ng-template>
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
                     </div>
                 </div>
 
@@ -362,7 +440,7 @@
                             </nz-form-control>
                         </nz-form-item>
 
-                        <input nz-input formControlName="units" type="number" placeholder="Units Purchased" />
+                        <input nz-input formControlName="units" placeholder="Units Purchased" />
                         <input nz-input formControlName="payment_plan" placeholder="Select payment plan" />
                         <nz-date-picker formControlName="date_of_payment"></nz-date-picker>
                         <input nz-input formControlName="special_requirements" placeholder="Special requirements (optional)" />
@@ -372,6 +450,30 @@
                                 <i nz-icon nzType="upload"></i> Upload bank statement
                             </button>
                         </nz-upload> -->
+
+                        <nz-form-item>
+                            <nz-form-label [nzSpan]="24">Upload bank statement</nz-form-label>
+                            <nz-form-control>
+                                <input
+                                        type="file"
+                                        id="fileInput"
+                                        formControlName="bank_statement_url"
+                                        (change)="onBankFileSelected($event)"
+                                />
+                                <div class="mt-2">
+                                    <ng-container *ngIf="getCtrl('employment','bank_statement_url')?.value; else showUploadLabel">
+                                        <div class="flex items-center gap-3">
+                                            <label for="fileInput" class="text-sm text-gray-600 cursor-pointer">Uploaded — <span class="underline">Click to change</span></label>
+                                        </div>
+                                    </ng-container>
+                                    <ng-template #showUploadLabel>
+                                        <label for="fileInput" class="flex justify-center w-fit px-4 py-2 rounded border border-gray-200 cursor-pointer">
+                                            {{ 'Click to upload your bank statement' }}
+                                        </label>
+                                    </ng-template>
+                                </div>
+                            </nz-form-control>
+                        </nz-form-item>
                     </div>
                 </div>
 
@@ -482,13 +584,14 @@
                 </div>
 
                 <div class="flex justify-between mt-6">
-                    <button nz-button nzType="default" (click)="prev()" [disabled]="step === 0">Back</button>
+                    <button class="cursor-pointer" nz-button nzType="default" (click)="prev()" [disabled]="step === 0">Back</button>
                     <div>
-                        <button nz-button nzType="default" class="mr-2 !text-gray-500 border-gray-300" (click)="next()" *ngIf="step < titles.length - 1">Continue</button>
-                        <button nz-button nzType="primary" (click)="submit()" [nzLoading]="isSubmitting" *ngIf="step === titles.length - 1" class="!bg-primary border-none">Submit</button>
+                        <button nz-button nzType="default" class="mr-2 !text-gray-500 border-gray-300 cursor-pointer" (click)="next()" *ngIf="step < titles.length - 1">Continue</button>
+                        <button nz-button nzType="primary" (click)="submit()" [nzLoading]="isSubmitting" *ngIf="step === titles.length - 1" class="!bg-primary border-none cursor-pointer">Submit</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    }
 </div>

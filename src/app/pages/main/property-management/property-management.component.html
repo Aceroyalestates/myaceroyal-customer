@@ -26,6 +26,11 @@
         <nz-tabset class="w-full">
             <nz-tab nzTitle="Saved">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
+                    @if (isLoading) { @for (item of emptyArray; track $index) {
+                    <div class="h-fit flex relative rounded-lg w-full animate-pulse">
+                        <div class="bg-gray-200 w-full h-64 rounded-lg"></div>
+                    </div>
+                    }}
                     <div class="flex justify-center" *ngIf="savedPayments && savedPayments.length === 0">
                         <p class="text-gray-500">No data found.</p>
                     </div>
@@ -79,7 +84,11 @@
             </nz-tab>
             <nz-tab nzTitle="Fully Paid">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
-
+                    @if (isLoading) { @for (item of emptyArray; track $index) {
+                    <div class="h-fit flex relative rounded-lg w-full animate-pulse">
+                        <div class="bg-gray-200 w-full h-64 rounded-lg"></div>
+                    </div>
+                    }}
                     <div class="flex justify-center" *ngIf="fullyPaidPayments && fullyPaidPayments.length === 0">
                         <p class="text-gray-500">No data found.</p>
                     </div>
@@ -137,6 +146,11 @@
             </nz-tab>
             <nz-tab nzTitle="In Payment">
                 <div class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 gap-6 pt-12">
+                    @if (isLoading) { @for (item of emptyArray; track $index) {
+                    <div class="h-fit flex relative rounded-lg w-full animate-pulse">
+                        <div class="bg-gray-200 w-full h-64 rounded-lg"></div>
+                    </div>
+                    }}
                     <div class="flex justify-center" *ngIf="inPaymentProperties && inPaymentProperties.length === 0">
                         <p class="text-gray-500">No data found.</p>
                     </div>
