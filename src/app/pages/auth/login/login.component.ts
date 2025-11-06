@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { LoaderService } from '../../../core/services/loader.service';
 import { ErrorModalService } from '../../../core/services/error-modal.service';
@@ -12,6 +12,7 @@ import { ErrorModalService } from '../../../core/services/error-modal.service';
 	imports: [
 		CommonModule,
 		ReactiveFormsModule,
+		RouterLink,
 	],
 	templateUrl: './login.component.html',
 	styleUrl: './login.component.css',
