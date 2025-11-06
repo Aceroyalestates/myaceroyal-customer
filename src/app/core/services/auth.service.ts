@@ -43,6 +43,10 @@ export interface IRefreshTokenResponse {
   refresh_token?: string;
 }
 
+export interface IforgotPasswordPayload {
+  email: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -220,5 +224,9 @@ export class AuthService {
    */
   shouldRefreshToken(): boolean {
     return this.tokenService.isTokenExpiringSoon();
+  }
+
+  forgotPassword(payload: IforgotPasswordPayload): Observable<any> {
+    return this.httpService.post<any>('auth/forgot-password', payload);
   }
 }
