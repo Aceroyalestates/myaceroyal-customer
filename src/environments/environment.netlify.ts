@@ -4,7 +4,7 @@ export const environment = {
   // Production API URLs
   baseUrl: 'http://onerevapi-qa.apps.non-core-dev.sterlingbank.com/api', // QA
   // apiUrl: 'https://myaceroyal-backend.onrender.com/api',
-  apiUrl: 'https://api.myaceroyal.com/',
+  apiUrl: 'https://api.myaceroyal.com',
 
   // Encryption keys
   publicEncString: 'v2y/F?E(H+MbQegg',
