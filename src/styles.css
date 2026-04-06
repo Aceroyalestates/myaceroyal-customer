@@ -443,6 +443,24 @@ input::placeholder {
   border-color: var(--border-color) !important;
 }
 
+.ant-pagination-options,
+.ant-pagination-options-quick-jumper,
+.ant-pagination-options-quick-jumper span,
+.ant-pagination-options-quick-jumper div {
+  color: var(--text-secondary) !important;
+}
+
+.ant-pagination-options-quick-jumper input {
+  min-width: 64px;
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
+  color: var(--text-color) !important;
+}
+
+.ant-pagination-options-quick-jumper input::placeholder {
+  color: var(--text-muted) !important;
+}
+
 .ant-btn {
   min-width: 140px;
   height: auto !important;

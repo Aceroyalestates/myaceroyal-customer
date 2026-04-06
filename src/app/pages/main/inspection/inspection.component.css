@@ -1,0 +1,61 @@
+.inspection-page {
+  padding-top: 24px;
+  color: var(--text-color);
+}
+
+.inspection-page__content {
+  gap: 32px;
+}
+
+.inspection-page__header {
+  align-items: center;
+}
+
+.inspection-page__title,
+.inspection-page__back {
+  color: var(--text-secondary);
+}
+
+.inspection-page__section-title {
+  color: var(--text-secondary);
+}
+
+.inspection-page__table {
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  background: var(--surface-bg);
+  box-shadow: var(--shadow-elevated);
+  overflow: hidden;
+}
+
+:host-context(.dark) .inspection-page__table {
+  background: var(--surface-bg);
+}
+
+@media (max-width: 991px) {
+  .inspection-page {
+    padding-top: 16px;
+  }
+
+  .inspection-page__content {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .inspection-page {
+    padding-top: 12px;
+  }
+
+  .inspection-page__header {
+    gap: 14px;
+  }
+
+  .inspection-page__title {
+    font-size: 28px;
+  }
+
+  .inspection-page__section-title {
+    font-size: 20px;
+  }
+}
