@@ -2,8 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
 
-import { avatarRequest, UpdateUserRequest, UserProfileResponse } from '../models/users';
-
 
 @Injectable({
     providedIn: 'root',

@@ -43,6 +43,10 @@ const routes: Routes = [
         component: PasswordComponent,
       },
       {
+        path: 'password',
+        component: PasswordComponent,
+      },
+      {
         path: 'support',
         component: SupportComponent,
       },

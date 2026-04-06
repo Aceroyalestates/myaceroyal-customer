@@ -1,1 +1,23 @@
-<p>not-found works!</p>
+<main class="not-found-page">
+  <div class="not-found-page__overlay"></div>
+
+  <section class="not-found-card">
+    <div class="not-found-card__brand">
+      <img src="logo.png" alt="Aceroyal Estates" class="not-found-card__logo" />
+      <span>ACEROYAL ESTATES</span>
+    </div>
+
+    <div class="not-found-card__content">
+      <p class="not-found-card__code">404</p>
+      <h1>Page not found</h1>
+      <p class="not-found-card__copy">
+        The page you tried to open does not exist or has been moved. Return to the dashboard or continue exploring properties.
+      </p>
+    </div>
+
+    <div class="not-found-card__actions">
+      <a routerLink="/main/explore" class="not-found-card__link not-found-card__link--primary">Explore Properties</a>
+      <a routerLink="/auth/login" class="not-found-card__link">Go to Login</a>
+    </div>
+  </section>
+</main>

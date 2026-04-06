@@ -1,209 +1,254 @@
-<!-- Profile page implemented with Tailwind CSS + NG-ZORRO components -->
-<div class="p-6 bg-white min-h-screen">
-	<!-- Header -->
-	<div class="flex items-center justify-between mb-6">
-		<div class="flex items-center gap-4">
-				<!-- <button nz-button class="!border-none :hover:!bg-transparent p-2 cursor-pointer">
-                    <app-icon name="arrow-left"></app-icon>
-				</button> -->
-				<h2 class="text-2xl font-semibold">Profile</h2>
-			</div>
-		<div class="text-sm text-gray-500">&nbsp;</div>
-	</div>
+<main class="profile-page">
+  <div class="profile-page__header">
+    <div>
+      <h1>My Profile</h1>
+      <p>Manage your profile details, identification information, and password.</p>
+    </div>
+    <app-button buttonText="Change Password" (onButtonClick)="goToPassword()"></app-button>
+  </div>
 
-	<!-- Top card: avatar + name + edit picture -->
-	<div class="bg-white rounded-md shadow-sm p-6 mb-6">
-		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-4">
-				<div class="relative">
-					<!-- <img *ngIf="user?.avatar" [src]="user?.avatar" alt="avatar" class="w-20 h-20 rounded-full object-cover" /> -->
-                    @if (user?.avatar) {
-                        <img [src]="user.avatar" alt="avatar" class="w-20 h-20 rounded-full object-cover" />
-                    } @else {
-                        <img [src]="'https://cdn.vectorstock.com/i/1000v/51/05/male-profile-avatar-with-brown-hair-vector-12055105.jpg'" alt="avatar" class="w-20 h-20 rounded-full object-cover" />
-                    }
-					
-
-					<!-- uploading spinner overlay -->
-					<div *ngIf="isLoading" class="absolute inset-0 bg-white/70 rounded-full flex items-center justify-center">
-						<i nz-icon nzType="loading" nzSpin class="text-xl text-gray-600"></i>
-					</div>
-				</div>
-				<div>
-					<div class="text-lg font-semibold"> {{ user?.full_name }} </div>
-					<div class="text-sm text-gray-500">{{ user?.email }}</div>
-				</div>
-			</div>
-			<div class="text-right">
-				<input #avatarInput type="file" accept="image/*" (change)="onAvatarFileSelected($event)" class="hidden" />
-				<button nz-button nzType="link" class="!text-primary cursor-pointer" (click)="openAvatarFilePicker()">
-					Upload Profile Picture
-					<app-icon name="edit"></app-icon>
-				</button>
-			</div>
-		</div>
-	</div>
-
-	<!-- Personal Information -->
-	<div class="bg-white rounded-md shadow-sm p-6 mb-6">
-		<div class="flex items-center justify-between mb-4">
-			<h3 class="text-lg font-medium">Personal Information</h3>
-			<button nz-button nzType="link" class="!text-primary cursor-pointer" (click)="openEditModal()">
-				Edit Details
-				<app-icon name="edit"></app-icon>
-			</button>
-		</div>
-
-		<div class="grid grid-cols-1 md:grid-cols-5 gap-y-6 gap-x-6 text-sm text-gray-700">
-			<div>
-				<div class="text-xs text-gray-400">Full Name</div>
-				<div class="mt-1">{{ user?.full_name }}</div>
-			</div>
-			<div>
-				<div class="text-xs text-gray-400">Email</div>
-				<div class="mt-1">{{ user?.email }}</div>
-			</div>
-			<div>
-				<div class="text-xs text-gray-400">Phone Number</div>
-				<div class="mt-1">{{ user?.phone_number }}</div>
-			</div>
-
-			<div *ngIf="user?.date_of_birth">
-				<div class="text-xs text-gray-400">Date of Birth</div>
-				<div class="mt-1">{{ user?.date_of_birth }}</div>
-			</div>
-			<div *ngIf="user?.gender">
-				<div class="text-xs text-gray-400">Gender</div>
-				<div class="mt-1">{{ user?.gender | titlecase }}</div>
-			</div>
-			<!-- empty cells to keep grid balanced on wider screens -->
-			<div class="md:col-span-3"></div>
-		</div>
-	</div>
-
-	<!-- Address -->
-	<div class="bg-white rounded-md shadow-sm p-6">
-		<div class="flex items-center justify-between mb-4">
-			<h3 class="text-lg font-medium">Address</h3>
-		</div>
-
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm text-gray-700">
-			<div>
-				<div class="text-xs text-gray-400">Country</div>
-				<div class="mt-1">Nigeria</div>
-			</div>
-			<div>
-				<div class="text-xs text-gray-400">State</div>
-				<div class="mt-1">Lagos</div>
-			</div>
-			<!-- <div>
-				<div class="text-xs text-gray-400">L . G . A</div>
-				<div class="mt-1">Amuwo Odofin</div>
-			</div> -->
-			<div>
-				<div class="text-xs text-gray-400">Residential Address</div>
-				<div class="mt-1">{{ user?.address }}</div>
-			</div>
-		</div>
-
-        <!-- Edit Modal -->
-    <nz-modal [(nzVisible)]="editModalVisible" nzTitle="Edit Profile" (nzOnCancel)="closeEditModal()" (nzOnOk)="saveProfile()">
-      <ng-container *nzModalContent>
-        <form nz-form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-          <div class="flex flex-col gap-2 mb-12">
-              <label for="full_name" class="text-gray-500 text-xs font-medium">
-                Full Name
-                <span nz-tooltip nzTooltipTitle="Required field" class="text-red-500">*</span>
-              </label>
-              <nz-form-control nzErrorTip="Please enter a valid full name">
-                <input
-                  nz-input
-                  id="full_name"
-                  formControlName="full_name"
-                  placeholder="Enter full name"
-                  type="text"
-                  class="w-full"
-                  [nzSize]="'large'"
-                />
-              </nz-form-control>
-            </div>
-            <div class="flex flex-col gap-2 mb-12">
-              <label for="phone_number" class="text-gray-500 text-xs font-medium">
-                Phone Number
-                <span nz-tooltip nzTooltipTitle="Required field" class="text-red-500">*</span>
-              </label>
-              <nz-form-control nzErrorTip="Please enter a valid phone number">
-                <input
-                  nz-input
-                  id="phone_number"
-                  formControlName="phone_number"
-                  placeholder="Enter phone number"
-                  type="text"
-                  class="w-full"
-                  [nzSize]="'large'"
-                />
-              </nz-form-control>
-            </div>
-            <div class="flex flex-col gap-2 mb-12">
-              <label for="gender" class="text-gray-500 text-xs font-medium">
-                Gender
-                <span nz-tooltip nzTooltipTitle="Required field" class="text-red-500">*</span>
-              </label>
-              <nz-form-control>
-                <nz-select
-                  id="gender"
-                  formControlName="gender"
-                  nzPlaceHolder="Select a gender"
-                  class="w-full"
-                  [nzSize]="'large'"
-                >
-                  @for (option of [{value: 'male', label: 'Male'}, {value: 'female', label: 'Female'}, {value: 'other', label: 'Other'}]; track option) {
-                    <nz-option [nzValue]="option.value" [nzLabel]="option.label"></nz-option>
-                  }
-                </nz-select>
-              </nz-form-control>
-            </div>
-            <div class="flex flex-col gap-2 mb-12">
-              <label for="date_of_birth" class="text-gray-500 text-xs font-medium">
-                Date of Birth
-                <span nz-tooltip nzTooltipTitle="Required field" class="text-red-500">*</span>
-              </label>
-              <nz-form-control>
-                <input
-                  nz-input
-                  id="date_of_birth"
-                  formControlName="date_of_birth"
-                  placeholder="Select date of birth"
-                  type="date"
-                  class="w-full"
-                  [nzSize]="'large'"
-                />
-              </nz-form-control>
-            </div>
-            <div class="flex flex-col gap-2 mb-12">
-              <label for="address" class="text-gray-500 text-xs font-medium">
-                Address
-                <span nz-tooltip nzTooltipTitle="Required field" class="text-red-500">*</span>
-              </label>
-              <nz-form-control nzErrorTip="Please enter a valid address">
-                <input
-                  nz-input
-                  id="address"
-                  formControlName="address"
-                  placeholder="Enter address"
-                  type="text"
-                  class="w-full"
-                  [nzSize]="'large'"
-                />
-              </nz-form-control>
-            </div>
-            
-        </form>
-      </ng-container>
-        <div *nzModalFooter>
-          <button class="!rounded-full !text-gray-500" nz-button nzType="default" (click)="closeEditModal()" [disabled]="isLoading">Cancel</button>
-          <button class="!rounded-full !bg-primary !border-none" nz-button nzType="primary" (click)="saveProfile()" [nzLoading]="isLoading" [disabled]="isLoading">Submit</button>
+  <div class="profile-page__hero" *ngIf="!isProfileLoading; else loadingState">
+    <div class="profile-avatar-card">
+      <div class="profile-avatar-card__media">
+        <img [src]="avatarUrl" alt="Profile picture" class="profile-avatar-card__image" />
+        <div *ngIf="isAvatarLoading" class="profile-avatar-card__overlay">
+          <i nz-icon nzType="loading" nzSpin></i>
         </div>
-    </nz-modal>
-	</div>
-</div>
+      </div>
+
+      <div class="profile-avatar-card__content">
+        <p class="profile-avatar-card__eyebrow">Customer Account</p>
+        <h2>{{ user?.full_name }}</h2>
+        <p>{{ user?.email }}</p>
+        <div class="profile-avatar-card__chips">
+          <span class="profile-chip" [class.profile-chip--verified]="user?.is_verified">
+            {{ user?.is_verified ? 'Verified' : 'Unverified' }}
+          </span>
+          <span class="profile-chip">{{ displayValue(user?.role?.label) }}</span>
+        </div>
+      </div>
+
+      <div class="profile-avatar-card__actions">
+        <input #avatarInput type="file" accept="image/*" (change)="onAvatarFileSelected($event)" class="hidden" />
+        <app-button buttonText="Upload Picture" [disabled]="isAvatarLoading" [loading]="isAvatarLoading" (onButtonClick)="openAvatarFilePicker()"></app-button>
+        <span
+          class="profile-avatar-card__confirm-trigger"
+          nz-popconfirm
+          nzPopconfirmTitle="Remove your profile picture?"
+          (nzOnConfirm)="deleteAvatar()"
+        >
+          <app-button buttonText="Remove Picture" [disabled]="!canDeleteAvatar || isAvatarLoading"></app-button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-section-grid" *ngIf="!isProfileLoading; else loadingState">
+    <section class="profile-section-card">
+      <div class="profile-section-card__header">
+        <div>
+          <h3>Personal Information</h3>
+          <p>Basic identity and contact information.</p>
+        </div>
+        <button nz-button nzType="link" class="!text-primary" (click)="openEditModal()">Edit Details</button>
+      </div>
+
+      <div class="profile-detail-grid">
+        <div class="profile-detail-item">
+          <span>Full Name</span>
+          <strong>{{ displayValue(user?.full_name) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>Email</span>
+          <strong>{{ displayValue(user?.email) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>Phone Number</span>
+          <strong>{{ displayValue(user?.phone_number) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>Gender</span>
+          <strong>{{ user?.gender ? (user?.gender | titlecase) : 'N/A' }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>Date of Birth</span>
+          <strong>{{ displayValue(user?.date_of_birth) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>Referral Code</span>
+          <strong>{{ displayValue(user?.referral_code) }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-section-card">
+      <div class="profile-section-card__header">
+        <div>
+          <h3>Location Information</h3>
+          <p>Nationality and residential address details.</p>
+        </div>
+      </div>
+
+      <div class="profile-detail-grid">
+        <div class="profile-detail-item">
+          <span>Nationality</span>
+          <strong>{{ displayValue(user?.nationality) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>State</span>
+          <strong>{{ displayValue(user?.state) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>Local Government</span>
+          <strong>{{ displayValue(user?.local_government) }}</strong>
+        </div>
+        <div class="profile-detail-item profile-detail-item--wide">
+          <span>Address</span>
+          <strong>{{ displayValue(user?.address) }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-section-card">
+      <div class="profile-section-card__header">
+        <div>
+          <h3>Verification Information</h3>
+          <p>Government-issued and financial identity records.</p>
+        </div>
+      </div>
+
+      <div class="profile-detail-grid">
+        <div class="profile-detail-item">
+          <span>BVN</span>
+          <strong>{{ displayValue(user?.bank_verification_number) }}</strong>
+        </div>
+        <div class="profile-detail-item">
+          <span>NIN</span>
+          <strong>{{ displayValue(user?.national_identity_number) }}</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="profile-loading">
+      <i nz-icon nzType="loading" nzSpin></i>
+      <p>Loading profile details...</p>
+    </div>
+  </ng-template>
+
+  <div class="profile-modal" *ngIf="editModalVisible" (click)="closeEditModal()">
+    <div class="profile-modal__dialog" (click)="$event.stopPropagation()">
+      <div class="profile-modal__header">
+        <div>
+          <p class="profile-modal__eyebrow">Profile Update</p>
+          <h2>Edit Profile</h2>
+          <p class="profile-modal__copy">Update your contact, identification, and location details.</p>
+        </div>
+        <button type="button" class="profile-modal__close" (click)="closeEditModal()" [disabled]="isSavingProfile" aria-label="Close edit profile modal">
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+        </button>
+      </div>
+
+      <div class="profile-modal__body">
+        <form nz-form [formGroup]="profileForm" class="profile-form-grid" (ngSubmit)="saveProfile()">
+          <div class="profile-form-field">
+            <label>Full Name</label>
+            <input nz-input formControlName="full_name" placeholder="Enter full name" />
+          </div>
+
+          <div class="profile-form-field">
+            <label>Phone Number</label>
+            <input nz-input formControlName="phone_number" placeholder="Enter phone number" />
+          </div>
+
+          <div class="profile-form-field">
+            <label>Gender</label>
+            <div class="profile-form-field__select-wrap">
+              <select class="profile-form-field__select" formControlName="gender">
+                <option value="">Select gender</option>
+                <option *ngFor="let gender of genderOptions" [value]="gender">{{ gender | titlecase }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="profile-form-field">
+            <label>Date of Birth</label>
+            <input nz-input type="date" formControlName="date_of_birth" />
+          </div>
+
+          <div class="profile-form-field">
+            <label>Nationality</label>
+            <div class="profile-form-field__select-wrap">
+              <select class="profile-form-field__select" formControlName="nationality">
+                <option value="">Select nationality</option>
+                <option *ngFor="let nationality of nationalityOptions" [value]="nationality">{{ nationality }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="profile-form-field">
+            <label>State</label>
+            <div class="profile-form-field__select-wrap">
+              <select
+                class="profile-form-field__select"
+                formControlName="state"
+                [disabled]="profileForm.get('nationality')?.value !== 'Nigerian'"
+              >
+                <option value="">Select state</option>
+                <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="profile-form-field">
+            <label>Local Government</label>
+            <div class="profile-form-field__select-wrap">
+              <select
+                class="profile-form-field__select"
+                formControlName="local_government"
+                [disabled]="profileForm.get('nationality')?.value !== 'Nigerian' || !availableLgas.length"
+              >
+                <option value="">Select local government</option>
+                <option *ngFor="let lga of availableLgas" [value]="lga">{{ lga }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="profile-form-field">
+            <label>Referral Code</label>
+            <input nz-input formControlName="referral_code" placeholder="Enter referral code if any" />
+          </div>
+
+          <div class="profile-form-field profile-form-field--wide">
+            <label>Address</label>
+            <textarea nz-input formControlName="address" rows="3" placeholder="Enter residential address"></textarea>
+          </div>
+
+          <div class="profile-form-field">
+            <label>BVN</label>
+            <input nz-input formControlName="bank_verification_number" maxlength="11" placeholder="Enter 11-digit BVN" />
+            <small *ngIf="profileForm.get('bank_verification_number')?.touched && profileForm.get('bank_verification_number')?.hasError('pattern')">
+              BVN must be 11 digits.
+            </small>
+          </div>
+
+          <div class="profile-form-field">
+            <label>NIN</label>
+            <input nz-input formControlName="national_identity_number" maxlength="11" placeholder="Enter 11-digit NIN" />
+            <small *ngIf="profileForm.get('national_identity_number')?.touched && profileForm.get('national_identity_number')?.hasError('pattern')">
+              NIN must be 11 digits.
+            </small>
+          </div>
+        </form>
+      </div>
+
+      <div class="profile-modal__footer">
+        <div class="profile-modal__actions">
+          <app-button buttonText="Cancel" [disabled]="isSavingProfile" (onButtonClick)="closeEditModal()"></app-button>
+          <app-button buttonText="Save Changes" [disabled]="isSavingProfile" [loading]="isSavingProfile" (onButtonClick)="saveProfile()"></app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
