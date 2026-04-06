@@ -1,7 +1,7 @@
 <main class="payments-page flex flex-col w-full">
   <div class="payments-page__header flex items-center gap-4">
-    <app-icon class="cursor-pointer" name="arrow-left"></app-icon>
-    <h1 class="text-2xl font-bold !text-gray-600">Payments</h1>
+    <app-icon class="payments-page__back cursor-pointer" name="arrow-left"></app-icon>
+    <h1 class="payments-page__title text-2xl font-bold">Payments</h1>
   </div>
 
   <div class="payments-summary" *ngIf="paymentSummary as summary">
@@ -97,8 +97,8 @@
     </div>
 
     <div class="payments-filters__actions">
-      <button nz-button nzType="default" (click)="resetFilters()">Reset</button>
-      <button nz-button nzType="primary" class="!bg-primary !border-primary" (click)="applyFilters()">Apply Filters</button>
+      <app-button buttonText="Reset" variant="secondary" (onButtonClick)="resetFilters()"></app-button>
+      <app-button buttonText="Apply Filters" (onButtonClick)="applyFilters()"></app-button>
     </div>
   </section>
 
@@ -140,15 +140,12 @@
             <td>{{ data.purchase.balance_due | currency:'₦ ':'symbol':'1.0-0' }}</td>
             <td>{{ data.created_at | date:'mediumDate' }}</td>
             <td>
-              <button
+              <app-button
                 *ngIf="data.proof_url; else noProof"
-                nz-button
-                nzType="default"
-                class="payments-action"
-                (click)="openProof(data.proof_url)"
-              >
-                View Proof
-              </button>
+                buttonText="View Proof"
+                variant="secondary"
+                (onButtonClick)="openProof(data.proof_url)"
+              ></app-button>
               <ng-template #noProof>
                 <span class="text-gray-400">N/A</span>
               </ng-template>

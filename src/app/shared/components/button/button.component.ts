@@ -19,16 +19,24 @@ export class ButtonComponent {
   @Input() routerLink: boolean = false;
   @Input() isCancelButton: boolean = false;
   @Input() type: string = 'button';
+  @Input() variant: 'primary' | 'secondary' = 'primary';
+  @Input() fullWidth: boolean = false;
   @Output() onButtonClick = new EventEmitter<any>();
 
   constructor(private router: Router) {}
 
   getButtonClass() {
-    return this.buttonText.toLowerCase() === 'cancel' ||
+    const isSecondary = this.variant === 'secondary' ||
+      this.isCancelButton ||
+      this.buttonText.toLowerCase() === 'cancel' ||
       this.buttonText.toLowerCase() === 'decline' ||
-      this.buttonText.toLowerCase() === 'reject'
-      ? 'buttonStyles'
-      : 'custom-button';
+      this.buttonText.toLowerCase() === 'reject';
+
+    return {
+      'custom-button': !isSecondary,
+      'buttonStyles': isSecondary,
+      'custom-button--full-width': this.fullWidth
+    };
   }
 
   onBtnClick(event: Event): void {

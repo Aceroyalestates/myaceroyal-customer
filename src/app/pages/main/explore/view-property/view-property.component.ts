@@ -7,11 +7,8 @@ import { PropertiesService } from 'src/app/core/services/properties.service';
 import { Property } from 'src/app/core/models/properties';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { FormsModule } from '@angular/forms';
-import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { Subject, Subscription, of } from 'rxjs';
@@ -37,11 +34,8 @@ import type { ImageSliderItem } from 'src/app/shared/components/image-slider/ima
     NzTabsModule, 
     NzModalModule,
     FormsModule,
-    NzFormModule,
     NzInputModule,
-    NzSelectModule,
     NzButtonModule,
-    NzRadioModule,
     NzUploadModule,
     NzSpinModule,
     NzSwitchModule,
@@ -109,7 +103,7 @@ export class ViewPropertyComponent {
   private subs = new Subscription();
 
   showUnitModal(): void {
-    this.isUnitModalVisible = true;
+    this.setPurchaseModalVisible(true);
     this.purchaseStep = 0;
     this.selectedUnitNumber = this.selectedUnitNumber ?? 1;
     this.selectedPlan = this.outrightPlanValue;
@@ -131,6 +125,10 @@ export class ViewPropertyComponent {
     this.couponLoading = false;
   }
 
+  private setPurchaseModalVisible(visible: boolean): void {
+    this.isUnitModalVisible = visible;
+    document.body.style.overflow = visible ? 'hidden' : '';
+  }
 
   handleUnitOk(): void {
     if (!this.selectedUnitNumber) {
@@ -158,7 +156,7 @@ export class ViewPropertyComponent {
 
     this.totalAmount = this.purchaseTotalAmount;
     this.finalAmount = this.discountedPurchaseTotal;
-    this.isUnitModalVisible = false;
+    this.setPurchaseModalVisible(false);
 
     if (this.selectedPaymentMethod === 1) {
       this.isBankTransferModalVisible = true;
@@ -247,7 +245,7 @@ export class ViewPropertyComponent {
   }
 
   handleCancel(): void {
-    this.isUnitModalVisible = false;
+    this.setPurchaseModalVisible(false);
     this.isPlanModalVisible = false;
     this.isPaymentMethodModalVisible = false;
     this.isBankTransferModalVisible = false;
@@ -307,6 +305,15 @@ export class ViewPropertyComponent {
     if (this.purchaseStep > 0) {
       this.purchaseStep -= 1;
     }
+  }
+
+  selectPurchasePlan(plan: string): void {
+    this.selectedPlan = plan;
+    this.onPurchaseContextChange();
+  }
+
+  selectPaymentMethodOption(method: number): void {
+    this.selectedPaymentMethod = method;
   }
 
   get isOnPurchaseReviewStep(): boolean {
@@ -406,6 +413,7 @@ export class ViewPropertyComponent {
   
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+    document.body.style.overflow = '';
   }
 
   back() {
