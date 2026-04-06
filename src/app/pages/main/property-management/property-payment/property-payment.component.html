@@ -1,4 +1,4 @@
-<main class="flex flex-col w-full">
+<main class="property-payment-page flex flex-col w-full">
 
 
     @if (isLoading) {
@@ -12,55 +12,174 @@
     <div class="mb-16">
       <app-breadcrumb
         [items]="[
-          { label: 'Property Management', url: '/main/property-management' },
+          { label: 'My Properties', url: '/main/property-management' },
           { label: propertyPurchaseDetails.unit.property.name }
         ]"
       ></app-breadcrumb>
     </div>
 
    <div class="flex flex-col gap-8">
-     <div class="mb-8 md:mb-16">
-    <app-image-slider
-      [images]="propertyImages"
-      [showIndicators]="true"
-      [showNavigation]="true"
-      [showImageCounter]="true"
-      [height]="sliderHeight"
-      [objectFit]="'cover'"
-      [borderRadius]="'8px'"
-      [enableKeyboardNavigation]="true"
-      [enableSwipeNavigation]="true"
-      (imageChange)="onImageChange($event)"
-      (imageClick)="onImageClick($event)"
-    ></app-image-slider>
-  </div>
+    <div class="property-gallery mb-8 md:mb-16">
+      <div class="property-gallery__thumbs" *ngIf="propertyImages.length > 1">
+        @for (image of propertyImages; track image.src; let index = $index) {
+        <button
+          type="button"
+          class="property-gallery__thumb"
+          [class.property-gallery__thumb--active]="index === currentImageIndex"
+          (click)="selectImage(index)"
+          [attr.aria-label]="'Show property image ' + (index + 1)"
+        >
+          <img [src]="image.src" [alt]="image.alt" />
+        </button>
+        }
+      </div>
+
+      <div class="property-gallery__stage">
+        @if (currentImage) {
+        <div class="property-gallery__counter">
+          {{ currentImageIndex + 1 }} / {{ propertyImages.length }}
+        </div>
+
+        @if (propertyImages.length > 1) {
+        <button
+          type="button"
+          class="property-gallery__nav property-gallery__nav--prev"
+          (click)="showPreviousImage()"
+          aria-label="Previous property image"
+        >
+          <span>&lsaquo;</span>
+        </button>
+
+        <button
+          type="button"
+          class="property-gallery__nav property-gallery__nav--next"
+          (click)="showNextImage()"
+          aria-label="Next property image"
+        >
+          <span>&rsaquo;</span>
+        </button>
+        }
+
+        <img
+          class="property-gallery__image"
+          [src]="currentImage.src"
+          [alt]="currentImage.alt"
+        />
+        } @else {
+        <div class="property-gallery__empty">
+          <p>No property images available.</p>
+        </div>
+        }
+      </div>
+    </div>
 
     <div class="flex flex-col gap-2">
         <h3 class="text-xl font-semibold !text-gray-600">{{ propertyPurchaseDetails.unit.property.name }}</h3>
         <h1 class="text-2xl !font-bold !text-gray-600">{{ propertyPurchaseDetails.initial_payment_due | currency: '₦ ' }}</h1>
     </div>
-    <div class="flex flex-col gap-3 px-4 py-6 bg-primary rounded-lg !text-white w-fit">
-        <div class="flex justify-between">
-            <div class="flex gap-2 items-center">
-                <app-icon class="" name="tag"></app-icon>
-                <p class="text-sm"> Number of Units </p>
-            </div>
-            <p>{{ propertyPurchaseDetails.quantity }}</p>
+    <div class="flex flex-col lg:flex-row gap-6 items-start">
+      <div class="flex flex-col gap-3 px-4 py-6 bg-primary rounded-lg !text-white w-full lg:w-fit min-w-[320px]">
+          <div class="flex justify-between">
+              <div class="flex gap-2 items-center">
+                  <app-icon class="" name="tag"></app-icon>
+                  <p class="text-sm"> Number of Units </p>
+              </div>
+              <p>{{ propertyPurchaseDetails.quantity }}</p>
+          </div>
+          <div class="flex gap-20 justify-between">
+              <div class="flex gap-2 items-center">
+                  <app-icon class="" name="credit-card"></app-icon>
+                  <p class="text-sm"> Payment Type </p>
+              </div>
+              <p class="text-sm">{{ paymentTypeLabel }}</p>
+          </div>
+          <div class="flex gap-20 justify-between">
+              <div class="flex gap-2 items-center">
+                  <app-icon class="" name="wallet"></app-icon>
+                  <p class="text-sm"> Payment Mode </p>
+              </div>
+              <div class="flex items-center gap-2 text-sm">
+                  <app-icon class="!text-sm" name="wallet"></app-icon>
+                  <p class="text-sm">{{ paymentModeLabel }}</p>
+              </div>
+          </div>
+          <div class="flex justify-between">
+              <div class="flex gap-2 items-center">
+                  <app-icon class="" name="circle"></app-icon>
+                  <p class="text-sm"> Payment Status </p>
+              </div>
+              <p class="text-sm !text-white-400 !font-normal bg-red-500 rounded-full !px-4">{{ propertyPurchaseDetails.status }}</p>
+          </div>
+      </div>
+
+      <div class="flex w-full lg:flex-1 flex-col gap-4">
+        <div
+          *ngIf="isOfflinePaymentMode"
+          class="flex w-full items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 min-h-[160px]"
+        >
+          <app-icon name="info" class="!text-amber-500 !text-lg"></app-icon>
+          <div>
+            <h2 class="!mb-1 !text-gray-600 text-base font-semibold">Finance Review In Progress</h2>
+            <p class="!mb-0 !text-gray-500 text-sm">
+              This {{ paymentModeLabel.toLowerCase() }} transaction is still being reviewed by the finance team. You can reach out to admin or your realtor for more details.
+            </p>
+          </div>
         </div>
-        <div class="flex gap-20 justify-between">
-            <div class="flex gap-2 items-center">
-                <app-icon class="" name="credit-card"></app-icon>
-                <p class="text-sm"> Payment Option </p>
-            </div>
-            <p class="text-sm">{{ propertyPurchaseDetails.payment_method }}</p>
+
+        <div
+          *ngIf="isPendingPaystackPayment"
+          class="flex w-full items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 min-h-[160px]"
+        >
+          <app-icon name="info" class="!text-primary !text-lg"></app-icon>
+          <div>
+            <h2 class="!mb-1 !text-gray-600 text-base font-semibold">Incomplete Paystack Checkout</h2>
+            <p class="!mb-0 !text-gray-500 text-sm">
+              This Paystack transaction is still in payment because the checkout was initiated but not completed. The process may have been abandoned or cancelled.
+            </p>
+          </div>
         </div>
-        <div class="flex justify-between">
-            <div class="flex gap-2 items-center">
-                <app-icon class="" name="circle"></app-icon>
-                <p class="text-sm"> Payment Status </p>
-            </div>
-            <p class="text-sm !text-white-400 !font-normal bg-red-500 rounded-full !px-4">{{ propertyPurchaseDetails.status }}</p>
+      </div>
+    </div>
+
+    <div
+      *ngIf="propertyDetails"
+      class="flex w-full flex-col gap-6 rounded-2xl border border-gray-200 bg-white px-5 py-5 md:px-6"
+    >
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div class="flex flex-col gap-1">
+          <p class="text-sm !text-gray-400">Property Type</p>
+          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.property_type.name || 'N/A' }}</h3>
         </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-sm !text-gray-400">Location</p>
+          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.location || 'N/A' }}</h3>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-sm !text-gray-400">Address</p>
+          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.address || 'N/A' }}</h3>
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-sm !text-gray-400">Availability</p>
+          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.is_available ? 'Available' : 'Unavailable' }}</h3>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2" *ngIf="propertyDetails.description">
+        <p class="text-sm !text-gray-400">Description</p>
+        <p class="text-sm leading-6 !text-gray-500">{{ propertyDetails.description }}</p>
+      </div>
+
+      <div class="flex flex-col gap-3" *ngIf="propertyDetails.property_features.length > 0">
+        <p class="text-sm !text-gray-400">Property Features</p>
+        <div class="flex flex-wrap gap-3">
+          @for (feature of propertyDetails.property_features; track feature.feature_id) {
+            <span class="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm !text-primary">
+              <app-icon name="airdrop" [size]="14"></app-icon>
+              <span>{{ feature.feature.name }}</span>
+            </span>
+          }
+        </div>
+      </div>
     </div>
 
     <!-- <h1 class="text-xl font-semibold !text-gray-600">Realtor Details</h1> -->
@@ -90,16 +209,11 @@
 
     <!-- <h1 class="text-xl font-semibold !text-primary border-b-2 border-primary w-fit cursor-pointer">Request Realtor Change</h1> -->
 
-    <div class="flex justify-between items-center w-full md:w-2/3">
-        <h1 class="text-xl font-semibold !text-gray-600" *ngIf="propertyPurchaseDetails.schedules.length > 0">Payment Schedule</h1>
-        <!-- Refresh button -->
-        <button nz-button nzType="default" class="!text-gray-500 !bg-transparent hover:!bg-gray-100" (click)="getUserSchedules(id!)">
-            <!-- <app-icon name="refresh" class="!text-gray-500"></app-icon> -->
-            Refresh
-        </button>
+    <div class="flex justify-between items-center w-full md:w-2/3" *ngIf="shouldLoadSchedules && schedules.length > 0">
+        <h1 class="text-xl font-semibold !text-gray-600">Payment Schedule</h1>
     </div>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4" *ngIf="shouldLoadSchedules && schedules.length > 0">
         @for(schedule of schedules; track schedule.id) {
             <div class="flex flex-col w-full md:w-2/3 border border-gray-200 rounded-lg p-4 gap-4 bg-white">
                 <div class="flex justify-between items-center pb-4">
@@ -143,6 +257,7 @@
              <!-- <h1> ₦ </h1> -->
         }
     </div>
+
    </div>
 
 
@@ -388,7 +503,7 @@
       </div>
     </nz-modal>
 
-    <!-- Payment Success Modal -->
+    <!-- Offline Proof Submission Modal -->
     <nz-modal
       [(nzVisible)]="isPaymentSuccessModalVisible"
       nzTitle=""
@@ -399,10 +514,13 @@
       <div *nzModalContent>
         <div class="flex justify-center my-6 bg-red-50 p-2 rounded-full w-fit mx-auto">
           <div class="flex justify-center items-center bg-red-100 p-4 rounded-full">
-            <app-icon name="check" class="!text-primary !text-2xl"></app-icon>
+            <app-icon name="info" class="!text-primary !text-2xl"></app-icon>
           </div>
         </div>
-        <h1 class="!text-gray-600 justify-center text-center text-lg font-semibold !my-4">SUCCESS</h1>
+        <h1 class="!text-gray-600 justify-center text-center text-lg font-semibold !my-4">Submit Payment Proof</h1>
+        <p class="!text-gray-500 text-sm text-center !mb-5">
+          Your {{ selectedPaymentMethod === 1 ? 'bank transfer' : 'bank draft' }} payment will remain under review until the finance team confirms it.
+        </p>
         <div class="relative flex items-center justify-center cursor-pointer border border-gray-400 w-full rounded-lg hover:bg-gray-100 !px-4 !mb-4">
           <input
               type="file"
@@ -422,12 +540,12 @@
 
         <div class="flex items-center gap-4">
           <app-icon name="info" class="!text-gray-400 !text-xl"></app-icon>
-          <p class="!text-gray-500 text-sm">Please kindly note that you need to fill our purchase form before your property allocation can be completed.</p>
+          <p class="!text-gray-500 text-sm">This transaction is still being reviewed by the finance team. You can reach out to admin for more details while review is in progress.</p>
         </div>
       </div>
       <div *nzModalFooter>
         <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Continue</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Submit for Review</button>
       </div>
     </nz-modal>
 

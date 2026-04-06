@@ -1,39 +1,102 @@
-<div class="min-h-screen bg-gray-50 p-6">
-  <div class="max-w-4xl mx-auto">
-    <div class="rounded-lg overflow-hidden shadow-md">
-      <!-- Red banner -->
-      <div class="bg-red-600 !text-white p-6">
-        <h2 class="text-2xl !text-white font-bold mb-2">AceRoyal Estates Homes Ltd.</h2>
-        <p class="mb-2">it's time to find your next home</p>
-        <p class="mb-1">Email: <a class="underline !text-white font-medium" href="mailto:customercare@aceroyalestates.com">customercare&#64;aceroyalestates.com</a></p>
-        <p class="mb-1">Address: Providence plaza, 17 Olokonla road, Sangotedo, Lekki-Ajah Expressway, Lagos.</p>
+<main class="support-page">
+  <div class="support-page__container">
+    <div class="support-page__header">
+      <h1>Support</h1>
+      <p>Reach Aceroyal through the official support channels below.</p>
+    </div>
+
+    <div class="support-card" *ngIf="!isLoading; else loadingState">
+      <div class="support-card__hero">
+        <img
+          *ngIf="showLogo && contact.logoUrl; else logoFallback"
+          [src]="contact.logoUrl"
+          [alt]="contact.companyName"
+          class="support-card__logo"
+          (error)="onLogoError()"
+        />
+        <ng-template #logoFallback>
+          <div class="support-card__logo support-card__logo--fallback">
+            {{ contact.companyName.charAt(0) }}
+          </div>
+        </ng-template>
+
+        <div class="support-card__details">
+          <p class="support-card__eyebrow">Aceroyal Support</p>
+          <h2>{{ contact.companyName }}</h2>
+          <p class="support-card__tagline">{{ contact.tagline }}</p>
+        </div>
       </div>
 
-      <!-- Contact actions -->
-      <div class="bg-white p-6">
-        <h3 class="text-lg font-semibold !mb-4 !text-gray-500">Contact us</h3>
-
-        <div class="grid grid-cols-3 gap-4">
-          <a class="flex flex-col items-center gap-2 p-4 rounded-lg border border-primary hover:shadow-md" href="tel:+2348000000000" aria-label="Call us">
-            <i nz-icon nzType="phone" class="text-red-600 text-2xl"></i>
-            <span class="text-sm font-medium !text-primary">Call</span>
-            <span class="text-xs text-gray-500">+234 800 000 0000</span>
-          </a>
-
-          <a class="flex flex-col items-center gap-2 p-4 rounded-lg border border-primary hover:shadow-md" href="https://wa.me/2348000000000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-            <i nz-icon nzType="whatsapp" class="text-green-500 text-2xl"></i>
-            <span class="text-sm font-medium !text-primary">WhatsApp</span>
-            <span class="text-xs text-gray-500">Chat with us</span>
-          </a>
-
-          <a class="flex flex-col items-center gap-2 p-4 rounded-lg border border-primary hover:shadow-md" href="mailto:customercare@aceroyalestates.com" aria-label="Email us">
-            <i nz-icon nzType="mail" class="text-2xl"></i>
-            <span class="text-sm font-medium !text-primary">Email</span>
-            <span class="text-xs text-gray-500">customercare&#64;aceroyalestates.com</span>
-          </a>
+      <div class="support-card__details support-card__details--body">
+        <div class="support-card__detail">
+          <span class="support-card__label">Phone</span>
+          <a [href]="phoneHref">{{ contact.phone }}</a>
+          <div class="support-card__list" *ngIf="displayPhones.length > 1">
+            <a *ngFor="let phone of displayPhones.slice(1)" [href]="'tel:' + normalizePhoneForTel(phone)">
+              {{ phone }}
+            </a>
+          </div>
         </div>
+        <div class="support-card__detail">
+          <span class="support-card__label">Email</span>
+          <a [href]="emailHref">{{ contact.email }}</a>
+          <div class="support-card__list" *ngIf="displayEmails.length > 1">
+            <a *ngFor="let email of displayEmails.slice(1)" [href]="'mailto:' + email">
+              {{ email }}
+            </a>
+          </div>
+        </div>
+        <div class="support-card__detail support-card__detail--full">
+          <span class="support-card__label">Address</span>
+          <p>{{ contact.address }}</p>
+        </div>
+      </div>
 
+      <div class="support-card__actions">
+        <a class="support-action" [href]="phoneHref" aria-label="Call Aceroyal support">
+          <i nz-icon nzType="phone" nzTheme="outline" class="support-action__icon"></i>
+          <span class="support-action__title">Call</span>
+          <span class="support-action__meta">{{ contact.phone }}</span>
+        </a>
+
+        <a
+          *ngIf="hasWhatsApp"
+          class="support-action"
+          [href]="whatsAppHref"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat with Aceroyal support on WhatsApp"
+        >
+          <i nz-icon nzType="message" nzTheme="outline" class="support-action__icon support-action__icon--whatsapp"></i>
+          <span class="support-action__title">WhatsApp</span>
+          <span class="support-action__meta">{{ contact.whatsapp }}</span>
+        </a>
+
+        <a class="support-action" [href]="emailHref" aria-label="Email Aceroyal support">
+          <i nz-icon nzType="mail" nzTheme="outline" class="support-action__icon"></i>
+          <span class="support-action__title">Email</span>
+          <span class="support-action__meta">{{ contact.email }}</span>
+        </a>
       </div>
     </div>
+
+    <ng-template #loadingState>
+      <div class="support-loading">
+        <div class="support-loading__spinner"></div>
+        <p>Loading support contact details...</p>
+      </div>
+    </ng-template>
   </div>
-</div>
+
+  <a
+    *ngIf="hasWhatsApp"
+    class="support-whatsapp-float"
+    [href]="whatsAppHref"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Open WhatsApp support"
+    title="Chat on WhatsApp"
+  >
+    <i nz-icon nzType="message" nzTheme="outline"></i>
+  </a>
+</main>

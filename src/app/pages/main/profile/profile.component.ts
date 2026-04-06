@@ -1,12 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NIGERIA_STATE_LGAS, NIGERIA_STATES } from 'src/app/core/constants/nigeria-state-lgas';
+import { UpdateUserRequest, User } from 'src/app/core/models/users';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { ImageService } from 'src/app/core/services/image.service';
 import { UsersService } from 'src/app/core/services/users.service';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -17,88 +21,137 @@ import { SharedModule } from 'src/app/shared/shared.module';
   imports: [
     SharedModule,
     CommonModule,
-    NzModalModule, 
     ReactiveFormsModule,
-    NzSelectModule,
     NzFormModule,
     NzInputModule,
     NzButtonModule,
     NzIconModule,
+    NzPopconfirmModule,
   ],
   templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.css']
+  styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit {
-
   @ViewChild('avatarInput') avatarInput!: ElementRef<HTMLInputElement>;
 
-  user: any = null;
-  isLoading = false;
+  readonly defaultAvatar = 'https://cdn.vectorstock.com/i/1000v/51/05/male-profile-avatar-with-brown-hair-vector-12055105.jpg';
+  readonly nationalityOptions = ['Nigerian', 'Non Nigerian'];
+  readonly genderOptions = ['male', 'female', 'other'];
+  readonly states = NIGERIA_STATES;
+
+  user: User | null = null;
+  isProfileLoading = false;
+  isSavingProfile = false;
+  isAvatarLoading = false;
   editModalVisible = false;
+  availableLgas: string[] = [];
 
   profileForm: FormGroup;
 
   constructor(
-    private userservice: UsersService,
-    private imageService: ImageService,
-    private fb: FormBuilder
+    private readonly userService: UsersService,
+    private readonly imageService: ImageService,
+    private readonly fb: FormBuilder,
+    private readonly notification: NzNotificationService,
+    private readonly router: Router,
+    private readonly authService: AuthService,
   ) {
     this.profileForm = this.fb.group({
       full_name: ['', [Validators.required]],
       phone_number: ['', [Validators.required]],
-      gender: ['', [Validators.required]],
-      date_of_birth: ['', [Validators.required]],
-      address: ['', [Validators.required]],
+      gender: [''],
+      date_of_birth: [''],
+      nationality: [''],
+      state: [''],
+      local_government: [''],
+      address: [''],
+      bank_verification_number: ['', [Validators.pattern(/^\d{11}$/)]],
+      national_identity_number: ['', [Validators.pattern(/^\d{11}$/)]],
+      referral_code: [''],
     });
   }
 
   ngOnInit(): void {
     this.getUser();
-  }
-
-  getUser() {
-    this.userservice.getUserProfile().subscribe({
-      next: (response) => {
-        this.user = response.user;
-        // patch form with returned values when available
-        console.log({ user: this.user });
-        this.profileForm.patchValue({
-          full_name: this.user.full_name,
-          phone_number: this.user.phone_number,
-          gender: this.user.gender,
-          date_of_birth: this.user.date_of_birth,
-          address: this.user.address,
-        });
-      },
-      error: (error) => {
-        console.error('Error fetching user:', error);
+    this.profileForm.get('state')?.valueChanges.subscribe((state) => {
+      this.availableLgas = state ? (NIGERIA_STATE_LGAS[state] ?? []) : [];
+      const currentLga = this.profileForm.get('local_government')?.value;
+      if (currentLga && !this.availableLgas.includes(currentLga)) {
+        this.profileForm.patchValue({ local_government: '' }, { emitEvent: false });
       }
     });
   }
 
- 
+  get avatarUrl(): string {
+    return this.user?.avatar || this.defaultAvatar;
+  }
 
-  // trigger native file picker
-  openAvatarFilePicker() {
+  get canDeleteAvatar(): boolean {
+    return !!this.user?.avatar && !this.isAvatarLoading;
+  }
+
+  getUser(): void {
+    this.isProfileLoading = true;
+    this.userService.getUserProfile().subscribe({
+      next: (response) => {
+        this.user = response.user;
+        this.patchFormWithUser();
+        this.isProfileLoading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching user:', error);
+        this.notification.error('', 'Failed to load your profile.');
+        this.isProfileLoading = false;
+      },
+    });
+  }
+
+  patchFormWithUser(): void {
+    if (!this.user) {
+      return;
+    }
+
+    this.availableLgas = this.user.state ? (NIGERIA_STATE_LGAS[this.user.state] ?? []) : [];
+
+    this.profileForm.patchValue(
+      {
+        full_name: this.user.full_name ?? '',
+        phone_number: this.user.phone_number ?? '',
+        gender: this.user.gender ?? '',
+        date_of_birth: this.user.date_of_birth ?? '',
+        nationality: this.user.nationality ?? '',
+        state: this.user.state ?? '',
+        local_government: this.user.local_government ?? '',
+        address: this.user.address ?? '',
+        bank_verification_number: this.user.bank_verification_number ?? '',
+        national_identity_number: this.user.national_identity_number ?? '',
+        referral_code: this.user.referral_code ?? '',
+      },
+      { emitEvent: false },
+    );
+  }
+
+  openAvatarFilePicker(): void {
     this.avatarInput?.nativeElement?.click();
   }
 
-  onAvatarFileSelected(event: Event) {
+  onAvatarFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
-    const file = input.files[0];
+    const file = input.files?.[0];
 
-    // validate file type and size (<= 1MB)
+    if (!file) {
+      return;
+    }
+
     if (!file.type.startsWith('image/')) {
-      // show a user-friendly error - replace with notification service if available
-      alert('Please select an image file');
+      this.notification.error('', 'Please select a valid image file.');
       input.value = '';
       return;
     }
 
-    const maxSize = 1 * 1024 * 1024; // 1MB
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert('Image must be 1MB or smaller');
+      this.notification.error('', 'Profile picture must be 2MB or smaller.');
       input.value = '';
       return;
     }
@@ -106,74 +159,125 @@ export class ProfileComponent implements OnInit {
     this.uploadAvatar(file);
   }
 
-  uploadAvatar(file: File) {
-    this.isLoading = true;
+  uploadAvatar(file: File): void {
+    this.isAvatarLoading = true;
     this.imageService.uploadImage(file).subscribe({
-      next: (res) => {
-        // handle different response shapes: string url or { url }
-        const url = res.data.file.secure_url;
+      next: (response) => {
+        const url = response?.data?.file?.secure_url;
         if (!url) {
-          console.error('No URL returned from image upload', res);
-          alert('Failed to upload image');
-          this.isLoading = false;
+          this.notification.error('', 'Image upload failed.');
+          this.isAvatarLoading = false;
           return;
         }
 
-        // call API to update user avatar
-        this.userservice.updateUserAvatar({ avatar: url }).subscribe({
-          next: (r: any) => {
-            // assume response contains updated user
-            this.user = r.user ?? { ...this.user, avatar: url };
-            this.isLoading = false;
-            // clear file input
-            if (this.avatarInput) this.avatarInput.nativeElement.value = '';
+        this.userService.updateUserAvatar({ avatar: url }).subscribe({
+          next: (res) => {
+            this.user = res.user ?? (this.user ? { ...this.user, avatar: url } : null);
+            if (this.user) {
+              this.authService.setUser(this.user as any);
+            }
+            this.notification.success('', 'Profile picture updated.');
+            this.isAvatarLoading = false;
+            if (this.avatarInput) {
+              this.avatarInput.nativeElement.value = '';
+            }
           },
-          error: (err: any) => {
-            console.error('Error updating avatar', err);
-            alert('Failed to set avatar');
-            this.isLoading = false;
-          }
+          error: (error) => {
+            console.error('Error updating avatar:', error);
+            this.notification.error('', 'Failed to update profile picture.');
+            this.isAvatarLoading = false;
+          },
         });
       },
-      error: (err: any) => {
-        console.error('Image upload error', err);
-        alert('Image upload failed');
-        this.isLoading = false;
-      }
+      error: (error) => {
+        console.error('Image upload error:', error);
+        this.notification.error('', 'Image upload failed.');
+        this.isAvatarLoading = false;
+      },
     });
   }
 
-  openEditModal() {
-    // this.patchFormWithUser();
+  deleteAvatar(): void {
+    this.isAvatarLoading = true;
+    this.userService.deleteUserAvatar().subscribe({
+      next: (response) => {
+        this.user = response.user ?? (this.user ? { ...this.user, avatar: null } : null);
+        if (this.user) {
+          this.authService.setUser(this.user as any);
+        }
+        this.notification.success('', 'Profile picture removed.');
+        this.isAvatarLoading = false;
+      },
+      error: (error) => {
+        console.error('Error deleting avatar:', error);
+        this.notification.error('', 'Failed to remove profile picture.');
+        this.isAvatarLoading = false;
+      },
+    });
+  }
+
+  openEditModal(): void {
+    this.patchFormWithUser();
     this.editModalVisible = true;
+    document.body.style.overflow = 'hidden';
   }
 
-  closeEditModal() {
+  closeEditModal(): void {
     this.editModalVisible = false;
+    document.body.style.overflow = '';
   }
 
-  saveProfile() {
+  goToPassword(): void {
+    this.router.navigate(['/main/password']);
+  }
+
+  saveProfile(): void {
     if (this.profileForm.invalid) {
       this.profileForm.markAllAsTouched();
       return;
     }
 
-    const payload = this.profileForm.value;
-    console.log({payload});
-    this.isLoading = true;
-    this.userservice.updateUserProfile(payload).subscribe({
-      next: (res: any) => {
-        // update local user
-        this.user = res.user ?? { ...this.user, ...payload };
-        this.isLoading = false;
+    const raw = this.profileForm.getRawValue();
+    const payload: UpdateUserRequest = {
+      full_name: raw.full_name?.trim(),
+      phone_number: raw.phone_number?.trim(),
+      gender: raw.gender || undefined,
+      date_of_birth: raw.date_of_birth || undefined,
+      nationality: raw.nationality || undefined,
+      state: raw.state || undefined,
+      local_government: raw.local_government || undefined,
+      address: raw.address?.trim() || undefined,
+      bank_verification_number: raw.bank_verification_number?.trim() || undefined,
+      national_identity_number: raw.national_identity_number?.trim() || undefined,
+      referral_code: raw.referral_code?.trim() || undefined,
+    };
+
+    if (payload.nationality !== 'Nigerian') {
+      payload.state = undefined;
+      payload.local_government = undefined;
+    }
+
+    this.isSavingProfile = true;
+    this.userService.updateUserProfile(payload).subscribe({
+      next: (res) => {
+        this.user = res.user ?? (this.user ? { ...this.user, ...payload } as User : null);
+        if (this.user) {
+          this.authService.setUser(this.user as any);
+        }
+        this.notification.success('', res.message || 'Profile updated successfully.');
+        this.isSavingProfile = false;
         this.editModalVisible = false;
+        document.body.style.overflow = '';
       },
-      error: (err: any) => {
-        console.error('Error updating profile', err);
-        alert('Failed to update profile');
-        this.isLoading = false;
-      }
+      error: (error) => {
+        console.error('Error updating profile:', error);
+        this.notification.error('', error?.error?.message || 'Failed to update profile.');
+        this.isSavingProfile = false;
+      },
     });
   }
 
+  displayValue(value: string | null | undefined): string {
+    return value?.trim() ? value : 'N/A';
+  }
 }

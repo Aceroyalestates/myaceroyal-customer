@@ -1,0 +1,128 @@
+<div
+  class="auth-shell"
+  style="background-image: url('/images/login-background.jpg')"
+>
+  <div class="auth-overlay"></div>
+  <button
+    type="button"
+    class="auth-theme-toggle"
+    [class.auth-theme-toggle--dark]="theme === 'dark'"
+    (click)="toggleTheme()"
+    [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+    [attr.title]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+  >
+    <span class="auth-theme-toggle__icon">{{ theme === 'dark' ? '☀' : '☾' }}</span>
+  </button>
+
+  <div class="auth-card">
+    <section class="auth-spotlight">
+      <div class="auth-spotlight__badge">Aceroyal Estate Portal</div>
+      <h2 class="auth-spotlight__title">Verify once, then go straight into your dashboard.</h2>
+      <p class="auth-spotlight__copy">
+        Confirm your email with the 6-digit OTP we sent. Once verified, your account is ready for property discovery and payment tracking.
+      </p>
+
+      <div class="auth-spotlight__list">
+        <article class="auth-spotlight__item">
+          <span class="auth-spotlight__item-index">01</span>
+          <div>
+            <h3>Email confirmation</h3>
+            <p>Use the OTP sent to your email to activate your new Aceroyal account.</p>
+          </div>
+        </article>
+        <article class="auth-spotlight__item">
+          <span class="auth-spotlight__item-index">02</span>
+          <div>
+            <h3>Instant access</h3>
+            <p>After verification, the app takes you directly into the main customer portal.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="auth-form-panel">
+      <div class="auth-form-panel__head">
+        <h1 class="auth-form-panel__title">Verify Your Email</h1>
+        <p class="auth-form-panel__subtitle">Enter the 6-digit OTP sent to your email address.</p>
+      </div>
+
+      @if (successMessage) {
+        <div class="verify-feedback verify-feedback--success">
+          {{ successMessage }}
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="verify-feedback verify-feedback--error">
+          {{ errorMessage }}
+        </div>
+      }
+
+      <form [formGroup]="verifyForm" (ngSubmit)="onSubmit()" class="auth-form">
+        <div class="flex flex-col gap-2">
+          <label for="verify_email" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Email</label>
+          <input
+            type="email"
+            id="verify_email"
+            formControlName="email"
+            class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+            [class.error]="hasError('email', 'required') || hasError('email', 'email')"
+            placeholder="Enter your email"
+            [disabled]="isLoading"
+          />
+          <div *ngIf="hasError('email', 'required')" class="text-primary text-xs sm:text-sm">
+            email is required
+          </div>
+          <div *ngIf="hasError('email', 'email')" class="text-primary text-xs sm:text-sm">
+            enter a valid email address
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label for="token" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">6-Digit OTP</label>
+          <input
+            type="text"
+            id="token"
+            formControlName="token"
+            inputmode="numeric"
+            maxlength="6"
+            class="otp-input border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-base sm:text-[18px] tracking-[0.35em] leading-[100%] text-[#4F4F4F] w-full border-[#EBEBEB] text-center"
+            [class.error]="hasError('token', 'required') || hasError('token', 'pattern')"
+            placeholder="123456"
+            [disabled]="isLoading"
+            (input)="onTokenInput($event)"
+          />
+          <div *ngIf="hasError('token', 'required')" class="text-primary text-xs sm:text-sm">
+            otp is required
+          </div>
+          <div *ngIf="hasError('token', 'pattern')" class="text-primary text-xs sm:text-sm">
+            enter a valid 6-digit otp
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="rounded-full bg-primary !text-white py-3 sm:py-[18px] outline-0 text-sm sm:text-base font-medium"
+          [disabled]="!verifyForm.valid || isLoading"
+        >
+          <span *ngIf="!isLoading">Verify Email</span>
+          <span *ngIf="isLoading" class="loading-text">Verifying...</span>
+        </button>
+      </form>
+
+      <div class="text-sm sm:text-base text-[#7A7A7A]">
+        <button
+          type="button"
+          class="verify-link mr-2"
+          (click)="resendCode()"
+          [disabled]="isResending || isLoading"
+        >
+          {{ isResending ? 'Resending...' : 'Resend code' }}
+        </button>
+        <span>or </span>
+        <span>Need to start over? </span>
+        <a routerLink="/auth/login" class="verify-link">Back to login</a>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, Observable } from 'rxjs';
-import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryResponse, PaymentSchedulesResponse, PurchaseFormPayload, PurchaseFormResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryFilters, PaymentHistoryResponse, PaymentSchedulesResponse, PurchaseFormPayload, PurchaseFormResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
 
 @Injectable({
   providedIn: 'root'
@@ -28,15 +28,34 @@ export class PaymentService {
       page: number = 1,
       limit: number = 10,
       sortBy: string = 'created_at',
-      sortOrder: 'ASC' | 'DESC' = 'DESC'
+      sortOrder: 'ASC' | 'DESC' = 'DESC',
+      filters?: PaymentHistoryFilters
     ): Observable<PaymentHistoryResponse> {
+      const params: any = {
+        page: page.toString(),
+        limit: limit.toString(),
+        sort_by: sortBy,
+        sort_order: sortOrder
+      };
+
+      if (filters?.status) {
+        params.status = filters.status;
+      }
+      if (filters?.method) {
+        params.method = filters.method;
+      }
+      if (filters?.purchase_id) {
+        params.purchase_id = filters.purchase_id;
+      }
+      if (filters?.from_date) {
+        params.from_date = filters.from_date;
+      }
+      if (filters?.to_date) {
+        params.to_date = filters.to_date;
+      }
+
       return this.httpService.get<PaymentHistoryResponse>('payments/me', {
-        params: {
-          page: page.toString(),
-          limit: limit.toString(),
-          sort_by: sortBy,
-          sort_order: sortOrder
-        }
+        params
       });
     }
 

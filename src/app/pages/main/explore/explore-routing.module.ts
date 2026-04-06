@@ -15,7 +15,7 @@ const routes: Routes = [
         component: ExploreComponent
       },
       {
-        path: 'view/:id',
+        path: 'view/:slug',
         component: ViewPropertyComponent
       },
       {

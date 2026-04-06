@@ -1,53 +1,38 @@
-import { IResponse, Activity } from './generic';
+import { Activity, IResponse } from './generic';
 
 export interface UsersResponse extends IResponse {
   data: User[];
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  label: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface User {
   id: string;
   full_name: string;
   email: string;
-  phone_number: string;
-  avatar: string;
-  gender: string;
-  date_of_birth: string;
-  is_verified: boolean;
+  phone_number: string | null;
+  avatar: string | null;
   role_id: number;
-  referral_code: string;
-  is_active: boolean | string;
-  google_id: string,
-  failed_login_attempts: number,
-  account_locked_at: string,
-  is_account_locked: false,
-  provider: string,
-  provider_id: string,
-  email_verified_at: string,
-  referral_code:string,
-  nationality_id: string,
-  states_id: string,
-  address: string,
-  bank_verification_number: string,
-  national_identity_number: string,
-  means_of_identification: string,
-  suspension_metadata: string,
-  suspended_by: string,
-  suspended_at: string,
-  suspension_reason: string,
-  createdAt: string;
-  updatedAt: string;
-
-  financial_transactions: {
-    total_assets: number;
-    outstanding_bills: number;
-    number_of_installments: number;
-    next_installment_payment: number;
-    next_payment_due_date: string;
-    total_purchases: number;
-    completed_payments: number;
-    pending_payments: number;
-  };
+  is_verified: boolean;
+  account_locked_at: string | null;
+  gender: string | null;
+  date_of_birth: string | null;
+  referral_code: string | null;
+  nationality: string | null;
+  state: string | null;
+  local_government: string | null;
+  address: string | null;
+  bank_verification_number: string | null;
+  national_identity_number: string | null;
   role: Role;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ActivityLogsResponse extends IResponse {
@@ -82,22 +67,30 @@ export interface TeamActivityLog {
 }
 
 export interface UserProfileResponse extends IResponse {
+  message?: string;
   user: User;
 }
 
-export interface avatarRequest {
+export interface AvatarRequest {
   avatar: string;
 }
 
 export interface UpdateUserRequest {
   full_name?: string;
   phone_number?: string;
+  avatar?: string | null;
   gender?: string;
   date_of_birth?: string;
-  avatar?: File | null;
+  nationality?: string;
+  state?: string;
+  local_government?: string;
   address?: string;
-  nationality_id?: string;
-  states_id?: string;
   bank_verification_number?: string;
   national_identity_number?: string;
+  referral_code?: string;
+}
+
+export interface ChangePasswordRequest {
+  old_password: string;
+  new_password: string;
 }

@@ -1,98 +1,181 @@
-<main class="flex flex-col w-full">
-  <!-- <div class="flex flex-col gap-12"> -->
-    <!-- <app-breadcrumb
-      [items]="[{ label: 'Property Management', url: '/property-management' }]"
-    ></app-breadcrumb> -->
-    <div class="flex gap-6">
-        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Financial Management</h1>
-    </div>
-    <div *ngIf="paymentScheduleDashboard as dashboard" class="flex gap-4 justify-between pt-6 pb-12">
-        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-            <p class="text-[#4F4F4F] text-lg">Total Amount Paid</p>
-            <p class="text-3xl">{{ dashboard.totalAmountPaid | currency:'NGN':'symbol':'1.0-0' }}</p>
-        </div>
-        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-            <p class="text-[#4F4F4F] text-lg">Total Amount Due</p>
-            <p class="text-3xl">{{ dashboard.totalAmountDue | currency:'NGN':'symbol':'1.0-0' }}</p>
-        </div>
-        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-            <p class="text-[#4F4F4F] text-lg">Remaining Balance</p>
-            <p class="text-3xl">{{ dashboard.remainingBalance | currency:'NGN':'symbol':'1.0-0' }}</p>
-        </div>
-    
+<main class="payments-page flex flex-col w-full">
+  <div class="payments-page__header flex items-center gap-4">
+    <app-icon class="cursor-pointer" name="arrow-left"></app-icon>
+    <h1 class="text-2xl font-bold !text-gray-600">Payments</h1>
   </div>
-  <div class="flex w-full">
-        <nz-tabset class="w-full">
-            <nz-tab nzTitle="Pending Payments">
-                <div class="flex w-full pt-12">
-                    <nz-table 
-                        nzSize="middle" 
-                        [nzData]="pendingPayments"
-                        [nzShowPagination]="false"
-                        nzWidthMode="full"
-                        class="!w-full">
-                        <thead>
-                        <tr>
-                            <!-- <th>Installment</th> -->
-                            <th>Property</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @for (data of pendingPayments; track data.id) {
-                            <tr>
-                                <!-- <td>1/3</td> -->
-                                <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
-                                <td>{{ data.created_at | date:'mediumDate' }}</td>
-                                <td>{{ data.amount | currency:'₦ ':'symbol':'1.0-0' }}</td>
-                                <td>
-                                    <button (click)="pay()" class="flex px-4 bg-green-600 !text-sm !text-white rounded-full cursor-pointer hover:bg-green-700 whitespace-nowrap">Pay Now</button>
 
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </nz-table>
-                </div>
-                
-            </nz-tab>
-            <nz-tab nzTitle="Payment Completed" class="w-full">
-                <div class="flex w-full pt-12">
-                    <nz-table 
-                        nzSize="middle" 
-                        [nzData]="completedPayments"
-                        [nzShowPagination]="false"
-                        class="!w-full">
-                        <thead>
-                        <tr>
-                            <!-- <th>Installment</th> -->
-                            <th>Property</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @for (data of completedPayments; track data.id) {
-                            <tr>
-                                <!-- <td>3/3</td> -->
-                                <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
-                                <td>{{ data.created_at | date:'mediumDate' }}</td>
-                                <td>{{ data.amount | currency:'₦ ':'symbol':'1.0-0' }}</td>
-                                <td>
-                                    <button (click)="downloadReceipt(data.id)" class="flex items-center px-4 bg-red-600 !text-sm !text-white rounded-full cursor-pointer hover:bg-red-700 whitespace-nowrap">
-                                        <app-icon class="text-[10px]" name="download"></app-icon> Receipt
-                                    </button>
-
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </nz-table>
-                </div>
-            </nz-tab>
-        </nz-tabset>
+  <div class="payments-summary" *ngIf="paymentSummary as summary">
+    <div class="payments-summary__card">
+      <p>Total Payments</p>
+      <h2>{{ summary.total_payments }}</h2>
     </div>
+    <div class="payments-summary__card">
+      <p>Total Amount</p>
+      <h2>{{ summary.total_amount | currency:'NGN':'symbol':'1.0-0' }}</h2>
+    </div>
+    <div class="payments-summary__card" *ngIf="summary.status_breakdown['pending'] as pendingSummary">
+      <p>Pending Amount</p>
+      <h2>{{ pendingSummary.total_amount | currency:'NGN':'symbol':'1.0-0' }}</h2>
+    </div>
+  </div>
+
+  <div class="payments-breakdown" *ngIf="paymentSummary as summary">
+    <div class="payments-breakdown__group" *ngIf="statusKeys.length > 0">
+      <p class="payments-breakdown__title">Status Breakdown</p>
+      <div class="payments-breakdown__chips">
+        @for (status of statusKeys; track status) {
+          <span class="payments-breakdown__chip">
+            {{ formatLabel(status) }}: {{ summary.status_breakdown[status].count }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <div class="payments-breakdown__group" *ngIf="methodKeys.length > 0">
+      <p class="payments-breakdown__title">Method Breakdown</p>
+      <div class="payments-breakdown__chips">
+        @for (method of methodKeys; track method) {
+          <span class="payments-breakdown__chip">
+            {{ formatLabel(method) }}: {{ summary.method_breakdown[method].count }}
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <section class="payments-filters">
+    <div class="payments-filters__grid">
+      <div class="payments-filters__field">
+        <label>Status</label>
+        <nz-select [(ngModel)]="filters.status" nzAllowClear nzPlaceHolder="All statuses">
+          @for (status of statusOptions; track status) {
+            <nz-option [nzValue]="status" [nzLabel]="formatLabel(status)"></nz-option>
+          }
+        </nz-select>
+      </div>
+
+      <div class="payments-filters__field">
+        <label>Method</label>
+        <nz-select [(ngModel)]="filters.method" nzAllowClear nzPlaceHolder="All methods">
+          @for (method of methodOptions; track method) {
+            <nz-option [nzValue]="method" [nzLabel]="formatLabel(method)"></nz-option>
+          }
+        </nz-select>
+      </div>
+
+      <div class="payments-filters__field">
+        <label>Purchase ID</label>
+        <input nz-input [(ngModel)]="filters.purchase_id" placeholder="Filter by purchase ID" />
+      </div>
+
+      <div class="payments-filters__field">
+        <label>From Date</label>
+        <input nz-input type="date" [(ngModel)]="filters.from_date" />
+      </div>
+
+      <div class="payments-filters__field">
+        <label>To Date</label>
+        <input nz-input type="date" [(ngModel)]="filters.to_date" />
+      </div>
+
+      <div class="payments-filters__field">
+        <label>Sort By</label>
+        <nz-select [(ngModel)]="filters.sort_by" nzPlaceHolder="Sort by">
+          @for (sortBy of sortByOptions; track sortBy) {
+            <nz-option [nzValue]="sortBy" [nzLabel]="formatLabel(sortBy)"></nz-option>
+          }
+        </nz-select>
+      </div>
+
+      <div class="payments-filters__field">
+        <label>Sort Order</label>
+        <nz-select [(ngModel)]="filters.sort_order" nzPlaceHolder="Sort order">
+          <nz-option nzValue="DESC" nzLabel="Descending"></nz-option>
+          <nz-option nzValue="ASC" nzLabel="Ascending"></nz-option>
+        </nz-select>
+      </div>
+    </div>
+
+    <div class="payments-filters__actions">
+      <button nz-button nzType="default" (click)="resetFilters()">Reset</button>
+      <button nz-button nzType="primary" class="!bg-primary !border-primary" (click)="applyFilters()">Apply Filters</button>
+    </div>
+  </section>
+
+  <section class="payments-table-wrap">
+    <nz-table
+      nzSize="middle"
+      [nzData]="paymentHistory"
+      [nzShowPagination]="false"
+      [nzLoading]="isLoading"
+      nzWidthMode="full"
+      class="payments-table"
+    >
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Unit Type</th>
+          <th>Payment Type</th>
+          <th>Method</th>
+          <th>Status</th>
+          <th>Amount</th>
+          <th>Balance Due</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (data of paymentHistory; track data.id) {
+          <tr>
+            <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
+            <td>{{ data.purchase.unit.type || 'N/A' }}</td>
+            <td>{{ formatLabel(data.payment_type) }}</td>
+            <td>{{ formatLabel(data.method) }}</td>
+            <td>
+              <span class="payments-status" [class]="'payments-status--' + data.status">
+                {{ formatLabel(data.status) }}
+              </span>
+            </td>
+            <td>{{ data.amount | currency:'₦ ':'symbol':'1.0-0' }}</td>
+            <td>{{ data.purchase.balance_due | currency:'₦ ':'symbol':'1.0-0' }}</td>
+            <td>{{ data.created_at | date:'mediumDate' }}</td>
+            <td>
+              <button
+                *ngIf="data.proof_url; else noProof"
+                nz-button
+                nzType="default"
+                class="payments-action"
+                (click)="openProof(data.proof_url)"
+              >
+                View Proof
+              </button>
+              <ng-template #noProof>
+                <span class="text-gray-400">N/A</span>
+              </ng-template>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+
+    <div class="payments-empty" *ngIf="!isLoading && paymentHistory.length === 0">
+      No payment history found.
+    </div>
+  </section>
+
+  <div class="payments-pagination">
+    <div class="text-gray-500 text-sm">
+      Showing {{ paymentHistory.length ? ((pageIndex - 1) * pageSize) + 1 : 0 }}
+      to {{ ((pageIndex - 1) * pageSize) + paymentHistory.length }} of {{ totalItems }} payments
+    </div>
+    <nz-pagination
+      [nzPageIndex]="pageIndex"
+      [nzPageSize]="pageSize"
+      [nzTotal]="totalItems"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[10, 20, 50]"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+    ></nz-pagination>
+  </div>
 </main>

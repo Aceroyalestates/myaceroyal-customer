@@ -5,6 +5,19 @@ export interface PropertyResponse extends IResponse {
   pagination: Pagination;
 }
 
+export interface PropertyTypesResponse extends IResponse {
+  data: PropertyType[];
+  pagination?: Pagination;
+}
+
+export interface PropertyFilters {
+  type?: number;
+  location?: string;
+  min_price?: number;
+  max_price?: number;
+  search?: string;
+}
+
 export interface Property {
   id: string;
   name: string;
@@ -15,11 +28,13 @@ export interface Property {
   address: string;
   listed_by: string;
   is_available: boolean;
-  vr_link: string;
+  vr_link: string | null;
+  map_link: string | null;
   deleted_at: string | null;
+  deleted_by: string | null;
   createdAt: string;
   updatedAt: string;
-  property_type: PropertyType;
+  property_type: PropertyTypeSummary;
   property_images: PropertyImage[];
   property_units: PropertyUnit[];
   property_features: PropertyFeature[];
@@ -34,10 +49,14 @@ export interface PropertyImage {
 
 export interface PropertyUnit {
   id: number;
-  name: number | null;
+  name: string | null;
+  unit_type_id: number;
   price: string;
-  is_available: boolean;
-  unit_type: UnitType;
+  total_units: number;
+  units_sold: number;
+  is_sold_out: boolean;
+  is_available?: boolean;
+  unit_type: UnitTypeSummary;
   property_installment_plans: PropertyInstallmentPlan[];
 }
 
@@ -73,6 +92,11 @@ export interface PropertyTypeOptions {
   name: string;
 }
 
+export interface PropertyTypeSummary {
+  name: string;
+  label?: string | null;
+}
+
 export interface PropertyType {
     id: number;
     name: string;
@@ -92,9 +116,14 @@ export interface PropertyFeatureAdmin {
 export interface UnitType {
   id: number;
   name: string;
-  type_id: string;
+  type_id: number;
   label: string | null;
   default_size: string | null;
+}
+
+export interface UnitTypeSummary {
+  name: string;
+  label?: string | null;
 }
 
 export interface PropertyCreateRequest {

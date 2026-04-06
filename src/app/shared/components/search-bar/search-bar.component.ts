@@ -21,7 +21,7 @@ export class SearchBarComponent {
   @Output() search = new EventEmitter<string>();
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
   @Input() placeholder: string = 'Search...';
-  query: string = '';
+  @Input() query: string = '';
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
