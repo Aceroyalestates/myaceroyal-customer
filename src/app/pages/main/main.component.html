@@ -134,11 +134,11 @@
       </ul>
     </div>
   </nz-sider>
-  <nz-layout>
+  <nz-layout class="main-shell">
     <!-- Make -->
-    <nz-header>
+    <nz-header class="main-header">
       <div class="app-header border-b border-gray-100">
-        <div class="flex items-center justify-between py-[30px] px-10 w-full">
+        <div class="app-header__inner flex items-center justify-between py-[30px] px-10 w-full">
           <h1 class="!text-primary !text-xl">Welcome, {{ firstName }}!</h1>
           <div class="flex items-center justify-between gap-4">
             <!-- <app-search-bar
@@ -147,6 +147,16 @@
             ></app-search-bar> -->
           </div>
           <div class="flex gap-4 items-center">
+            <button
+              type="button"
+              class="theme-toggle"
+              [class.theme-toggle--dark]="theme === 'dark'"
+              (click)="toggleTheme()"
+              [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+              [attr.title]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <span class="theme-toggle__icon">{{ theme === 'dark' ? '☀' : '☾' }}</span>
+            </button>
             <app-icon
               [name]="'bell'"
               class="text-primary p-2 bg-primary/10 rounded-full cursor-pointer"
@@ -175,7 +185,7 @@
         </div>
       </div>
     </nz-header>
-    <nz-content>
+    <nz-content class="main-content">
       <div class="inner-content">
         <router-outlet></router-outlet>
       </div>

@@ -12,6 +12,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ErrorModalService } from '../../../core/services/error-modal.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
 	selector: 'app-login',
@@ -42,16 +43,19 @@ export class LoginComponent implements OnInit {
 	signupErrorMessage = '';
 	successMessage = '';
 	verificationEmail = '';
+	theme: 'light' | 'dark' = 'light';
 
 	constructor(
 		private fb: FormBuilder,
 		private authService: AuthService,
 		private router: Router,
-		private errorModalService: ErrorModalService
+		private errorModalService: ErrorModalService,
+		private themeService: ThemeService,
 	) { }
 
 	ngOnInit(): void {
 		this.resetToLoginView();
+		this.theme = this.themeService.getTheme();
 		this.initForm();
 		this.initSignupForm();
 		this.initVerificationForm();
@@ -314,6 +318,10 @@ export class LoginComponent implements OnInit {
 
 	toggleConfirmPasswordVisibility(): void {
 		this.showConfirmPassword = !this.showConfirmPassword;
+	}
+
+	toggleTheme(): void {
+		this.theme = this.themeService.toggleTheme();
 	}
 
 	private markFormGroupTouched(): void {

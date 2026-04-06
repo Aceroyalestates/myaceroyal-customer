@@ -3,6 +3,16 @@
   style="background-image: url('/images/login-background.jpg')"
 >
   <div class="auth-overlay"></div>
+  <button
+    type="button"
+    class="auth-theme-toggle"
+    [class.auth-theme-toggle--dark]="theme === 'dark'"
+    (click)="toggleTheme()"
+    [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+    [attr.title]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+  >
+    <span class="auth-theme-toggle__icon">{{ theme === 'dark' ? '☀' : '☾' }}</span>
+  </button>
 
   <div class="login-card auth-card">
     <section class="auth-spotlight">

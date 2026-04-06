@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ErrorModalService } from 'src/app/core/services/error-modal.service';
+import { ThemeService } from 'src/app/core/services/theme.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -19,6 +20,7 @@ export class ResetPasswordComponent implements OnInit {
   successMessage = '';
   email = '';
   showPassword = false;
+  theme: 'light' | 'dark' = 'light';
 
   constructor(
     private fb: FormBuilder,
@@ -26,9 +28,11 @@ export class ResetPasswordComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private errorModalService: ErrorModalService,
+    private themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
+    this.theme = this.themeService.getTheme();
     this.initForm();
     const navigation = this.router.getCurrentNavigation();
     const stateMessage = navigation?.extras.state?.['message'];
@@ -106,5 +110,9 @@ export class ResetPasswordComponent implements OnInit {
     Object.values(this.resetPasswordForm.controls).forEach((control) => {
       control.markAsTouched();
     });
+  }
+
+  toggleTheme(): void {
+    this.theme = this.themeService.toggleTheme();
   }
 }

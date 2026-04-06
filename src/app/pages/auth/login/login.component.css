@@ -21,6 +21,38 @@
     rgba(0, 0, 0, 0.26);
 }
 
+.auth-theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  padding: 6px;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+}
+
+.auth-theme-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 15px;
+}
+
+.auth-theme-toggle--dark {
+  border-color: rgba(248, 250, 252, 0.16);
+  background: rgba(15, 23, 42, 0.72);
+}
+
 .auth-card {
   position: relative;
   z-index: 1;
@@ -33,6 +65,10 @@
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(14px);
+}
+
+:host-context(.dark) .auth-card {
+  background: rgba(15, 23, 42, 0.94);
 }
 
 .auth-spotlight {
@@ -129,6 +165,10 @@
   overflow-y: auto;
 }
 
+:host-context(.dark) .auth-form-panel {
+  background: rgba(2, 6, 23, 0.42);
+}
+
 .auth-form-panel__head {
   display: flex;
   flex-direction: column;
@@ -143,12 +183,20 @@
   font-weight: 700;
 }
 
+:host-context(.dark) .auth-form-panel__title {
+  color: #f8fafc;
+}
+
 .auth-form-panel__subtitle {
   margin: 0;
   max-width: 42ch;
   color: #6b7280;
   font-size: 14px;
   line-height: 1.65;
+}
+
+:host-context(.dark) .auth-form-panel__subtitle {
+  color: #94a3b8;
 }
 
 .auth-card-body {
@@ -165,6 +213,45 @@
 
 input.error {
   border-color: #e41c24;
+}
+
+:host-context(.dark) .auth-form-panel label,
+:host-context(.dark) .auth-form-panel .text-\[\#4F4F4F\] {
+  color: #cbd5e1 !important;
+}
+
+:host-context(.dark) .auth-form-panel input {
+  background: #111827;
+  border-color: #334155;
+  color: #f8fafc !important;
+}
+
+:host-context(.dark) .auth-form-panel input::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .auth-secondary-button {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .signup-stepper-item {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .signup-stepper-item span {
+  border-color: #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .signup-stepper-line {
+  background: #334155;
+}
+
+:host-context(.dark) .password-strength-track {
+  background: #1e293b;
 }
 
 .auth-feedback {
@@ -332,6 +419,11 @@ input.error {
 @media (max-width: 840px) {
   .auth-shell {
     padding: 16px;
+  }
+
+  .auth-theme-toggle {
+    top: 12px;
+    right: 12px;
   }
 
   .auth-card {

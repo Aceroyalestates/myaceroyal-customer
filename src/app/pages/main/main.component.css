@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 :host {
-  display: flex;
+  display: block;
+  height: 100vh;
+  overflow: hidden;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -11,37 +13,111 @@
   background-color: #FBFBFB;
 }
 
+.app-layout {
+  height: 100vh;
+  overflow: hidden;
+}
+
+:host-context(.dark) .ant-layout,
+:host-context(.dark) .app-layout,
+:host-context(.dark) .main-shell {
+  background-color: #0b1220;
+}
+
 .menu-sidebar {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 10;
-  min-height: 100vh;
+  height: 100vh;
   min-width: fit-content !important;
   background-color: white;
   border-right: #FBFBFB solid 2px !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #E41C24 #F3F4F6;
+}
+
+:host-context(.dark) .menu-sidebar {
+  background-color: #111827;
+  border-right-color: #1f2937 !important;
+}
+
+.main-shell {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex: 0 0 auto;
 }
 
 nz-header {
   padding: 0;
   width: 100%;
-  z-index: 2;
 }
 
 .app-header {
   position: relative;
-  height: fit-content;
+  min-height: fit-content;
   padding: 0;
   background: #fff;
 }
 
-nz-content {
-  margin: 24px;
-  margin-top: 56px;
+.app-header__inner {
+  width: 100%;
+}
+
+:host-context(.dark) .app-header {
+  background: #0f172a;
+  border-bottom-color: #1f2937 !important;
+}
+
+.main-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: #E41C24 #F3F4F6;
+}
+
+:host-context(.dark) .main-content {
+  background: #0b1220;
 }
 
 .inner-content {
   background: transparent;
-  height: 100%;
-  padding-top: 48px;
+  min-height: 100%;
+}
+
+.menu-sidebar::-webkit-scrollbar,
+.main-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.menu-sidebar::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 999px;
+}
+
+.menu-sidebar::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb {
+  background: #E41C24;
+  border-radius: 999px;
+  border: 2px solid #F3F4F6;
+}
+
+.menu-sidebar::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #C9171E;
 }
 
 .ant-menu-item {
@@ -63,6 +139,19 @@ nz-content {
   line-height: 100%;
   letter-spacing: 0%;
   padding: 0;
+}
+
+:host-context(.dark) .ant-menu,
+:host-context(.dark) .ant-menu-sub,
+:host-context(.dark) .ant-menu-inline {
+  background: transparent !important;
+}
+
+:host-context(.dark) .ant-menu-item a,
+:host-context(.dark) .menu-sidebar h1,
+:host-context(.dark) .menu-sidebar .ant-menu-item,
+:host-context(.dark) .menu-sidebar .ant-menu-title-content {
+  color: #cbd5e1 !important;
 }
 
 .ant-menu-item:hover a {
@@ -97,4 +186,71 @@ h6 {
   margin-bottom: .5em;
   color: inherit !important;
   font-weight: 500;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1f2937;
+  padding: 6px;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.theme-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(228, 28, 36, 0.1);
+  color: #e41c24;
+  font-size: 15px;
+}
+
+.theme-toggle:hover {
+  border-color: #f0b6b8;
+}
+
+.theme-toggle--dark {
+  background: #111827;
+  border-color: #334155;
+  color: #f8fafc;
+}
+
+.theme-toggle--dark .theme-toggle__icon {
+  background: rgba(248, 250, 252, 0.08);
+  color: #facc15;
+}
+
+:host-context(.dark) .text-small,
+:host-context(.dark) .text-normal,
+:host-context(.dark) .app-header h2,
+:host-context(.dark) .app-header p {
+  color: #cbd5e1 !important;
+}
+
+@media (max-width: 991px) {
+  .menu-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .app-header__inner {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
 }

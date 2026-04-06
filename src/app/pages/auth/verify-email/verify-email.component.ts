@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ErrorModalService } from 'src/app/core/services/error-modal.service';
+import { ThemeService } from 'src/app/core/services/theme.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -20,6 +21,7 @@ export class VerifyEmailComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   email = '';
+  theme: 'light' | 'dark' = 'light';
 
   constructor(
     private fb: FormBuilder,
@@ -27,9 +29,11 @@ export class VerifyEmailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private errorModalService: ErrorModalService,
+    private themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
+    this.theme = this.themeService.getTheme();
     this.initForm();
     const navigation = this.router.getCurrentNavigation();
     const stateMessage = navigation?.extras.state?.['message'];
@@ -172,5 +176,9 @@ export class VerifyEmailComponent implements OnInit {
     const digitsOnly = input.value.replace(/\D/g, '').slice(0, 6);
     this.verifyForm.get('token')?.setValue(digitsOnly, { emitEvent: false });
     input.value = digitsOnly;
+  }
+
+  toggleTheme(): void {
+    this.theme = this.themeService.toggleTheme();
   }
 }

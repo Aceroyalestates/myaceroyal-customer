@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ErrorModalService } from 'src/app/core/services/error-modal.service';
+import { ThemeService } from 'src/app/core/services/theme.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -19,17 +20,20 @@ export class ForgotPasswordComponent {
   forgotPasswordForm!: FormGroup;
 	isLoading = false;
 	errorMessage = '';
+  theme: 'light' | 'dark' = 'light';
 
 	constructor(
-		private fb: FormBuilder,
-		private authService: AuthService,
-		private router: Router,
-		private errorModalService: ErrorModalService,
-	) { }
+			private fb: FormBuilder,
+			private authService: AuthService,
+			private router: Router,
+			private errorModalService: ErrorModalService,
+      private themeService: ThemeService,
+		) { }
 
 	ngOnInit(): void {
-		this.initForm();
-	}
+      this.theme = this.themeService.getTheme();
+			this.initForm();
+		}
 
 	private initForm(): void {
 		this.forgotPasswordForm = this.fb.group({
@@ -97,8 +101,12 @@ export class ForgotPasswordComponent {
 		return '';
 	}
 
-  goToLogin(): void {
-    this.router.navigate(['/auth/login']);
+	  goToLogin(): void {
+	    this.router.navigate(['/auth/login']);
+	  }
+
+  toggleTheme(): void {
+    this.theme = this.themeService.toggleTheme();
   }
 
-}
+	}
