@@ -1,115 +1,441 @@
-<div class="flex flex-col items-center justify-center min-h-screen w-full bg-cover bg-center bg-no-repeat px-4 sm:px-6 md:px-8" style="background-image: url('/images/login-background.jpg')">
-  <div class="absolute inset-0 bg-black/40"></div>
-  <div class="bg-white px-4 sm:px-6 md:px-10 py-8 sm:py-16 md:py-[157px] rounded-[10px] w-full max-w-[90%] sm:max-w-[500px] md:max-w-[683px] relative z-10 my-4">
-    <div class="login-modal">
-      <div class="w-full flex flex-col items-center justify-center gap-y-3">
-        <h1 class="text-2xl sm:text-3xl md:text-[32px] leading-tight md:leading-[40px] font-medium text-center">User Login</h1>
-        <p class="text-sm sm:text-medium text-[#7A7A7A] text-center">Enter login details below</p>
+<div
+  class="auth-shell"
+  style="background-image: url('/images/login-background.jpg')"
+>
+  <div class="auth-overlay"></div>
+
+  <div class="login-card auth-card">
+    <section class="auth-spotlight">
+      <div class="auth-spotlight__badge">Welcome to Aceroyal Estate</div>
+      <h2 class="auth-spotlight__title">Property access, payments, and account updates in one place.</h2>
+      <p class="auth-spotlight__copy">
+        Sign in to browse verified properties, track payments, and stay current with key updates.
+      </p>
+
+      <div class="auth-spotlight__list">
+        <article class="auth-spotlight__item">
+          <span class="auth-spotlight__item-index">01</span>
+          <div>
+            <h3>Explore listings</h3>
+            <p>View available properties with verified details and pricing.</p>
+          </div>
+        </article>
+
+        <article class="auth-spotlight__item">
+          <span class="auth-spotlight__item-index">02</span>
+          <div>
+            <h3>Track your account</h3>
+            <p>Follow payments and keep up with important updates from the portal.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="login-modal auth-form-panel">
+      <div class="auth-form-panel__head">
+        <h1 class="auth-form-panel__title">
+          {{ authMode === 'login' ? 'User Login' : 'Create Account' }}
+        </h1>
+        <p class="auth-form-panel__subtitle">
+          {{
+            authMode === 'login'
+              ? 'Enter your account details to continue.'
+              : 'Create your account in a few steps.'
+          }}
+        </p>
       </div>
 
-      <div *ngIf="errorMessage" class="global-text-primary mt-4">
-        {{ errorMessage }}
-      </div>
-
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4 sm:gap-6 md:gap-8 mt-6">
-        <div class="flex flex-col gap-2">
-          <label for="email" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Username</label>
-          <input
-            type="email"
-            id="email"
-            formControlName="email"
-            class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[20px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
-            [class.error]="
-              hasError('email', 'required') ||
-              hasError('email', 'minlength')
-            "
-            placeholder="Enter your email"
-            [disabled]="isLoading"
-          />
-          <div *ngIf="hasError('email', 'required')" class="text-primary text-xs sm:text-sm">
-            email is required
+      <div class="auth-card-body">
+        @if (successMessage) {
+          <div class="auth-feedback auth-feedback--success">
+            {{ successMessage }}
           </div>
-          <div *ngIf="hasError('email', 'minlength')" class="text-primary text-xs sm:text-sm">
-            email must be at least 3 characters
-          </div>
-        </div>
+        }
 
-        <div class="flex flex-col gap-2">
-          <label for="password" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Password</label>
-          <div class="relative">
-            <input
-              [type]="showPassword ? 'text' : 'password'"
-              id="password"
-              formControlName="password"
-              class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[20px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
-              [class.error]="
-                hasError('password', 'required') ||
-                hasError('password', 'minlength')
-              "
-              placeholder="Enter your password"
-              [disabled]="isLoading"
-            />
+        @if (authMode === 'login' && errorMessage) {
+          <div class="auth-feedback auth-feedback--error">
+            {{ errorMessage }}
+          </div>
+        }
+
+        @if (authMode === 'login') {
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
+            <div class="flex flex-col gap-2">
+              <label for="email" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Email</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[20px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                [class.error]="
+                  hasError('email', 'required') ||
+                  hasError('email', 'minlength')
+                "
+                placeholder="Enter your email"
+                [disabled]="isLoading"
+              />
+              <div *ngIf="hasError('email', 'required')" class="text-primary text-xs sm:text-sm">
+                email is required
+              </div>
+              <div *ngIf="hasError('email', 'minlength')" class="text-primary text-xs sm:text-sm">
+                email must be at least 3 characters
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="password" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Password</label>
+              <div class="relative">
+                <input
+                  [type]="showPassword ? 'text' : 'password'"
+                  id="password"
+                  formControlName="password"
+                  class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[20px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                  [class.error]="
+                    hasError('password', 'required') ||
+                    hasError('password', 'minlength')
+                  "
+                  placeholder="Enter your password"
+                  [disabled]="isLoading"
+                />
+                <button
+                  type="button"
+                  class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
+                  (click)="togglePasswordVisibility()"
+                  [disabled]="isLoading"
+                  [attr.aria-label]="
+                    showPassword ? 'Hide password' : 'Show password'
+                  "
+                >
+                  <svg
+                    *ngIf="!showPassword"
+                    class="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg
+                    *ngIf="showPassword"
+                    class="w-4 h-4 sm:w-5 sm:h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                    ></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <div *ngIf="hasError('password', 'required')" class="text-primary text-xs sm:text-sm">
+                Password is required
+              </div>
+              <div *ngIf="hasError('password', 'minlength')" class="text-primary text-xs sm:text-sm">
+                Password must be at least 6 characters
+              </div>
+            </div>
+
+            <div class="flex w-full justify-end">
+              <a routerLink="/auth/forgot-password" class="!text-primary text-sm sm:text-base">Forgot Password?</a>
+            </div>
+
             <button
-              type="button"
-              class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
-              (click)="togglePasswordVisibility()"
-              [disabled]="isLoading"
-              [attr.aria-label]="
-                showPassword ? 'Hide password' : 'Show password'
-              "
+              type="submit"
+              class="rounded-full bg-primary !text-white py-3 sm:py-[20px] outline-0 text-sm sm:text-base font-medium"
+              [disabled]="!loginForm.valid || isLoading"
+              [class.loading]="isLoading"
             >
-              <svg
-                *ngIf="!showPassword"
-                class="w-4 h-4 sm:w-5 sm:h-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              <svg
-                *ngIf="showPassword"
-                class="w-4 h-4 sm:w-5 sm:h-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-                ></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-              </svg>
+              <span *ngIf="!isLoading">Login</span>
+              <span *ngIf="isLoading" class="loading-text">Logging in...</span>
             </button>
+          </form>
+        } @else {
+          <div class="signup-stepper">
+            <div class="signup-stepper-item" [class.signup-stepper-item--active]="signupStep === 1" [class.signup-stepper-item--complete]="signupStep > 1">
+              <span>1</span>
+              <p>Details</p>
+            </div>
+            <div class="signup-stepper-line" [class.signup-stepper-line--active]="signupStep > 1"></div>
+            <div class="signup-stepper-item" [class.signup-stepper-item--active]="signupStep === 2" [class.signup-stepper-item--complete]="signupStep > 2">
+              <span>2</span>
+              <p>Password</p>
+            </div>
+            <div class="signup-stepper-line" [class.signup-stepper-line--active]="signupStep > 2"></div>
+            <div class="signup-stepper-item" [class.signup-stepper-item--active]="signupStep === 3">
+              <span>3</span>
+              <p>Verify</p>
+            </div>
           </div>
-          <div *ngIf="hasError('password', 'required')" class="text-primary text-xs sm:text-sm">
-            Password is required
-          </div>
-          <div *ngIf="hasError('password', 'minlength')" class="text-primary text-xs sm:text-sm">
-            Password must be at least 6 characters
-          </div>
-        </div>
 
-        <div class="flex w-full justify-end">
-           <a routerLink="/auth/forgot-password" class="!text-primary text-sm sm:text-base">Forgot Password?</a>
-        </div>
+          @if (signupErrorMessage) {
+            <div class="auth-feedback auth-feedback--error">
+              {{ signupErrorMessage }}
+            </div>
+          }
 
-        <button
-          type="submit"
-          class="rounded-full bg-primary !text-white py-3 sm:py-[20px] outline-0 text-sm sm:text-base font-medium"
-          [disabled]="!loginForm.valid || isLoading"
-          [class.loading]="isLoading"
-        >
-          <span *ngIf="!isLoading">Login</span>
-          <span *ngIf="isLoading" class="loading-text">Logging in...</span>
-        </button>
-      </form>
-    </div>
+          @if (signupStep === 1) {
+            <form [formGroup]="signupForm" class="auth-form">
+              <div class="flex flex-col gap-2">
+                <label for="full_name" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Full Name</label>
+                <input
+                  type="text"
+                  id="full_name"
+                  formControlName="full_name"
+                  class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                  [class.error]="
+                    hasSignupError('full_name', 'required') ||
+                    hasSignupError('full_name', 'pattern') ||
+                    hasSignupError('full_name', 'minlength')
+                  "
+                  placeholder="Enter your full name"
+                />
+                <div *ngIf="hasSignupError('full_name', 'required')" class="text-primary text-xs sm:text-sm">
+                  full name is required
+                </div>
+                <div *ngIf="hasSignupError('full_name', 'pattern')" class="text-primary text-xs sm:text-sm">
+                  full name can only contain letters, spaces and hyphens
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="signup_email" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Email</label>
+                <input
+                  type="email"
+                  id="signup_email"
+                  formControlName="email"
+                  class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                  [class.error]="
+                    hasSignupError('email', 'required') ||
+                    hasSignupError('email', 'email')
+                  "
+                  placeholder="Enter your email"
+                />
+                <div *ngIf="hasSignupError('email', 'required')" class="text-primary text-xs sm:text-sm">
+                  email is required
+                </div>
+                <div *ngIf="hasSignupError('email', 'email')" class="text-primary text-xs sm:text-sm">
+                  enter a valid email address
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="phone_number" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phone_number"
+                  formControlName="phone_number"
+                  class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                  [class.error]="
+                    hasSignupError('phone_number', 'required') ||
+                    hasSignupError('phone_number', 'pattern')
+                  "
+                  placeholder="+2348012345678"
+                />
+                <div *ngIf="hasSignupError('phone_number', 'required')" class="text-primary text-xs sm:text-sm">
+                  phone number is required
+                </div>
+                <div *ngIf="hasSignupError('phone_number', 'pattern')" class="text-primary text-xs sm:text-sm">
+                  enter a valid phone number
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="rounded-full bg-primary !text-white py-3 sm:py-[18px] outline-0 text-sm sm:text-base font-medium"
+                (click)="nextSignupStep()"
+              >
+                Next
+              </button>
+            </form>
+          }
+
+          @if (signupStep === 2) {
+            <form [formGroup]="signupForm" (ngSubmit)="onSignupSubmit()" class="auth-form">
+              <div class="flex flex-col gap-2">
+                <label for="signup_password" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Password</label>
+                <div class="relative">
+                  <input
+                    [type]="showSignupPassword ? 'text' : 'password'"
+                    id="signup_password"
+                    formControlName="password"
+                    class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                    [class.error]="
+                      hasSignupError('password', 'required') ||
+                      hasSignupError('password', 'minlength')
+                    "
+                    placeholder="Create a password"
+                    [disabled]="isSignupLoading"
+                  />
+                  <button
+                    type="button"
+                    class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
+                    (click)="toggleSignupPasswordVisibility()"
+                    [disabled]="isSignupLoading"
+                  >
+                    <span class="text-xs sm:text-sm text-[#7A7A7A]">
+                      {{ showSignupPassword ? 'Hide' : 'Show' }}
+                    </span>
+                  </button>
+                </div>
+                <div class="password-strength">
+                  <div class="password-strength-track">
+                    <div
+                      class="password-strength-fill"
+                      [class]="passwordStrengthClass"
+                      [style.width]="passwordStrengthWidth"
+                    ></div>
+                  </div>
+                  <p class="password-strength-label">
+                    Password strength: <span>{{ passwordStrength.label }}</span>
+                  </p>
+                </div>
+                <div *ngIf="hasSignupError('password', 'required')" class="text-primary text-xs sm:text-sm">
+                  password is required
+                </div>
+                <div *ngIf="hasSignupError('password', 'minlength')" class="text-primary text-xs sm:text-sm">
+                  password must be at least 8 characters
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="confirm_password" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">Confirm Password</label>
+                <div class="relative">
+                  <input
+                    [type]="showConfirmPassword ? 'text' : 'password'"
+                    id="confirm_password"
+                    formControlName="confirm_password"
+                    class="border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-sm sm:text-[16px] leading-[100%] text-[#7A7A7A] w-full border-[#EBEBEB]"
+                    [class.error]="
+                      hasSignupError('confirm_password', 'required') ||
+                      hasPasswordMismatch()
+                    "
+                    placeholder="Confirm your password"
+                    [disabled]="isSignupLoading"
+                  />
+                  <button
+                    type="button"
+                    class="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-10 cursor-pointer"
+                    (click)="toggleConfirmPasswordVisibility()"
+                    [disabled]="isSignupLoading"
+                  >
+                    <span class="text-xs sm:text-sm text-[#7A7A7A]">
+                      {{ showConfirmPassword ? 'Hide' : 'Show' }}
+                    </span>
+                  </button>
+                </div>
+                <div *ngIf="hasSignupError('confirm_password', 'required')" class="text-primary text-xs sm:text-sm">
+                  confirm password is required
+                </div>
+                <div *ngIf="hasPasswordMismatch()" class="text-primary text-xs sm:text-sm">
+                  passwords do not match
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  class="auth-secondary-button rounded-full py-3 sm:py-[18px] outline-0 text-sm sm:text-base font-medium"
+                  (click)="previousSignupStep()"
+                >
+                  Back
+                </button>
+                <button
+                  type="submit"
+                  class="rounded-full bg-primary !text-white py-3 sm:py-[18px] outline-0 text-sm sm:text-base font-medium flex-1"
+                  [disabled]="!signupForm.valid || isSignupLoading"
+                >
+                  <span *ngIf="!isSignupLoading">Create Account</span>
+                  <span *ngIf="isSignupLoading" class="loading-text">Creating account...</span>
+                </button>
+              </div>
+            </form>
+          }
+
+          @if (signupStep === 3) {
+            <form [formGroup]="verificationForm" (ngSubmit)="onVerifySignupOtp()" class="auth-form">
+              <div class="rounded-2xl bg-[#F8F8F8] px-4 py-3 text-sm text-[#4F4F4F]">
+                OTP sent to <span class="font-semibold">{{ verificationEmail }}</span>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <label for="signup_token" class="text-sm sm:text-medium text-[#4F4F4F] leading-[100%] font-medium">6-Digit OTP</label>
+                <input
+                  type="text"
+                  id="signup_token"
+                  formControlName="token"
+                  inputmode="numeric"
+                  maxlength="6"
+                  class="otp-input border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-[18px] text-base sm:text-[18px] tracking-[0.35em] leading-[100%] text-[#4F4F4F] w-full border-[#EBEBEB] text-center"
+                  [class.error]="
+                    hasVerificationError('required') ||
+                    hasVerificationError('pattern')
+                  "
+                  placeholder="123456"
+                  [disabled]="isVerificationLoading"
+                  (input)="onVerificationTokenInput($event)"
+                />
+                <div *ngIf="hasVerificationError('required')" class="text-primary text-xs sm:text-sm">
+                  otp is required
+                </div>
+                <div *ngIf="hasVerificationError('pattern')" class="text-primary text-xs sm:text-sm">
+                  enter a valid 6-digit otp
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  class="auth-secondary-button rounded-full py-3 sm:py-[18px] outline-0 text-sm sm:text-base font-medium"
+                  (click)="restartSignupFlow()"
+                  [disabled]="isVerificationLoading"
+                >
+                  Start Over
+                </button>
+                <button
+                  type="submit"
+                  class="rounded-full bg-primary !text-white py-3 sm:py-[18px] outline-0 text-sm sm:text-base font-medium flex-1"
+                  [disabled]="!verificationForm.valid || isVerificationLoading"
+                >
+                  <span *ngIf="!isVerificationLoading">Verify Account</span>
+                  <span *ngIf="isVerificationLoading" class="loading-text">Verifying...</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                class="auth-switch-button text-left"
+                (click)="resendSignupVerification()"
+                [disabled]="isResendingVerification || isVerificationLoading"
+              >
+                {{ isResendingVerification ? 'Resending code...' : 'Resend code' }}
+              </button>
+            </form>
+          }
+        }
+
+        <div class="mt-4 text-center text-sm sm:text-base text-[#7A7A7A]">
+          @if (authMode === 'login') {
+            <span>Don't have an account? </span>
+            <button type="button" class="auth-switch-button" (click)="switchAuthMode('signup')">
+              Sign up
+            </button>
+          } @else {
+            <span>Already have an account? </span>
+            <button type="button" class="auth-switch-button" (click)="switchAuthMode('login')">
+              Login
+            </button>
+          }
+        </div>
+      </div>
+    </section>
   </div>
 </div>

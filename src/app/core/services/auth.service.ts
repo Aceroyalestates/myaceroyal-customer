@@ -9,6 +9,13 @@ export interface ILoginCredentials {
   password: string;
 }
 
+export interface IRegisterPayload {
+  full_name: string;
+  email: string;
+  password: string;
+  phone_number: string;
+}
+
 export interface IUser {
   id: string;
   full_name: string;
@@ -45,6 +52,34 @@ export interface IRefreshTokenResponse {
 
 export interface IforgotPasswordPayload {
   email: string;
+}
+
+export interface IRegisterResponse {
+  message: string;
+}
+
+export interface IVerifyEmailPayload {
+  email: string;
+  token: string;
+}
+
+export interface IVerifyEmailResponse {
+  message: string;
+}
+
+export interface IResendVerificationPayload {
+  email: string;
+}
+
+export interface IResetPasswordPayload {
+  email: string;
+  token: string;
+  password: string;
+}
+
+export interface IMessageResponse {
+  message: string;
+  success?: boolean;
 }
 
 @Injectable({
@@ -110,12 +145,28 @@ export class AuthService {
       .post<ILoginResponse>('auth/login', credentials)
       .pipe(
         tap((response) => {
-          if (response.success && response.token) {
+          if (response.token && response.user) {
             this.setAuthData(response.token, response.user, response.refresh_token);
           }
         }),
         map((response) => response)
       );
+  }
+
+  register(payload: IRegisterPayload): Observable<IRegisterResponse> {
+    return this.httpService.post<IRegisterResponse>('auth/register', payload);
+  }
+
+  verifyEmail(payload: IVerifyEmailPayload): Observable<IVerifyEmailResponse> {
+    return this.httpService.post<IVerifyEmailResponse>('auth/verify-email', payload);
+  }
+
+  resendVerification(payload: IResendVerificationPayload): Observable<IMessageResponse> {
+    return this.httpService.post<IMessageResponse>('auth/resend-verification', payload);
+  }
+
+  resetPassword(payload: IResetPasswordPayload): Observable<IMessageResponse> {
+    return this.httpService.post<IMessageResponse>('auth/reset-password', payload);
   }
 
   /**
@@ -179,15 +230,28 @@ export class AuthService {
    * Logout user and clear all authentication data
    */
   logout(): void {
-    // Clear all stored authentication data
+    const hasToken = !!this.tokenService.getToken();
+
+    if (hasToken) {
+      this.httpService
+        .post<IMessageResponse>('auth/logout', {}, {
+          skipLoading: true,
+          skipErrorHandling: true,
+        })
+        .subscribe({
+          next: () => {},
+          error: () => {},
+        });
+    }
+
+    this.clearAuthState();
+  }
+
+  private clearAuthState(): void {
     this.tokenService.clearAuthData();
-    
-    // Reset observables
     this.currentUserSubject.next(null);
     this.isAuthenticatedSubject.next(false);
-
-    // Navigate to login page
-    this.router.navigate(['/auth/login'], { 
+    this.router.navigate(['/auth/login'], {
       queryParams: { returnUrl: this.router.url }
     });
   }
@@ -226,7 +290,7 @@ export class AuthService {
     return this.tokenService.isTokenExpiringSoon();
   }
 
-  forgotPassword(payload: IforgotPasswordPayload): Observable<any> {
-    return this.httpService.post<any>('auth/forgot-password', payload);
+  forgotPassword(payload: IforgotPasswordPayload): Observable<IMessageResponse> {
+    return this.httpService.post<IMessageResponse>('auth/forgot-password', payload);
   }
 }

@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { ErrorModalService } from 'src/app/core/services/error-modal.service';
 
@@ -26,7 +25,6 @@ export class ForgotPasswordComponent {
 		private authService: AuthService,
 		private router: Router,
 		private errorModalService: ErrorModalService,
-    private message: NzMessageService
 	) { }
 
 	ngOnInit(): void {
@@ -51,18 +49,20 @@ export class ForgotPasswordComponent {
 			this.authService.forgotPassword(credentials).subscribe({
 				next: (response) => {
 					this.isLoading = false;
-					console.log("This is the response: ", response);
-						if (response.success) {
-            // this.router.navigate(['/auth/login']);
-            this.message.success(response.message || 'Password reset link sent to your email.');
-          }
+					this.router.navigate(['/auth/reset-password'], {
+						queryParams: { email: credentials.email },
+						state: {
+							message:
+								response.message ||
+								'Password reset token sent. Enter the 6-digit token to continue.',
+						},
+					});
 				},
 				error: (error) => {
 					this.isLoading = false;
 					this.errorModalService.showNetworkError();
 					this.errorMessage = 'Request failed. Please try again.';
 					console.error('Forgot password error:', error);
-          this.message.error(error?.originalError?.error?.message || 'An error occurred. Please try again.');
 				},
 			});
 		} else {
