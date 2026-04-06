@@ -687,8 +687,12 @@ export class ViewPropertyComponent {
         this.notificationService.info('Payment in review', 'Offline payment submitted. Awaiting verification.');
         // Close all modals and reset state as needed
         this.handleCancel();
-        // navigate to subscription page
-        this.router.navigateByUrl('main/subscription');
+        const purchaseId = res?.data?.purchase_id;
+        if (purchaseId) {
+          this.router.navigate(['/main/subscription', purchaseId]);
+        } else {
+          this.notificationService.error('Error', 'Purchase created, but no purchase ID was returned for the form route.');
+        }
       },
       error: (err) => {
         this.isLoading = false;

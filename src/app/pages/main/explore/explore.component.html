@@ -138,19 +138,24 @@
           />
         </div>
         <div class="flex flex-col gap-24 p-4 z-10 w-full">
-          <div class="flex items-center gap-4">
-            <span
-              class="flex items-center !text-small text-[10px] text-white gap-1 px-2 py-1 border border-white rounded-full"
-            >
-              <app-icon name="airdrop" [size]="16"></app-icon>
-              <p>{{ property.property_type.name || "Smart Home" }}</p>
-            </span>
-            <span
-              class="flex items-center !text-small text-[10px] text-white gap-1 px-2 py-1 border border-white rounded-full"
-            >
-              <app-icon name="driving" [size]="16"></app-icon>
-              <p>Good road network</p>
-            </span>
+          <div class="flex items-center gap-4 flex-wrap">
+            @if (property.property_features && property.property_features.length > 0) {
+              @for (feature of property.property_features.slice(0, 2); track feature.feature_id) {
+                <span
+                  class="flex items-center !text-small text-[10px] text-white gap-1 px-2 py-1 border border-white rounded-full"
+                >
+                  <app-icon name="airdrop" [size]="16"></app-icon>
+                  <p>{{ feature.feature.name }}</p>
+                </span>
+              }
+            } @else {
+              <span
+                class="flex items-center !text-small text-[10px] text-white gap-1 px-2 py-1 border border-white rounded-full"
+              >
+                <app-icon name="airdrop" [size]="16"></app-icon>
+                <p>{{ property.property_type.name || 'Property' }}</p>
+              </span>
+            }
           </div>
           <div class="bg-background p-4 min-w-full rounded-ss-lg rounded-se-lg">
             <div class="flex items-center justify-between mb-8">
@@ -193,9 +198,9 @@
               <span
                 class="flex py-1 px-3 gap-[2px] text-primary text-normal text-[8px] bg-primary/10 rounded-full"
               >
-                <h3 class="!text-primary">Unit Type:</h3>
+                <h3 class="!text-primary">Property Type:</h3>
                 <p class="font-medium">
-                    {{ property.property_units && property.property_units.length > 0 && property.property_units[0].unit_type.name ? property.property_units[0].unit_type.name : 'N/A' }}
+                    {{ property.property_type.name || 'N/A' }}
                 </p>
               </span>
             </div>
