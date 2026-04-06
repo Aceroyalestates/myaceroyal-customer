@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, Observable } from 'rxjs';
 import {
-    Property,
-    PropertyResponse,
-    Appointment,
+	    Property,
+	    PropertyResponse,
+      PropertyFilters,
+      PropertyTypesResponse,
+	    Appointment,
     AppointmentCreateRequest,
     AppointmentResponse,
     AppointmentsResponse,
@@ -23,13 +25,33 @@ export class PropertiesService {
     getProperties(
         page: number = 1,
         limit: number = PAGE_SIZE,
-        filters?: any
+        filters: PropertyFilters = {}
     ): Observable<PropertyResponse> {
-        const params = {
+        const params: Record<string, string> = {
             page: page.toString(),
             limit: limit.toString(),
-            ...filters,
         };
+
+        if (typeof filters.type === 'number') {
+            params['type'] = filters.type.toString();
+        }
+
+        if (filters.location?.trim()) {
+            params['location'] = filters.location.trim();
+        }
+
+        if (typeof filters.min_price === 'number') {
+            params['min_price'] = filters.min_price.toString();
+        }
+
+        if (typeof filters.max_price === 'number') {
+            params['max_price'] = filters.max_price.toString();
+        }
+
+        if (filters.search?.trim()) {
+            params['search'] = filters.search.trim();
+        }
+
         return this.httpService.get<PropertyResponse>('properties', { params });
     }
 
@@ -37,6 +59,25 @@ export class PropertiesService {
         return this.httpService
             .get<{ data: Property }>(`properties/${slug}`)
             .pipe(map((response) => response.data));
+    }
+
+    getPropertyTypes(
+        page: number = 1,
+        limit: number = 100,
+        search: string = '',
+        includeDeleted: boolean = false
+    ): Observable<PropertyTypesResponse> {
+        const params: Record<string, string> = {
+            page: page.toString(),
+            limit: limit.toString(),
+            includeDeleted: includeDeleted.toString(),
+        };
+
+        if (search.trim()) {
+            params['search'] = search.trim();
+        }
+
+        return this.httpService.get<PropertyTypesResponse>('property-types', { params });
     }
 
     getPropertyById(id: string): Observable<Property> {

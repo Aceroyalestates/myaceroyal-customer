@@ -1,5 +1,5 @@
-<div class="flex flex-col p-8 gap-12">
-    <div class="flex pl-6 w-full items-center bg-primary rounded-lg border border-red-500 justify-between">
+<div class="explore-shell flex flex-col p-8 gap-8">
+    <div class="explore-hero flex pl-6 w-full items-center bg-primary rounded-lg border border-red-500 justify-between">
         <div class="flex py-8 flex-col gap-2">
             <h1 class="text-3xl !font-semibold !text-white">Premium Properties at Your Fingertips</h1>
             <p class="text-white text-sm ml-4">Browse curated listings, compare with ease, and make confident property decisions.</p>
@@ -10,17 +10,107 @@
         </div>
     </div>
 
-    <div class="flex flex-col">
-        <div class="flex flex-col md:flex-row items-center justify-between w-full space-y-4 md:space-y-0 mb-6">
+    <div class="explore-content flex flex-col">
+        <div class="explore-section-head flex flex-col md:flex-row items-center justify-between w-full space-y-4 md:space-y-0 mb-6">
            
-            <h1 class="!text-gray-500 text-lg font-semibold cursor-pointer pb-6">All Properties</h1>
+            <h1 class="explore-section-title !text-gray-500 text-lg font-semibold cursor-pointer pb-6">All Properties</h1>
 
-            <app-search-bar placeholder="Search Property" />
+            <div class="explore-toolbar">
+              <div class="explore-search w-full md:max-w-[360px]">
+                <app-search-bar
+                  placeholder="Search Property"
+                  [query]="searchQuery"
+                  (search)="onSearch($event)"
+                />
+              </div>
+              <button
+                type="button"
+                class="explore-filter-toggle"
+                [class.explore-filter-toggle--active]="showFilters"
+                (click)="toggleFilters()"
+                [attr.aria-expanded]="showFilters"
+                aria-controls="explore-filters"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 6h16"></path>
+                  <path d="M7 12h10"></path>
+                  <path d="M10 18h4"></path>
+                </svg>
+                <span>Filters</span>
+              </button>
+            </div>
         </div>
 
-        <div
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8"
-    >
+        @if (showFilters) {
+        <div id="explore-filters" class="explore-filters mb-8">
+          <div class="explore-filters__grid">
+            <div class="explore-filter-field">
+              <label for="property-type">Property Type</label>
+              <select
+                id="property-type"
+                [(ngModel)]="selectedTypeId"
+                [disabled]="propertyTypesLoading"
+              >
+                <option [ngValue]="null">All property types</option>
+                @for (type of propertyTypes; track type.id) {
+                  <option [ngValue]="type.id">{{ type.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="explore-filter-field">
+              <label for="property-location">Location</label>
+              <input
+                id="property-location"
+                type="text"
+                [(ngModel)]="locationQuery"
+                placeholder="Filter by location"
+              />
+            </div>
+
+            <div class="explore-filter-field">
+              <label for="min-price">Minimum Price</label>
+              <input
+                id="min-price"
+                type="number"
+                min="0"
+                [(ngModel)]="minPriceQuery"
+                placeholder="e.g. 1000000"
+              />
+            </div>
+
+            <div class="explore-filter-field">
+              <label for="max-price">Maximum Price</label>
+              <input
+                id="max-price"
+                type="number"
+                min="0"
+                [(ngModel)]="maxPriceQuery"
+                placeholder="e.g. 5000000"
+              />
+            </div>
+          </div>
+
+          <div class="explore-filters__actions">
+            <button
+              type="button"
+              class="explore-filters__button explore-filters__button--ghost"
+              (click)="resetFilters()"
+            >
+              Reset
+            </button>
+            <button
+              type="button"
+              class="explore-filters__button explore-filters__button--primary"
+              (click)="applyFilters()"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+        }
+
+        <div class="explore-grid">
       @if (loading) { @for (item of emptyArray; track $index) {
       <div class="h-fit flex relative rounded-lg w-full animate-pulse">
         <div class="bg-gray-200 w-full h-64 rounded-lg"></div>

@@ -5,6 +5,19 @@ export interface PropertyResponse extends IResponse {
   pagination: Pagination;
 }
 
+export interface PropertyTypesResponse extends IResponse {
+  data: PropertyType[];
+  pagination?: Pagination;
+}
+
+export interface PropertyFilters {
+  type?: number;
+  location?: string;
+  min_price?: number;
+  max_price?: number;
+  search?: string;
+}
+
 export interface Property {
   id: string;
   name: string;
