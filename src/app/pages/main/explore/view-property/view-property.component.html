@@ -299,17 +299,23 @@
   </div>
 
   <!-- Purchase Modal -->
-  <nz-modal
-    [(nzVisible)]="isUnitModalVisible"
-    nzTitle="Make Payment"
-    (nzOnCancel)="handleCancel()"
-    (nzOnOk)="handleUnitOk()"
-    [nzOkLoading]="isLoading"
-    [nzWidth]="720"
-    [nzBodyStyle]="{ 'max-height': '72vh', 'overflow-y': 'auto', 'padding': '0 24px 16px' }"
-  >
-    <div *nzModalContent>
-      <div class="purchase-modal">
+  <div class="purchase-modal-shell" *ngIf="isUnitModalVisible" (click)="handleCancel()">
+    <div class="purchase-modal-shell__dialog" (click)="$event.stopPropagation()">
+      <div class="purchase-modal-shell__header">
+        <h2>Make Payment</h2>
+        <button
+          type="button"
+          class="purchase-modal-shell__close"
+          (click)="handleCancel()"
+          [disabled]="isLoading"
+          aria-label="Close make payment modal"
+        >
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+        </button>
+      </div>
+
+      <div class="purchase-modal-shell__body">
+        <div class="purchase-modal">
         <div class="purchase-modal__hero">
           <div>
             <p class="purchase-modal__eyebrow">Purchase Setup</p>
@@ -359,19 +365,19 @@
               <p class="purchase-modal__helper">
                 Select how many {{ quantityLabel.toLowerCase() }} you want to reserve in this purchase.
               </p>
-              <nz-form-control>
-                <nz-select
+              <div class="purchase-modal__select-wrap">
+                <select
                   id="unitNumber"
+                  class="purchase-modal__select"
                   [(ngModel)]="selectedUnitNumber"
                   (ngModelChange)="onPurchaseContextChange()"
-                  nzPlaceHolder="Select quantity"
-                  class="purchase-modal__control"
                 >
+                  <option [ngValue]="null" disabled>Select quantity</option>
                   @for (number of availableUnitNumber; track number) {
-                    <nz-option [nzValue]="number" [nzLabel]="number"></nz-option>
+                    <option [ngValue]="number">{{ number }}</option>
                   }
-                </nz-select>
-              </nz-form-control>
+                </select>
+              </div>
             </div>
 
             <div class="purchase-modal__section" *ngIf="hasInstallmentPlans">
@@ -379,21 +385,26 @@
               <p class="purchase-modal__helper">
                 Pick one payment option for this purchase.
               </p>
-              <nz-radio-group [(ngModel)]="selectedPlan" (ngModelChange)="onPurchaseContextChange()" class="purchase-modal__choices">
-                <label nz-radio [nzValue]="outrightPlanValue" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPlan === outrightPlanValue">
+              <div class="purchase-modal__choices">
+                <button
+                  type="button"
+                  class="purchase-modal__choice"
+                  [class.purchase-modal__choice--selected]="selectedPlan === outrightPlanValue"
+                  (click)="selectPurchasePlan(outrightPlanValue)"
+                >
                   Outright Payment
-                </label>
+                </button>
                 @for (plan of selectedUnit?.property_installment_plans; track plan.plan_id) {
-                  <label
-                    nz-radio
-                    [nzValue]="'' + plan.plan_id"
+                  <button
+                    type="button"
                     class="purchase-modal__choice"
                     [class.purchase-modal__choice--selected]="selectedPlan === '' + plan.plan_id"
+                    (click)="selectPurchasePlan('' + plan.plan_id)"
                   >
                     {{ plan.property_plan.title }}
-                  </label>
+                  </button>
                 }
-              </nz-radio-group>
+              </div>
             </div>
           </div>
         }
@@ -431,17 +442,15 @@
             <p class="purchase-modal__helper">
               You can pay above the initial payment, but not below it.
             </p>
-            <nz-form-control>
-              <input
-                nz-input
-                id="enteredAmount"
-                type="text"
-                [(ngModel)]="enteredAmount"
-                [placeholder]="'Minimum: ₦ ' + minimumInstallmentPayment.toLocaleString()"
-                [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', precision: 0, align: 'left' }"
-                class="purchase-modal__input"
-              />
-            </nz-form-control>
+            <input
+              nz-input
+              id="enteredAmount"
+              type="text"
+              [(ngModel)]="enteredAmount"
+              [placeholder]="'Minimum: ₦ ' + minimumInstallmentPayment.toLocaleString()"
+              [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', precision: 0, align: 'left' }"
+              class="purchase-modal__input"
+            />
           </div>
         </div>
 
@@ -454,17 +463,15 @@
               <p class="purchase-modal__helper">
                 Add the realtor code if someone referred you to this property.
               </p>
-              <nz-form-control>
-                <input
-                  nz-input
-                  id="refCode"
-                  [(ngModel)]="refCode"
-                  (ngModelChange)="onRefCodeChange($event)"
-                  placeholder="Enter realtor code if available"
-                  type="text"
-                  class="purchase-modal__input"
-                />
-              </nz-form-control>
+              <input
+                nz-input
+                id="refCode"
+                [(ngModel)]="refCode"
+                (ngModelChange)="onRefCodeChange($event)"
+                placeholder="Enter realtor code if available"
+                type="text"
+                class="purchase-modal__input"
+              />
               <nz-spin *ngIf="realtorLoading" class="mt-2"></nz-spin>
               <p *ngIf="realtorError" class="purchase-modal__error">{{ realtorError }}</p>
               <div *ngIf="realtorResult" class="purchase-modal__status-card">
@@ -484,17 +491,15 @@
               <p class="purchase-modal__helper">
                 Enter a coupon code to validate any discount on this purchase.
               </p>
-              <nz-form-control>
-                <input
-                  nz-input
-                  id="couponCode"
-                  [(ngModel)]="couponCode"
-                  (ngModelChange)="onCouponCodeChange($event)"
-                  placeholder="Enter coupon code if available"
-                  type="text"
-                  class="purchase-modal__input"
-                />
-              </nz-form-control>
+              <input
+                nz-input
+                id="couponCode"
+                [(ngModel)]="couponCode"
+                (ngModelChange)="onCouponCodeChange($event)"
+                placeholder="Enter coupon code if available"
+                type="text"
+                class="purchase-modal__input"
+              />
               <nz-spin *ngIf="couponLoading" class="mt-2"></nz-spin>
               <p *ngIf="couponError" class="purchase-modal__error">{{ couponError }}</p>
               <div *ngIf="couponResult" class="purchase-modal__status-card">
@@ -505,9 +510,12 @@
                       {{ couponResult.discount_type === 'percent' ? (couponResult.value + '% off') : ((couponResult.value || 0) | currency:'₦ ':'symbol':'1.0-0') }}
                     </p>
                   </div>
-                  <button nz-button nzType="default" class="purchase-modal__apply-button" (click)="acceptCoupon()" [disabled]="couponAccepted">
-                    {{ couponAccepted ? 'Applied' : 'Apply' }}
-                  </button>
+                  <app-button
+                    [buttonText]="couponAccepted ? 'Applied' : 'Apply'"
+                    variant="secondary"
+                    [disabled]="couponAccepted"
+                    (onButtonClick)="acceptCoupon()"
+                  ></app-button>
                 </div>
                 <p class="purchase-modal__status-copy mt-2" *ngIf="discountAmountNumber !== null">
                   Discount:
@@ -527,57 +535,66 @@
               <p class="purchase-modal__helper">
                 This is the final step before payment is initiated.
               </p>
-              <nz-radio-group [(ngModel)]="selectedPaymentMethod" class="purchase-modal__choices">
-                <label nz-radio [nzValue]="2" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPaymentMethod === 2" *ngIf="canUsePaystack">
+              <div class="purchase-modal__choices">
+                <button
+                  type="button"
+                  class="purchase-modal__choice"
+                  [class.purchase-modal__choice--selected]="selectedPaymentMethod === 2"
+                  (click)="selectPaymentMethodOption(2)"
+                  *ngIf="canUsePaystack"
+                >
                   Pay with Paystack
-                </label>
-                <label nz-radio [nzValue]="3" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPaymentMethod === 3">
+                </button>
+                <button
+                  type="button"
+                  class="purchase-modal__choice"
+                  [class.purchase-modal__choice--selected]="selectedPaymentMethod === 3"
+                  (click)="selectPaymentMethodOption(3)"
+                >
                   Bank Draft
-                </label>
-                <label nz-radio [nzValue]="1" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPaymentMethod === 1">
+                </button>
+                <button
+                  type="button"
+                  class="purchase-modal__choice"
+                  [class.purchase-modal__choice--selected]="selectedPaymentMethod === 1"
+                  (click)="selectPaymentMethodOption(1)"
+                >
                   Bank Transfer
-                </label>
-              </nz-radio-group>
+                </button>
+              </div>
             </div>
           </div>
         }
       </div>
+      </div>
+
+      <div class="purchase-modal-shell__footer">
+        <div class="purchase-modal-shell__actions">
+          <app-button buttonText="Cancel" variant="secondary" [disabled]="isLoading" (onButtonClick)="handleCancel()"></app-button>
+          <app-button
+            *ngIf="purchaseStep > 0"
+            buttonText="Back"
+            variant="secondary"
+            [disabled]="isLoading"
+            (onButtonClick)="goToPreviousPurchaseStep()"
+          ></app-button>
+          <app-button
+            *ngIf="!isOnPurchaseReviewStep"
+            buttonText="Next"
+            [disabled]="isLoading"
+            (onButtonClick)="goToNextPurchaseStep()"
+          ></app-button>
+          <app-button
+            *ngIf="isOnPurchaseReviewStep"
+            buttonText="Continue"
+            [loading]="isLoading"
+            [disabled]="isLoading || !selectedPaymentMethod"
+            (onButtonClick)="handleUnitOk()"
+          ></app-button>
+        </div>
+      </div>
     </div>
-    <div *nzModalFooter>
-      <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-      <button
-        *ngIf="purchaseStep > 0"
-        class="!rounded !text-gray-500 hover:!border-primary"
-        nz-button
-        nzType="default"
-        (click)="goToPreviousPurchaseStep()"
-        [disabled]="isLoading"
-      >
-        Back
-      </button>
-      <button
-        *ngIf="!isOnPurchaseReviewStep"
-        class="!rounded !bg-primary !border-none !text-white disabled:opacity-50"
-        nz-button
-        nzType="primary"
-        (click)="goToNextPurchaseStep()"
-        [disabled]="isLoading"
-      >
-        Next
-      </button>
-      <button
-        *ngIf="isOnPurchaseReviewStep"
-        class="!rounded !bg-primary !border-none !text-white disabled:opacity-50"
-        nz-button
-        nzType="primary"
-        (click)="handleUnitOk()"
-        [nzLoading]="isLoading"
-        [disabled]="isLoading || !selectedPaymentMethod"
-      >
-        Continue
-      </button>
-    </div>
-  </nz-modal>
+  </div>
 
     <!-- Bank Transfer Modal -->
     <nz-modal

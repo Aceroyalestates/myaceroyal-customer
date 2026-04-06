@@ -1,3 +1,83 @@
 .my-properties-page {
   min-height: 100%;
 }
+
+.my-properties-page__heading {
+  align-items: center;
+}
+
+.my-properties-page__title {
+  color: #4b5563;
+}
+
+.my-properties-page__back {
+  color: #4b5563;
+}
+
+.my-properties-page__empty-text {
+  color: #6b7280;
+}
+
+.payment-mode-row__label-icon,
+.payment-mode-row__value-icon {
+  color: #e41c24;
+}
+
+:host ::ng-deep .my-properties-page__tabs .ant-tabs-nav::before {
+  border-bottom-color: #e5e7eb;
+}
+
+:host ::ng-deep .my-properties-page__tabs .ant-tabs-tab {
+  color: #6b7280;
+}
+
+:host ::ng-deep .my-properties-page__tabs .ant-tabs-tab:hover,
+:host ::ng-deep .my-properties-page__tabs .ant-tabs-tab-btn:hover {
+  color: #e41c24;
+}
+
+:host ::ng-deep .my-properties-page__tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #e41c24;
+  font-weight: 600;
+}
+
+:host-context(.dark) .my-properties-page__title,
+:host-context(.dark) .my-properties-page__back {
+  color: #e5e7eb;
+}
+
+:host-context(.dark) .my-properties-page__empty-text {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .payment-mode-row__label-icon,
+:host-context(.dark) .payment-mode-row__value-icon {
+  color: #f87171;
+}
+
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-nav::before {
+  border-bottom-color: #334155;
+}
+
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab {
+  color: #94a3b8;
+}
+
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab-btn {
+  color: #94a3b8;
+}
+
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab:hover,
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab:hover .ant-tabs-tab-btn,
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab-btn:hover {
+  color: #fca5a5;
+}
+
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab-active,
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #f87171;
+}
+
+:host-context(.dark) ::ng-deep .my-properties-page__tabs .ant-tabs-ink-bar {
+  background: #e41c24;
+}

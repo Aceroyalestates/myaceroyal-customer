@@ -1,35 +1,73 @@
-/* styles.css or component-specific CSS */
 .custom-button {
-  width: 190px;
+  min-width: 160px;
   display: flex;
   justify-content: center;
-  border-radius: 30px;
-  background-color: #db353a !important;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background-color: var(--primary) !important;
   white-space: nowrap;
-  padding: 0.5rem 1rem;
+  padding: 0.95rem 1.5rem;
   color: #fff !important;
   cursor: pointer;
   align-items: center;
-  padding: 24px 12px;
+  gap: 0.5rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.custom-button:hover:not(:disabled) {
+  background-color: #c81820 !important;
+  border-color: #c81820 !important;
+}
+
+.custom-button--full-width {
+  width: 100%;
 }
 
 button:disabled {
-  background: #c4c4c4 !important;
-  color: #495057;
-  opacity: 0.5;
+  background: #94a3b8 !important;
+  border-color: #94a3b8 !important;
+  color: #e5e7eb !important;
+  opacity: 0.75;
   cursor: not-allowed;
 }
+
 .buttonStyles {
-  background-color: #fff !important;
-  color: #db353a !important;
-  border: 1px solid #db353a;
-  width: 165px;
+  background-color: transparent !important;
+  color: var(--primary) !important;
+  border: 1px solid rgba(228, 28, 36, 0.28);
+  min-width: 160px;
   display: flex;
   justify-content: center;
-  border-radius: 30px;
+  border-radius: 999px;
   white-space: nowrap;
-  padding: 0.5rem 1rem;
+  padding: 0.95rem 1.5rem;
   cursor: pointer;
   align-items: center;
-  padding: 24px 12px;
+  gap: 0.5rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.buttonStyles:hover:not(:disabled) {
+  background-color: rgba(228, 28, 36, 0.08) !important;
+  border-color: rgba(228, 28, 36, 0.45) !important;
+}
+
+:host-context(.dark) .buttonStyles {
+  color: #fca5a5 !important;
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+:host-context(.dark) .buttonStyles:hover:not(:disabled) {
+  background-color: rgba(248, 113, 113, 0.12) !important;
+  border-color: rgba(248, 113, 113, 0.4) !important;
+}
+
+mat-spinner {
+  --mdc-circular-progress-active-indicator-color: currentColor;
 }

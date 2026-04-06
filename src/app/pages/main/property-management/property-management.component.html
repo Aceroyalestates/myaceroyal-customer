@@ -3,8 +3,9 @@
     <!-- <app-breadcrumb
       [items]="[{ label: 'Property Management', url: '/property-management' }]"
     ></app-breadcrumb> -->
-    <div class="flex gap-6">
-        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">My Properties</h1>
+    <div class="my-properties-page__heading flex gap-6">
+        <app-icon class="cursor-pointer my-properties-page__back" name="arrow-left"></app-icon>
+        <h1 class="my-properties-page__title text-2xl font-bold">My Properties</h1>
     </div>
     <!-- <div class="flex gap-4 justify-between">
         
@@ -23,7 +24,7 @@
         
     </div> -->
     <div class="flex">
-        <nz-tabset class="w-full">
+        <nz-tabset class="my-properties-page__tabs w-full">
             <nz-tab nzTitle="Saved">
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8">
                     @if (isLoading) { @for (item of emptyArray; track $index) {
@@ -32,7 +33,7 @@
                     </div>
                     }}
                     <div class="flex justify-center" *ngIf="savedPayments && savedPayments.length === 0">
-                        <p class="text-gray-500">No data found.</p>
+                        <p class="my-properties-page__empty-text text-gray-500">No data found.</p>
                     </div>
                     <div *ngFor="let data of savedPayments"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative "
@@ -90,7 +91,7 @@
                     </div>
                     }}
                     <div class="flex justify-center" *ngIf="fullyPaidPayments && fullyPaidPayments.length === 0">
-                        <p class="text-gray-500">No data found.</p>
+                        <p class="my-properties-page__empty-text text-gray-500">No data found.</p>
                     </div>
                     <div *ngFor="let data of fullyPaidPayments"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
@@ -120,13 +121,13 @@
                                                 </div>
                                                 <p class="text-sm  !text-gray-500">{{ getPurchasePaymentType(data) }}</p>
                                             </div>
-                                            <div class="flex justify-between">
+                                            <div class="flex justify-between payment-mode-row">
                                                 <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="wallet"></app-icon>
+                                                    <app-icon class="payment-mode-row__label-icon !text-gray-400" name="wallet"></app-icon>
                                                     <p class="text-sm"> Payment Mode </p>
                                                 </div>
                                                 <div class="flex items-center gap-2 text-sm !text-gray-500">
-                                                    <app-icon class="!text-gray-400 !text-sm" name="wallet"></app-icon>
+                                                    <app-icon class="payment-mode-row__value-icon !text-gray-400 !text-sm" name="wallet"></app-icon>
                                                     <p class="text-sm !text-gray-500">{{ getPurchasePaymentMode(data) }}</p>
                                                 </div>
                                             </div>
@@ -162,7 +163,7 @@
                     </div>
                     }}
                     <div class="flex justify-center" *ngIf="inPaymentProperties && inPaymentProperties.length === 0">
-                        <p class="text-gray-500">No data found.</p>
+                        <p class="my-properties-page__empty-text text-gray-500">No data found.</p>
                     </div>
                     <div *ngFor="let data of inPaymentProperties"
                         class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
@@ -192,13 +193,13 @@
                                                 </div>
                                                 <p class="text-sm  !text-gray-500">{{ getPurchasePaymentType(data) }}</p>
                                             </div>
-                                            <div class="flex justify-between">
+                                            <div class="flex justify-between payment-mode-row">
                                                 <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="wallet"></app-icon>
+                                                    <app-icon class="payment-mode-row__label-icon !text-gray-400" name="wallet"></app-icon>
                                                     <p class="text-sm"> Payment Mode </p>
                                                 </div>
                                                 <div class="flex items-center gap-2 text-sm !text-gray-500">
-                                                    <app-icon class="!text-gray-400 !text-sm" name="wallet"></app-icon>
+                                                    <app-icon class="payment-mode-row__value-icon !text-gray-400 !text-sm" name="wallet"></app-icon>
                                                     <p class="text-sm !text-gray-500">{{ getPurchasePaymentMode(data) }}</p>
                                                 </div>
                                             </div>

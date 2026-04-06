@@ -1,5 +1,5 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -39,12 +39,14 @@ import { NationalityService } from 'src/app/core/services/nationality.service';
     NzDividerModule,
     NzUploadModule,
   ],
-  templateUrl: './subscription.component.html'
+  templateUrl: './subscription.component.html',
+  styleUrl: './subscription.component.css'
 })
 export class SubscriptionComponent implements OnInit {
   step = 0;
   isSubmitting = false;
   isLoading = false;
+  isMobileView = false;
 //http://localhost:4200/main/subscription/2f37b1e8-00ac-46a4-a769-2c4fccf144f8
   form!: FormGroup;
   selectedPassportFile: File | null = null;
@@ -85,6 +87,7 @@ export class SubscriptionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.updateViewportState();
     this.purchaseId = this.route.snapshot.paramMap.get('id');
 
     // build nested FormGroups for per-step validation
@@ -161,6 +164,15 @@ export class SubscriptionComponent implements OnInit {
     this.getPurchaseForm();
 
     // this.getNationalityList();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateViewportState();
+  }
+
+  private updateViewportState(): void {
+    this.isMobileView = window.innerWidth <= 991;
   }
 
   back() {

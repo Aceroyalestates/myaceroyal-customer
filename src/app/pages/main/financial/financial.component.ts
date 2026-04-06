@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -21,7 +20,6 @@ type PaymentSortBy = NonNullable<PaymentHistoryFilters['sort_by']>;
     NzTableModule,
     NzSelectModule,
     NzInputModule,
-    NzButtonModule,
     NzPaginationModule
   ],
   templateUrl: './financial.component.html',
