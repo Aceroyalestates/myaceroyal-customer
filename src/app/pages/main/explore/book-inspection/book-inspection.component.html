@@ -1,16 +1,16 @@
-<main class="flex flex-col w-full">
-  <div class="flex gap-2 items-center mb-8">
-    <app-back class="cursor-pointer"></app-back>
-    <h1 class="!text-[#4F4F4F] text-[32px] font-medium !mb-[12]">
+<main class="book-inspection-page flex flex-col w-full">
+  <div class="book-inspection-page__header flex gap-2 items-center mb-8">
+    <app-back class="book-inspection-page__back cursor-pointer"></app-back>
+    <h1 class="book-inspection-page__title !text-[#4F4F4F] text-[32px] font-medium !mb-[12]">
       Book Inspection
     </h1>
   </div>
-  <p class="!text-[#7A7A7A] !text-medium font-medium !mb-2">
+  <p class="book-inspection-page__intro !text-[#7A7A7A] !text-medium font-medium !mb-2">
     Kindly fill the form below to schedule an inspection for this property.
     Please Note the following:
   </p>
   <p
-    class="!text-[#7A7A7A] lowercase max-w-[760px] !text-medium !leading-6 !mb-8"
+    class="book-inspection-page__rules !text-[#7A7A7A] lowercase max-w-[760px] !text-medium !leading-6 !mb-8"
   >
     OUR INSPECTION DAYS ARE;
     <span class="text-primary capitalize font-semibold mr-1"
@@ -72,9 +72,8 @@
             nz-input
             type="tel"
             formControlName="phone_number"
-            placeholder="09022334455"
+            placeholder="+2348012345678"
             id="phone_number"
-            maxlength="11"
           />
         </nz-form-control>
       </div>
@@ -87,16 +86,65 @@
         </nz-form-label>
         <nz-form-control nzErrorTip="Please select appointment date">
           <nz-date-picker
+            class="book-inspection-page__datepicker"
             id="appointment_date"
             formControlName="appointment_date"
-            nzPlaceHolder="Select date"
+            nzPlaceHolder="Select an inspection date"
             nzFormat="yyyy-MM-dd"
             [nzDisabledDate]="disabledDate"
             (ngModelChange)="onDateChange($event)"
             style="width: 100%"
           ></nz-date-picker>
+          <p class="book-inspection-page__date-note">{{ inspectionDateGuidance }}</p>
         </nz-form-control>
       </div>
+
+      <div>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="coming_with_realtor" [nzNoColon]="true">
+          <span class="!text-medium !text-[16px] font-medium">Are You Coming With Your Realtor?</span>
+        </nz-form-label>
+        <nz-form-control nzErrorTip="Please choose an option">
+          <select
+            id="coming_with_realtor"
+            formControlName="coming_with_realtor"
+            class="inspection-native-select"
+          >
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </select>
+        </nz-form-control>
+      </div>
+
+      @if (formBasic.value.coming_with_realtor === 'yes') {
+        <div>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="realtor_tag" [nzNoColon]="true">
+            <span class="!text-medium !text-[16px] font-medium">Realtor Tag</span>
+          </nz-form-label>
+          <nz-form-control nzErrorTip="Please enter realtor tag">
+            <div class="inspection-realtor">
+              <input
+                nz-input
+                id="realtor_tag"
+                formControlName="realtor_tag"
+                placeholder="Enter realtor tag"
+              />
+              <button
+                type="button"
+                nz-button
+                nzType="default"
+                (click)="validateRealtorTag()"
+                [disabled]="validatingRealtor"
+              >
+                {{ validatingRealtor ? 'Validating...' : 'Validate Tag' }}
+              </button>
+            </div>
+          </nz-form-control>
+
+          @if (realtorError) {
+            <p class="inspection-realtor__error">{{ realtorError }}</p>
+          }
+        </div>
+      }
 
       <!-- Special Requirements -->
       <div class="md:col-span-2">
@@ -114,28 +162,18 @@
           ></textarea>
         </nz-form-control>
       </div>
-    </div>
 
-    <!-- Available Slots Display -->
-    @if (loading) {
-      <div class="flex justify-center py-4">
-        <nz-spin></nz-spin>
-      </div>
-    } @else if (availableSlots.length > 0) {
-      <div class="mt-6">
-        <h3 class="text-[#4F4F4F] font-semibold text-[18px] mb-4">Available Time Slots</h3>
-        <div *ngIf="availableSlots[0].display !== 'All Day'" class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          @for (slot of availableSlots; track slot.time) {
-            <div class="p-2 border border-gray-300 rounded text-center text-sm">
-              {{ slot.time }} {{ slot.period }}
-            </div>
-          }
+      @if (formBasic.value.coming_with_realtor === 'yes' && validatedRealtor) {
+        <div class="md:col-span-2">
+          <div class="inspection-realtor__card">
+            <p class="inspection-realtor__title">Realtor Confirmed</p>
+            <p><strong>Name:</strong> {{ validatedRealtor.full_name || validatedRealtor.name || 'N/A' }}</p>
+            <p><strong>Email:</strong> {{ validatedRealtor.email || 'N/A' }}</p>
+            <p><strong>Phone:</strong> {{ validatedRealtor.phone_number || validatedRealtor.phone || 'N/A' }}</p>
+          </div>
         </div>
-        <div *ngIf="availableSlots[0].display === 'All Day'" class="p-2 border border-gray-300 rounded text-center text-sm">
-          All Day
-        </div>
-      </div>
-    }
+      }
+    </div>
 
     <div class="flex items-center justify-end gap-6 my-12">
       <button

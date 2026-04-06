@@ -49,6 +49,12 @@
         <div class="support-card__detail support-card__detail--full">
           <span class="support-card__label">Address</span>
           <p>{{ contact.address }}</p>
+          <div class="support-card__offices" *ngIf="contact.offices.length">
+            <div class="support-card__office" *ngFor="let office of contact.offices">
+              <span class="support-card__office-name">{{ office.name }} Office</span>
+              <p>{{ office.address }}</p>
+            </div>
+          </div>
         </div>
       </div>
 

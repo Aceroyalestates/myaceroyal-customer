@@ -346,6 +346,11 @@ input::placeholder {
   color: var(--text-muted) !important;
 }
 
+.ant-picker-input > input,
+.ant-picker-input > input::placeholder {
+  color: var(--text-color) !important;
+}
+
 .ant-select-dropdown,
 .ant-picker-dropdown .ant-picker-panel-container,
 .ant-modal-content,
@@ -361,6 +366,44 @@ input::placeholder {
 .ant-modal-title,
 .ant-modal-close {
   color: var(--text-secondary) !important;
+}
+
+.ant-picker-header-view,
+.ant-picker-header button,
+.ant-picker-super-prev-icon,
+.ant-picker-super-next-icon,
+.ant-picker-prev-icon,
+.ant-picker-next-icon,
+.ant-picker-cell,
+.ant-picker-cell .ant-picker-cell-inner,
+.ant-picker-time-panel-column > li,
+.ant-picker-time-panel-column > li.ant-picker-time-panel-cell .ant-picker-time-panel-cell-inner,
+.ant-picker-now-btn {
+  color: var(--text-color) !important;
+}
+
+.ant-picker-content td.ant-picker-cell-disabled,
+.ant-picker-content td.ant-picker-cell-disabled .ant-picker-cell-inner,
+.ant-picker-time-panel-column > li.ant-picker-time-panel-cell-disabled .ant-picker-time-panel-cell-inner {
+  color: var(--text-soft) !important;
+}
+
+.ant-picker-cell-in-view {
+  color: var(--text-color) !important;
+}
+
+.ant-picker-cell-disabled::before,
+.ant-picker-cell-disabled .ant-picker-cell-inner {
+  background: transparent !important;
+}
+
+.dark .ant-picker-dropdown .ant-picker-panel-container,
+.dark .ant-picker-panel,
+.dark .ant-picker-date-panel,
+.dark .ant-picker-body,
+.dark .ant-picker-content,
+.dark .ant-picker-header {
+  background: var(--surface-bg-elevated) !important;
 }
 
 .ant-select-item-option-active:not(.ant-select-item-option-disabled),

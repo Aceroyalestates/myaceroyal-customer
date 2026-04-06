@@ -138,6 +138,28 @@
   line-height: 1.35;
 }
 
+.support-card__offices {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.support-card__office {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.support-card__office-name {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .support-card__actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { AppointmentsResponse } from '../models/properties';
+import { AppointmentsResponse, AppointmentSearchParams } from '../models/properties';
 
 const PAGE_SIZE = 10;
 
@@ -13,13 +13,20 @@ export class AppointmentService {
     getAppointments(
         page: number = 1,
         limit: number = PAGE_SIZE,
-        filters?: any
+        filters: AppointmentSearchParams = {}
     ): Observable<AppointmentsResponse> {
-        const params = {
+        const params: Record<string, string> = {
             page: page.toString(),
             limit: limit.toString(),
-            ...filters,
         };
+
+        if (filters.status) params['status'] = filters.status;
+        if (filters.appointment_type) params['appointment_type'] = filters.appointment_type;
+        if (filters.start_date) params['start_date'] = filters.start_date;
+        if (filters.end_date) params['end_date'] = filters.end_date;
+        if (filters.sortBy) params['sortBy'] = filters.sortBy;
+        if (filters.sortOrder) params['sortOrder'] = filters.sortOrder;
+
         return this.httpService.get<AppointmentsResponse>('users/me/appointments', { params });
     }
 

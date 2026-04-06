@@ -94,11 +94,11 @@ export class MainComponent {
       {
         title: 'Settings',
         items: [
-          {
-            label: 'Notifications',
-            icon: 'bell',
-            link: '/main/notifications',
-          },
+          // {
+          //   label: 'Notifications',
+          //   icon: 'bell',
+          //   link: '/main/notifications',
+          // },
           {
             label: this.theme === 'dark' ? 'Light Mode' : 'Dark Mode',
             icon: this.theme === 'dark' ? 'sun' : 'moon',

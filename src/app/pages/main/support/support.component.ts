@@ -20,6 +20,7 @@ interface SupportContactDetails {
   whatsapp: string;
   whatsappNumbers: string[];
   address: string;
+  offices: Array<{ name: string; address: string }>;
   logoUrl: string;
 }
 
@@ -47,6 +48,7 @@ export class SupportComponent {
     whatsapp: PRIMARY_WHATSAPP_NUMBER,
     whatsappNumbers: [PRIMARY_WHATSAPP_NUMBER],
     address: 'Providence Plaza, 17 Olokonla Road, Sangotedo, Lekki-Ajah Expressway, Lagos.',
+    offices: [],
     logoUrl: 'https://cdn.aceroyalestates.com/brand/logo.png'
   };
 
@@ -109,6 +111,7 @@ export class SupportComponent {
       const additionalEmails = this.readStringArray(record, ['app.contact.additional_emails']);
       const phoneNumbers = this.readStringArray(record, ['app.contact.phone_numbers']);
       const whatsappNumbers = this.readStringArray(record, ['contact.whatsapp_numbers']);
+      const offices = this.extractOfficeAddresses(record);
       const preferredWhatsapp =
         whatsappNumbers.find(
           (number) => this.normalizePhoneForWhatsapp(number) === this.normalizePhoneForWhatsapp(PRIMARY_WHATSAPP_NUMBER)
@@ -133,6 +136,7 @@ export class SupportComponent {
           fallback.whatsapp,
         whatsappNumbers: whatsappNumbers.length ? whatsappNumbers : fallback.whatsappNumbers,
         address: this.readString(record, ['company.address']) || fallback.address,
+        offices,
         logoUrl: this.readString(record, ['company.logo_url']) || fallback.logoUrl
       };
     }
@@ -191,8 +195,29 @@ export class SupportComponent {
       address:
         getSettingValue(['company.address', 'contact.address', 'support.address', 'address']) ||
         fallback.address,
+      offices: fallback.offices,
       logoUrl: fallback.logoUrl
     };
+  }
+
+  private extractOfficeAddresses(record: Record<string, unknown>): Array<{ name: string; address: string }> {
+    return Object.entries(record)
+      .filter(([key, value]) => key.startsWith('app.offices.') && key.endsWith('.address') && typeof value === 'string' && value.trim())
+      .map(([key, value]) => {
+        const officeKey = key.replace('app.offices.', '').replace('.address', '');
+        return {
+          name: this.formatOfficeName(officeKey),
+          address: (value as string).trim()
+        };
+      });
+  }
+
+  private formatOfficeName(key: string): string {
+    return key
+      .split('_')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
   }
 
   private readString(record: Record<string, unknown>, keys: string[]): string | undefined {
