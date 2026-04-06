@@ -10,6 +10,7 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NIGERIA_STATE_LGAS, NIGERIA_STATES } from 'src/app/core/constants/nigeria-state-lgas';
 import { UpdateUserRequest, User } from 'src/app/core/models/users';
+import { AuthService } from 'src/app/core/services/auth.service';
 import { ImageService } from 'src/app/core/services/image.service';
 import { UsersService } from 'src/app/core/services/users.service';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -53,6 +54,7 @@ export class ProfileComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly notification: NzNotificationService,
     private readonly router: Router,
+    private readonly authService: AuthService,
   ) {
     this.profileForm = this.fb.group({
       full_name: ['', [Validators.required]],
@@ -171,6 +173,9 @@ export class ProfileComponent implements OnInit {
         this.userService.updateUserAvatar({ avatar: url }).subscribe({
           next: (res) => {
             this.user = res.user ?? (this.user ? { ...this.user, avatar: url } : null);
+            if (this.user) {
+              this.authService.setUser(this.user as any);
+            }
             this.notification.success('', 'Profile picture updated.');
             this.isAvatarLoading = false;
             if (this.avatarInput) {
@@ -197,6 +202,9 @@ export class ProfileComponent implements OnInit {
     this.userService.deleteUserAvatar().subscribe({
       next: (response) => {
         this.user = response.user ?? (this.user ? { ...this.user, avatar: null } : null);
+        if (this.user) {
+          this.authService.setUser(this.user as any);
+        }
         this.notification.success('', 'Profile picture removed.');
         this.isAvatarLoading = false;
       },
@@ -253,6 +261,9 @@ export class ProfileComponent implements OnInit {
     this.userService.updateUserProfile(payload).subscribe({
       next: (res) => {
         this.user = res.user ?? (this.user ? { ...this.user, ...payload } as User : null);
+        if (this.user) {
+          this.authService.setUser(this.user as any);
+        }
         this.notification.success('', res.message || 'Profile updated successfully.');
         this.isSavingProfile = false;
         this.editModalVisible = false;

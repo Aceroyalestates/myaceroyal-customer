@@ -212,6 +212,60 @@
   border: 0;
 }
 
+.property-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.property-amenities__chip {
+  max-width: 100%;
+}
+
+.property-amenities__label {
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.property-detail-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.property-detail-layout__tabs {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.property-detail-layout__aside {
+  display: flex;
+  width: 100%;
+  max-width: 320px;
+  flex: 0 0 320px;
+  flex-direction: column;
+  padding-right: 16px;
+}
+
+.property-detail-layout__price {
+  white-space: nowrap;
+}
+
+.property-detail-layout__deposit {
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.property-detail-layout__actions {
+  width: 100%;
+}
+
+.property-detail-layout__action-btn {
+  width: 100%;
+}
+
 .purchase-modal {
   display: flex;
   flex-direction: column;
@@ -615,6 +669,17 @@
 }
 
 @media (max-width: 991px) {
+  .property-detail-layout {
+    flex-direction: column-reverse;
+    gap: 20px;
+  }
+
+  .property-detail-layout__aside {
+    max-width: none;
+    flex: 1 1 auto;
+    padding-right: 0;
+  }
+
   .property-gallery {
     grid-template-columns: 1fr;
   }
@@ -663,6 +728,48 @@
 @media (max-width: 640px) {
   .property-detail-page {
     padding-top: 4px;
+  }
+
+  .property-amenities {
+    gap: 10px;
+  }
+
+  .property-amenities__chip {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 16px;
+    padding: 10px 14px !important;
+  }
+
+  .property-detail-layout__aside {
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid #ececec;
+    border-radius: 20px;
+    background: #ffffff;
+  }
+
+  .property-detail-layout__price {
+    font-size: 26px !important;
+    line-height: 1.1;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .property-detail-layout__deposit {
+    width: 100%;
+    justify-content: space-between;
+    white-space: normal;
+    gap: 12px;
+  }
+
+  .property-detail-layout__actions {
+    margin-top: 8px !important;
+  }
+
+  .property-detail-layout__action-btn {
+    width: 100%;
+    min-height: 48px;
   }
 
   .property-gallery {

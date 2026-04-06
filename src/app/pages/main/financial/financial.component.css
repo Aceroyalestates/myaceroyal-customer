@@ -104,11 +104,31 @@
   border: 1px solid #ececec;
   border-radius: 24px;
   background: #ffffff;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #E41C24 #F3F4F6;
 }
 
 .payments-table {
   width: 100%;
+  min-width: 980px;
+}
+
+.payments-table-wrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.payments-table-wrap::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 999px;
+}
+
+.payments-table-wrap::-webkit-scrollbar-thumb {
+  background: #e41c24;
+  border-radius: 999px;
+  border: 2px solid #f3f4f6;
 }
 
 .payments-status {

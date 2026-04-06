@@ -1,122 +1,96 @@
 <nz-layout class="app-layout">
-  <!-- nzCollapsible nzBreakpoint="lg" [nzCollapsedWidth]="0" -->
-  <nz-sider
-    class="menu-sidebar"
-    nzCollapsible
-    [nzCollapsedWidth]="0"
-    nzBreakpoint="lg"
-    [(nzCollapsed)]="isCollapsed"
-  >
+  <nz-sider class="menu-sidebar">
     <div class="sidebar-logo">
-      <a href="/main/dashboard">
+      <a [routerLink]="['/main/explore']">
         <img src="logo.png" alt="logo" />
       </a>
     </div>
-    <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
-      <h1 class="!font-light text-sm !text-gray-500 uppercase">Main Menu</h1>
-      <ul nz-menu class="menu">
-        <!-- <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="dashboard"></app-icon>
 
-          <a
-            [routerLink]="['/main/dashboard']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            [routerLinkActiveOptions]="{ exact: true }"
-            >Dashboard</a
-          >
-        </li> -->
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon class="!text-sm" name="map"></app-icon>
+    <ng-container *ngFor="let section of navSections; let isLast = last; trackBy: trackBySection">
+      <div class="sidebar-section" [class.sidebar-section--last]="isLast">
+        <h1>{{ section.title }}</h1>
+        <ul nz-menu class="menu">
+          <li nz-menu-item class="menu-item" nzMatchRouter *ngFor="let item of section.items; trackBy: trackByItem">
+            <app-icon [name]="item.icon"></app-icon>
 
-          <a
-            [routerLink]="['/main/explore']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            [routerLinkActiveOptions]="{ exact: true }"
-            >Explore Property</a
-          >
-        </li>
-      </ul>
-    </div>
-    <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
-      <h1 class="!font-light text-sm !text-gray-500 uppercase">Property Menu</h1>
-      <ul nz-menu class="menu">
-        
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="property"></app-icon>
+            <a
+              *ngIf="item.link; else sidebarAction"
+              [routerLink]="[item.link]"
+              [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+              routerLinkActive="!bg-primary !text-[#fff]"
+            >
+              {{ item.label }}
+            </a>
 
-          <a
-            [routerLink]="['/main/property-management']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >My Properties</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="purse"></app-icon>
-
-          <a
-            [routerLink]="['/main/financial-transactions']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Payments</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="clock"></app-icon>
-
-          <a
-            [routerLink]="['/main/inspection-schedule']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Inspection Schedule</a
-          >
-        </li>
-      </ul>
-    </div>
-    <div class="pt-8 flex flex-col pr-8 pb-6 gap-0 border-b border-gray-100 ml-8">
-      <h1 class="!font-light text-sm !text-gray-500 uppercase">
-        SETTINGS
-      </h1>
-      <ul nz-menu class="menu">
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="help-circle"></app-icon>
-
-          <a
-            [routerLink]="['/main/faq']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >FAQ</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="phone-call"></app-icon>
-
-          <a
-            [routerLink]="['/main/support']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Support</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="exit"></app-icon>
-
-          <a (click)="logout()">Sign Out</a>
-        </li>
-      </ul>
-    </div>
+            <ng-template #sidebarAction>
+              <a (click)="onNavItemClick(item)">{{ item.label }}</a>
+            </ng-template>
+          </li>
+        </ul>
+      </div>
+    </ng-container>
   </nz-sider>
+
+  <div class="mobile-drawer" *ngIf="mobileMenuOpen">
+    <button class="mobile-drawer__backdrop" type="button" (click)="closeMobileMenu()" aria-label="Close mobile navigation"></button>
+    <aside class="mobile-drawer__panel">
+      <div class="mobile-drawer__header">
+        <a [routerLink]="['/main/explore']" (click)="closeMobileMenu()" class="mobile-drawer__brand">
+          <img src="logo.png" alt="logo" />
+          <span>Aceroyal Estates</span>
+        </a>
+        <button type="button" class="mobile-drawer__close" (click)="closeMobileMenu()" aria-label="Close menu">
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+        </button>
+      </div>
+
+      <ng-container *ngFor="let section of navSections; let isLast = last; trackBy: trackBySection">
+        <div class="mobile-drawer__section" [class.mobile-drawer__section--last]="isLast">
+          <h2>{{ section.title }}</h2>
+          <div class="mobile-drawer__links">
+            <ng-container *ngFor="let item of section.items; trackBy: trackByItem">
+              <a
+                *ngIf="item.link; else mobileAction"
+                class="mobile-drawer__link"
+                [routerLink]="[item.link]"
+                [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
+                routerLinkActive="mobile-drawer__link--active"
+                (click)="onNavItemClick(item)"
+              >
+                <app-icon [name]="item.icon" [size]="18"></app-icon>
+                <span>{{ item.label }}</span>
+              </a>
+
+              <ng-template #mobileAction>
+                <button type="button" class="mobile-drawer__link mobile-drawer__link--button" (click)="onNavItemClick(item)">
+                  <app-icon [name]="item.icon" [size]="18"></app-icon>
+                  <span>{{ item.label }}</span>
+                </button>
+              </ng-template>
+            </ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </aside>
+  </div>
+
   <nz-layout class="main-shell">
-    <!-- Make -->
     <nz-header class="main-header">
       <div class="app-header border-b border-gray-100">
         <div class="app-header__inner flex items-center justify-between py-[30px] px-10 w-full">
-          <h1 class="!text-primary !text-xl">Welcome, {{ firstName }}!</h1>
-          <div class="flex items-center justify-between gap-4">
-            <!-- <app-search-bar
-              (search)="onSearch($event)"
-              [placeholder]="'Search property...'"
-            ></app-search-bar> -->
+          <div class="app-header__start">
+            <button type="button" class="mobile-menu-toggle" (click)="toggleMobileMenu()" aria-label="Open navigation menu">
+              <i nz-icon [nzType]="mobileMenuOpen ? 'menu-fold' : 'menu-unfold'" nzTheme="outline"></i>
+            </button>
+            <h1 class="!text-primary !text-xl">Welcome, {{ firstName }}!</h1>
           </div>
-          <div class="flex gap-4 items-center">
+
+          <div class="flex items-center justify-between gap-4"></div>
+
+          <div class="app-header__actions flex gap-4 items-center">
             <button
               type="button"
-              class="theme-toggle"
+              class="theme-toggle app-header__theme-toggle"
               [class.theme-toggle--dark]="theme === 'dark'"
               (click)="toggleTheme()"
               [attr.aria-label]="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
@@ -124,22 +98,22 @@
             >
               <span class="theme-toggle__icon">{{ theme === 'dark' ? '☀' : '☾' }}</span>
             </button>
+
             <app-icon
               [name]="'bell'"
-              class="text-primary p-2 bg-primary/10 rounded-full cursor-pointer"
+              class="text-primary p-2 bg-primary/10 rounded-full cursor-pointer app-header__notifications"
               [routerLink]="['/main/notifications']"
             ></app-icon>
-            <div class="flex gap-2 items-center">
+
+            <div class="app-header__profile flex gap-2 items-center">
               <img
-                src="logo.png"
+                [src]="headerAvatarUrl"
                 alt="profile"
                 class="w-10 h-10 rounded-full object-cover border-2 border-red-500 cursor-pointer"
                 [routerLink]="['/main/my-profile']"
               />
-              <div>
-                <h2 class="font-medium !text-gray-500 mb-1 text-normal">
-                  {{ firstName }}
-                </h2>
+              <div class="app-header__profile-meta">
+                <h2 class="font-medium !text-gray-500 mb-1 text-normal">{{ firstName }}</h2>
                 <p class="text-small text-gray-400">{{ loggedInUser.email }}</p>
               </div>
             </div>
@@ -147,6 +121,7 @@
         </div>
       </div>
     </nz-header>
+
     <nz-content class="main-content">
       <div class="inner-content">
         <router-outlet></router-outlet>

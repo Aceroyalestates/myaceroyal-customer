@@ -6,7 +6,8 @@ import {
   PhoneOutline,
   MailOutline,
   MessageOutline,
-  CustomerServiceOutline
+  CustomerServiceOutline,
+  CloseOutline
 } from '@ant-design/icons-angular/icons';
 
 export const icons = [
@@ -17,5 +18,6 @@ export const icons = [
   PhoneOutline,
   MailOutline,
   MessageOutline,
-  CustomerServiceOutline
+  CustomerServiceOutline,
+  CloseOutline
 ];

@@ -142,8 +142,8 @@
   </section>
   }
 } @if (property) {
-  <div class="flex gap-8">
-    <nz-tabset class="w-full" nzSize="large" [(nzSelectedIndex)]="selectedIndex">
+  <div class="property-detail-layout">
+    <nz-tabset class="property-detail-layout__tabs w-full" nzSize="large" [(nzSelectedIndex)]="selectedIndex">
       @for (tab of property.property_units; track tab.id) {
         <nz-tab nzTitle="{{ tab.unit_type.name || 'Unit' }}" (nzClick)="selectTab(tab)">
         <div class="pt-4">
@@ -184,15 +184,14 @@
           </div>
           <div class="w-full max-w-[628px] mb-10">
             <h3 class="text-[#4F4F4F] text-normal text-2xl !mb-4">Amenities</h3>
-            <div class="grid grid-cols-2 items-center gap-4">
+            <div class="property-amenities">
               @for (amenity of property.property_features; track amenity.feature_id)
               {
                 <span
-                class="flex items-center !text-medium text-primary bg-primary/10 gap-2 px-4 py-1 border border-white rounded-full"
+                class="property-amenities__chip flex items-center !text-medium text-primary bg-primary/10 gap-2 px-4 py-1 border border-white rounded-full"
                 >
                     <app-icon name="airdrop" [size]="16"></app-icon>
-<!-- no wrap text -->
-                    <p class="!text-medium text-nowrap">{{ amenity?.feature?.name }}</p>
+                    <p class="property-amenities__label !text-medium">{{ amenity?.feature?.name }}</p>
                 </span>
               }
               <!-- <span
@@ -263,11 +262,11 @@
       </nz-tab>
       }
     </nz-tabset>
-    <div class="flex flex-col max-h-[270px] pr-12">
+    <div class="property-detail-layout__aside">
       <p class="!mb-1 text-gray-500 !text-normal text-[15px]">Price</p>
       <h2
         *ngIf="property.property_units && property.property_units.length > 0"
-        class="!text-primary text-normal text-[30px] whitespace-nowrap"
+        class="property-detail-layout__price !text-primary text-normal text-[30px]"
       >
       {{
             selectedUnit?.price | currency:'₦ ':'symbol':'1.0-0'
@@ -275,23 +274,23 @@
       </h2>
       <span
         *ngIf="selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0"
-        class="flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 !mt-2 border border-white rounded-full whitespace-nowrap"
+        class="property-detail-layout__deposit flex items-center !text-medium text-primary bg-primary/10 gap-1 px-2 py-1 !mt-2 border border-white rounded-full"
       >
         <p class="!text-medium">Initial Deposit: </p>
 
         <p class="!text-medium">{{ selectedUnit?.property_installment_plans[0].initial_amount | currency:'₦ ':'symbol':'1.0-0' }}</p>
       </span>
-      <div class="flex flex-col sm:flex-row gap-3 !mt-10">
+      <div class="property-detail-layout__actions flex flex-col sm:flex-row gap-3 !mt-10">
         <button
           type="button"
-          class="inline-flex items-center justify-center rounded-full bg-primary py-3 px-6 text-[15px] !text-white font-medium cursor-pointer whitespace-nowrap"
+          class="property-detail-layout__action-btn inline-flex items-center justify-center rounded-full bg-primary py-3 px-6 text-[15px] !text-white font-medium cursor-pointer whitespace-nowrap"
           (click)="showUnitModal()"
         >
           Make Purchase
         </button>
         <button
           (click)="bookInspection()"
-          class="inline-flex items-center justify-center rounded-full border border-primary !text-primary hover:bg-primary hover:!text-white py-3 px-6 text-[15px] font-medium cursor-pointer whitespace-nowrap"
+          class="property-detail-layout__action-btn inline-flex items-center justify-center rounded-full border border-primary !text-primary hover:bg-primary hover:!text-white py-3 px-6 text-[15px] font-medium cursor-pointer whitespace-nowrap"
         >
           Book Inspection
         </button>

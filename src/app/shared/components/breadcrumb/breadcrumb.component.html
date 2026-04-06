@@ -1,46 +1,35 @@
-<nav class="text-sm text-gray-500 !mb-0" aria-label="Breadcrumb">
-  <ol class="list-none p-0 inline-flex items-center space-x-1 !mb-0">
-    @if(items.length>1){
-    <li
-      *ngFor="let item of items; let first = first; let last = last"
-      class="flex items-center !mb-0"
-    >
-      <ng-container *ngIf="first" class="flex items-center">
-        <a
-          [routerLink]="item.url"
-          class="hover:underline text-[32px] font-medium"
-          [ngStyle]="{ color: '#4F4F4F' }"
-        >
-          {{ item.label }}
-        </a>
-        <span class="mx-1 text-[32px] font-medium text-[#4F4F4F]">›</span>
-      </ng-container>
-      <ng-container *ngIf="!last && !first" class="flex items-center">
-        <a
-          [routerLink]="item.url"
-          class="hover:underline text-2xl font-medium"
-          [ngStyle]="{ color: '#4F4F4F' }"
-        >
-          {{ item.label }}
-        </a>
-        <span class="mx-1 text-[32px] font-medium text-[#4F4F4F]">›</span>
-      </ng-container>
-      <ng-container *ngIf="last">
-        <span class="text-red-600 text-2xl font-medium">{{ item.label }}</span>
-      </ng-container>
-    </li>
-    }@else {
-    <li class="flex items-center !mb-0">
-      <ng-container class="flex items-center">
-        <a
-          [routerLink]="items[0].url"
-          class="hover:underline text-[32px] font-medium"
-          [ngStyle]="{ color: '#4F4F4F' }"
-        >
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <ol class="breadcrumb__list">
+    @if (items.length > 1) {
+      <li
+        *ngFor="let item of items; let first = first; let last = last"
+        class="breadcrumb__item"
+        [class.breadcrumb__item--current]="last"
+      >
+        <ng-container *ngIf="first">
+          <a [routerLink]="item.url" class="breadcrumb__link">
+            {{ item.label }}
+          </a>
+          <span class="breadcrumb__separator">›</span>
+        </ng-container>
+
+        <ng-container *ngIf="!last && !first">
+          <a [routerLink]="item.url" class="breadcrumb__link">
+            {{ item.label }}
+          </a>
+          <span class="breadcrumb__separator">›</span>
+        </ng-container>
+
+        <ng-container *ngIf="last">
+          <span class="breadcrumb__current">{{ item.label }}</span>
+        </ng-container>
+      </li>
+    } @else {
+      <li class="breadcrumb__item breadcrumb__item--current">
+        <a [routerLink]="items[0].url" class="breadcrumb__link">
           {{ items[0].label }}
         </a>
-      </ng-container>
-    </li>
+      </li>
     }
   </ol>
 </nav>
