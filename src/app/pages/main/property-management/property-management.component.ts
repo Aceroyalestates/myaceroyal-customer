@@ -217,5 +217,45 @@ export class PropertyManagementComponent {
     gotoPurchaseForm(purchaseId: string): void {
       this.router.navigate([`/main/subscription/${purchaseId}`]);
     }
+
+    getPurchasePaymentType(data: any): string {
+      if (data?.payment_type) {
+        return data.payment_type === 'installment' ? 'Installment' : 'Outright';
+      }
+
+      if (data?.plan || data?.plan_id || data?.purchase?.plan) {
+        return 'Installment';
+      }
+
+      return 'Outright';
+    }
+
+    getPurchasePaymentMode(data: any): string {
+      const method = data?.payment_method || data?.method;
+
+      if (!method) {
+        return 'N/A';
+      }
+
+      if (method === 'cheque') {
+        return 'Bank Draft';
+      }
+
+      return method.replace(/_/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase());
+    }
+
+    isPendingPaystackPurchase(data: any): boolean {
+      const method = data?.payment_method || data?.method;
+      return method === 'paystack' && data?.status === 'in-progress';
+    }
+
+    getPurchaseImage(data: any): string {
+      return (
+        data?.unit?.property?.property_images?.[0]?.image_url ||
+        data?.purchase?.property?.property_images?.[0]?.image_url ||
+        this.pendingPayments[0]?.image ||
+        ''
+      );
+    }
     
 }

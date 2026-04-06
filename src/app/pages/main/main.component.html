@@ -47,7 +47,7 @@
           <a
             [routerLink]="['/main/property-management']"
             routerLinkActive="!bg-primary !text-[#fff]"
-            >Property Management</a
+            >My Properties</a
           >
         </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
@@ -56,7 +56,7 @@
           <a
             [routerLink]="['/main/financial-transactions']"
             routerLinkActive="!bg-primary !text-[#fff]"
-            >Financial Transactions</a
+            >Payments</a
           >
         </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
@@ -70,44 +70,11 @@
         </li>
       </ul>
     </div>
-    <div class="pt-8 flex flex-col pb-6 pr-8 gap-4 border-b border-gray-100 ml-8">
-      <h1 class="!font-light text-sm !text-gray-500 uppercase">Personal Menu</h1>
-      <ul nz-menu class="menu">
-        
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="user"></app-icon>
-
-          <a
-            [routerLink]="['/main/my-profile']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >My Profile</a
-          >
-        </li>
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="lock"></app-icon>
-
-          <a
-            [routerLink]="['/main/password-security']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Password & Security</a
-          >
-        </li>
-      </ul>
-    </div>
     <div class="pt-8 flex flex-col pr-8 pb-6 gap-0 border-b border-gray-100 ml-8">
       <h1 class="!font-light text-sm !text-gray-500 uppercase">
         SETTINGS
       </h1>
       <ul nz-menu class="menu">
-        <li nz-menu-item class="menu-item" nzMatchRouter>
-          <app-icon name="bell"></app-icon>
-
-          <a
-            [routerLink]="['/main/notifications']"
-            routerLinkActive="!bg-primary !text-[#fff]"
-            >Notifications</a
-          >
-        </li>
         <li nz-menu-item class="menu-item" nzMatchRouter>
           <app-icon name="help-circle"></app-icon>
 

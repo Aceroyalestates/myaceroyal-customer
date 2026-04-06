@@ -1,5 +1,6 @@
 import { CommonModule, Location } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PropertiesService } from 'src/app/core/services/properties.service';
@@ -24,7 +25,7 @@ import { DefaultBankAccount, StartOfflinePurchasePayload, StartOnlinePurchasePay
 import { NgxCurrencyDirective } from "ngx-currency";
 import { ImageService } from 'src/app/core/services/image.service';
 import { ImageUploadApiResponse } from 'src/app/core/models/images';
-import { ImageSliderComponent, ImageSliderItem } from 'src/app/shared/components/image-slider/image-slider.component';
+import type { ImageSliderItem } from 'src/app/shared/components/image-slider/image-slider.component';
 
 
 
@@ -44,14 +45,14 @@ import { ImageSliderComponent, ImageSliderItem } from 'src/app/shared/components
     NzUploadModule,
     NzSpinModule,
     NzSwitchModule,
-    NgxCurrencyDirective,
-    ImageSliderComponent
+    NgxCurrencyDirective
   ],
   templateUrl: './view-property.component.html',
   styleUrl: './view-property.component.css'
 })
 export class ViewPropertyComponent {
-  id: string | null = null;
+  readonly outrightPlanValue = 'outright';
+  slug: string | null = null;
   property: Property | null = null;
   loading = false;
   error: string | null = null;
@@ -59,11 +60,13 @@ export class ViewPropertyComponent {
   selectedUnit: any;
   availableUnitNumber: number[] = [];
   selectedUnitNumber: number | null = null;
-  selectedPlan: any = '1';
+  selectedPlan: any = this.outrightPlanValue;
   selectedPaymentMethod: number | null = null;
   defaultBankAccounts: DefaultBankAccount[] = [];
   propertyImages: ImageSliderItem[] = [];
-  sliderHeight = '300px';
+  currentImageIndex = 0;
+  safeVrLink: SafeResourceUrl | null = null;
+  purchaseStep = 0;
 
   isUnitModalVisible = false;
   isPlanModalVisible = false;
@@ -107,19 +110,69 @@ export class ViewPropertyComponent {
 
   showUnitModal(): void {
     this.isUnitModalVisible = true;
-    this.selectedUnitNumber = null; // Reset selection when modal opens
+    this.purchaseStep = 0;
+    this.selectedUnitNumber = this.selectedUnitNumber ?? 1;
+    this.selectedPlan = this.outrightPlanValue;
+    this.selectedPaymentMethod = null;
+    this.enteredAmount = null;
+    this.refCode = '';
+    this.couponCode = '';
+    this.realtorAccepted = false;
+    this.realtorManage = false;
+    this.couponAccepted = false;
+    this.discountAmountNumber = null;
+    this.finalAmount = 0;
+    this.realtorResult = null;
+    this.realtorError = null;
+    this.realtorLoading = false;
+    this.couponResult = null;
+    this.couponResponse = null;
+    this.couponError = null;
+    this.couponLoading = false;
   }
 
 
   handleUnitOk(): void {
-    this.isLoading = true;
-    console.log('Clicked OK', this.selectedUnitNumber);
-    this.totalAmount = (this.selectedUnit?.price || 0) * (this.selectedUnitNumber || 1);
-    setTimeout(() => {
-      this.isUnitModalVisible = false;
-      this.isLoading = false;
-      this.isPlanModalVisible = true;
-    }, 500);
+    if (!this.selectedUnitNumber) {
+      this.notificationService.error('Error', `Please select the number of ${this.quantityLabel.toLowerCase()}`);
+      return;
+    }
+
+    if (!this.selectedPaymentMethod) {
+      this.notificationService.error('Error', 'Please select a payment method');
+      return;
+    }
+
+    if (!this.isOutrightPayment && !this.selectedInstallmentPlan) {
+      this.notificationService.error('Error', 'Please select a payment option');
+      return;
+    }
+
+    if (!this.isOutrightPayment && this.payableAmount < this.minimumInstallmentPayment) {
+      this.notificationService.error(
+        'Error',
+        `Minimum amount for this installment is ₦ ${this.minimumInstallmentPayment.toLocaleString()}`
+      );
+      return;
+    }
+
+    this.totalAmount = this.purchaseTotalAmount;
+    this.finalAmount = this.discountedPurchaseTotal;
+    this.isUnitModalVisible = false;
+
+    if (this.selectedPaymentMethod === 1) {
+      this.isBankTransferModalVisible = true;
+      return;
+    }
+
+    if (this.selectedPaymentMethod === 3) {
+      this.isBankChequeModalVisible = true;
+      return;
+    }
+
+    if (this.selectedPaymentMethod === 2) {
+      this.startOnlinePurchase();
+    }
   }
 
   handlePlanOk(): void {
@@ -128,7 +181,7 @@ export class ViewPropertyComponent {
     // validate enteredAmount if plan is not full payment
     
     setTimeout(() => {
-      if (this.selectedPlan !== '1') {
+      if (this.selectedPlan !== this.outrightPlanValue) {
       const minAmount = (this.selectedUnit?.property_installment_plans && this.selectedUnit?.property_installment_plans.length > 0) ? 
         (this.selectedUnit?.property_installment_plans[0].initial_amount * this.selectedUnitNumber!) : 0;
       console.log('Min amount for selected plan:', minAmount);
@@ -201,12 +254,14 @@ export class ViewPropertyComponent {
     this.isBankChequeModalVisible = false;
     this.isPaymentSuccessModalVisible = false;
     this.isLoading = false;
+    this.purchaseStep = 0;
     this.selectedUnitNumber = null;
-    this.selectedPlan = '1';
+    this.selectedPlan = this.outrightPlanValue;
     this.selectedPaymentMethod = null;
     this.refCode = '';
     this.couponCode = '';
     this.realtorAccepted = false;
+    this.realtorManage = false;
     this.couponAccepted = false;
     this.discountAmountNumber = null;
     this.totalAmount = 0;
@@ -222,10 +277,47 @@ export class ViewPropertyComponent {
     this.proofUrl = '';
   }
 
+  goToNextPurchaseStep(): void {
+    if (this.purchaseStep === 0) {
+      if (!this.selectedUnitNumber) {
+        this.notificationService.error('Error', `Please select the number of ${this.quantityLabel.toLowerCase()}`);
+        return;
+      }
+
+      if (!this.isOutrightPayment && !this.selectedInstallmentPlan) {
+        this.notificationService.error('Error', 'Please select a payment option');
+        return;
+      }
+
+      if (!this.isOutrightPayment && this.payableAmount < this.minimumInstallmentPayment) {
+        this.notificationService.error(
+          'Error',
+          `Minimum amount for this installment is ₦ ${this.minimumInstallmentPayment.toLocaleString()}`
+        );
+        return;
+      }
+    }
+
+    if (this.purchaseStep < 2) {
+      this.purchaseStep += 1;
+    }
+  }
+
+  goToPreviousPurchaseStep(): void {
+    if (this.purchaseStep > 0) {
+      this.purchaseStep -= 1;
+    }
+  }
+
+  get isOnPurchaseReviewStep(): boolean {
+    return this.purchaseStep === 2;
+  }
+
   constructor(
     private location: Location,
     private route: ActivatedRoute, 
     private router: Router,
+    private sanitizer: DomSanitizer,
     private propertiesService: PropertiesService,
     private notificationService: NzNotificationService,
     private paymentService: PaymentService,
@@ -235,18 +327,12 @@ export class ViewPropertyComponent {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
-      this.id = params.get('id');
-      if (this.id) {
-        this.loadProperty(this.id);
+      this.slug = params.get('slug');
+      if (this.slug) {
+        this.loadProperty(this.slug);
       }
     });
     
-        // Set initial slider height based on screen size
-    this.updateSliderHeight();
-    
-    // Listen for window resize events
-    window.addEventListener('resize', this.updateSliderHeight.bind(this));
-
     // listen to referral code changes (debounced) and validate when length >= 5
       const refSub = this.refCode$
         .pipe(
@@ -273,6 +359,7 @@ export class ViewPropertyComponent {
           this.realtorLoading = false;
           if (data) {
             this.realtorResult = data;
+            this.realtorAccepted = true;
           } else if (!this.realtorError) {
             this.realtorError = 'No realtor found for this code';
           }
@@ -292,7 +379,7 @@ export class ViewPropertyComponent {
           this.discountAmountNumber = null;
         }),
         switchMap((code) =>
-          this.paymentService.validateCoupon(code, this.totalAmount).pipe(
+          this.paymentService.validateCoupon(code, this.purchaseTotalAmount).pipe(
             catchError((err) => {
               console.error('Coupon validation error', err);
               this.couponError = 'Failed to validate coupon';
@@ -304,16 +391,10 @@ export class ViewPropertyComponent {
       .subscribe((res: any) => {
         this.couponLoading = false;
         if (res && res.success) {
-          this.couponResult = res.data.coupon;
-          this.couponResponse = res.data; // Store the entire response
+          this.couponResult = res.coupon;
+          this.couponResponse = res;
           console.log('Coupon validated:', res);
-          // compute discount amount based on coupon type and selected unit price
-          const base = (this.selectedUnit?.price || 0) * (this.selectedUnitNumber || 1);
-          if (this.couponResult.discount_type === 'percent') {
-            this.discountAmountNumber = Math.round((base * (this.couponResult.value || 0)) / 100);
-          } else {
-            this.discountAmountNumber = this.couponResult.value || 0;
-          }
+          this.discountAmountNumber = Number(res.discount) || 0;
         } else if (!this.couponError) {
           this.couponError = (res && res.message) || 'Invalid coupon';
         }
@@ -323,14 +404,8 @@ export class ViewPropertyComponent {
     this.subs.add(couponSub);
   }
   
-  updateSliderHeight(): void {
-    // 300px on mobile (< 768px), 550px from tablet and above
-    this.sliderHeight = window.innerWidth >= 768 ? '550px' : '300px';
-  }
-
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    window.removeEventListener('resize', this.updateSliderHeight.bind(this));
   }
 
   back() {
@@ -341,23 +416,34 @@ export class ViewPropertyComponent {
     console.log('Selected tab:', unit);
     this.selectedUnit = unit;
     this.availableUnitNumber = Array.from({ length: unit.total_units }, (_, i) => i + 1);
+    this.selectedUnitNumber = 1;
+    this.selectedPlan = this.outrightPlanValue;
+    this.selectedPaymentMethod = null;
+    this.enteredAmount = null;
+    this.couponCode = '';
+    this.couponResult = null;
+    this.couponResponse = null;
+    this.couponError = null;
+    this.couponAccepted = false;
+    this.discountAmountNumber = null;
     console.log('Available unit numbers:', this.availableUnitNumber);
   }
 
-  loadProperty(id: string): void {
+  loadProperty(slug: string): void {
     this.loading = true;
     this.error = null;
     
-    this.propertiesService.getPropertyById(id).subscribe({
+    this.propertiesService.getPropertyBySlug(slug).subscribe({
       next: (property) => {
         this.property = property;
         this.preparePropertyImages();
+        this.prepareVirtualTour();
         this.loading = false;
         console.log('Property loaded:', property);
         if (property.property_units && property.property_units.length > 0) {
           this.selectedUnit = property.property_units[0];
-
-        this.availableUnitNumber = Array.from({ length: this.selectedUnit.total_units }, (_, i) => i + 1);
+          this.availableUnitNumber = Array.from({ length: this.selectedUnit.total_units }, (_, i) => i + 1);
+          this.selectedUnitNumber = 1;
         }
         console.log('Selected unit after load:', this.selectedUnit);
         this.getDefaultBankAccounts();
@@ -446,6 +532,7 @@ export class ViewPropertyComponent {
         this.realtorResult = null;
         this.realtorError = null;
         this.realtorLoading = false;
+        this.realtorManage = false;
         return;
       }
       this.refCode$.next(v);
@@ -471,11 +558,93 @@ export class ViewPropertyComponent {
     this.couponCode$.next(v);
   }
 
+  onPurchaseContextChange(): void {
+    this.resetCouponState();
+
+    if (this.selectedPaymentMethod === 2 && !this.canUsePaystack) {
+      this.selectedPaymentMethod = null;
+    }
+  }
+
+  private resetCouponState(): void {
+    this.couponAccepted = false;
+    this.couponResult = null;
+    this.couponResponse = null;
+    this.couponError = null;
+    this.discountAmountNumber = null;
+    this.finalAmount = 0;
+    this.couponCode = '';
+  }
+
   acceptCoupon(): void {
     if (!this.couponResult) return;
     this.couponAccepted = true;
-    this.finalAmount = this.couponResponse.discount ? this.couponResponse.discounted_total : this.totalAmount;
+    this.finalAmount = this.discountedPurchaseTotal;
     // this.notificationService.success('', `Coupon ${this.couponResponse.coupon.code} applied`);
+  }
+
+  get quantityLabel(): string {
+    const propertyTypeName = this.property?.property_type?.name?.toLowerCase() ?? '';
+    return propertyTypeName === 'land' ? 'Plots' : 'Units';
+  }
+
+  get hasInstallmentPlans(): boolean {
+    return !!this.selectedUnit?.property_installment_plans?.length;
+  }
+
+  get isOutrightPayment(): boolean {
+    return this.selectedPlan === this.outrightPlanValue;
+  }
+
+  get selectedInstallmentPlan(): any | null {
+    if (!this.hasInstallmentPlans || this.isOutrightPayment) {
+      return null;
+    }
+
+    return this.selectedUnit?.property_installment_plans?.find(
+      (plan: any) => String(plan.plan_id) === String(this.selectedPlan)
+    ) ?? null;
+  }
+
+  get unitPrice(): number {
+    return Number(this.selectedUnit?.price) || 0;
+  }
+
+  get selectedQuantity(): number {
+    return this.selectedUnitNumber || 0;
+  }
+
+  get purchaseTotalAmount(): number {
+    return this.unitPrice * this.selectedQuantity;
+  }
+
+  get minimumInstallmentPayment(): number {
+    const initialAmount = Number(this.selectedInstallmentPlan?.initial_amount) || 0;
+    return initialAmount * this.selectedQuantity;
+  }
+
+  get discountedPurchaseTotal(): number {
+    if (!this.couponAccepted || !this.couponResult) {
+      return this.purchaseTotalAmount;
+    }
+
+    if (typeof this.couponResponse?.discounted_total === 'number') {
+      return this.couponResponse.discounted_total;
+    }
+
+    return Math.max(this.purchaseTotalAmount - (this.discountAmountNumber || 0), 0);
+  }
+
+  get payableAmount(): number {
+    if (this.isOutrightPayment) {
+      return this.discountedPurchaseTotal;
+    }
+
+    return this.enteredAmount || this.minimumInstallmentPayment;
+  }
+
+  get canUsePaystack(): boolean {
+    return this.payableAmount > 0 && this.payableAmount <= 100000000;
   }
 
   getDefaultBankAccounts(): void {
@@ -499,13 +668,12 @@ export class ViewPropertyComponent {
     this.isLoading = true;
 
     const payload: StartOfflinePurchasePayload = {
-      unit_id: this.selectedUnit.id,
+      unit_id: String(this.selectedUnit.id),
       quantity: this.selectedUnitNumber,
-      plan_id: this.selectedPlan === '1' ? undefined : parseInt(this.selectedPlan, 10),
+      plan_id: this.selectedPlan === this.outrightPlanValue ? undefined : String(this.selectedPlan),
       referral_code: this.realtorAccepted ? this.refCode : undefined,
       coupon_code: this.couponAccepted ? this.couponCode : undefined,
-      amount_paid: this.selectedPlan === '1' ? this.finalAmount || this.totalAmount : 
-        this.enteredAmount || (this.selectedUnit?.property_installment_plans[0].initial_amount * this.selectedUnitNumber!),
+      amount_paid: this.payableAmount,
       proof_url: this.proofUrl,
       realtor_can_manage: this.realtorManage
     };
@@ -516,7 +684,7 @@ export class ViewPropertyComponent {
       next: (res) => {
         this.isLoading = false;
         console.log('Offline purchase initiated successfully:', res);
-        this.notificationService.success('Success', 'Purchase initiated. Awaiting approval.');
+        this.notificationService.info('Payment in review', 'Offline payment submitted. Awaiting verification.');
         // Close all modals and reset state as needed
         this.handleCancel();
         // navigate to subscription page
@@ -539,13 +707,12 @@ export class ViewPropertyComponent {
     this.isLoading = true;
 
     const payload: StartOnlinePurchasePayload = {
-      unit_id: this.selectedUnit.id.toString(),
+      unit_id: String(this.selectedUnit.id),
       quantity: this.selectedUnitNumber,
-      plan_id: this.selectedPlan === '1' ? undefined : parseInt(this.selectedPlan, 10),
+      plan_id: this.selectedPlan === this.outrightPlanValue ? undefined : String(this.selectedPlan),
       referral_code: this.realtorAccepted ? this.refCode : undefined,
       coupon_code: this.couponAccepted ? this.couponCode : undefined,
-      amount_paid: this.selectedPlan === '1' ? this.finalAmount || this.totalAmount : 
-        this.enteredAmount || (this.selectedUnit?.property_installment_plans[0].initial_amount * this.selectedUnitNumber!),
+      amount_paid: this.payableAmount,
       realtor_can_manage: this.realtorManage
     };
 
@@ -557,8 +724,7 @@ export class ViewPropertyComponent {
         console.log('Online purchase initiated successfully:', res);
         if (res && res.data && res.data.session.data.authorization_url) {
           // Redirect user to payment gateway URL
-          // window.location.href = res.data.session.data.authorization_url;
-          window.open(res.data.session.data.authorization_url, '_blank');
+          window.location.href = res.data.session.data.authorization_url;
         } else {
           this.notificationService.error('Error', 'Payment link not received');
         }
@@ -613,6 +779,7 @@ export class ViewPropertyComponent {
   private preparePropertyImages(): void {
     if (!this.property) {
       this.propertyImages = [];
+      this.currentImageIndex = 0;
       return;
     }
 
@@ -643,14 +810,53 @@ export class ViewPropertyComponent {
         }
       ];
     }
+    this.currentImageIndex = 0;
   }
 
-  onImageChange(index: number): void {
-    console.log('Image changed to index:', index);
+  private prepareVirtualTour(): void {
+    const vrLink = this.property?.vr_link?.trim();
+
+    if (!vrLink || !/^https?:\/\//i.test(vrLink)) {
+      this.safeVrLink = null;
+      return;
+    }
+
+    this.safeVrLink = this.sanitizer.bypassSecurityTrustResourceUrl(vrLink);
   }
 
-  onImageClick(image: ImageSliderItem): void {
-    console.log('Image clicked:', image);
-    // You can implement a lightbox or modal here if needed
+  get hasVirtualTour(): boolean {
+    return !!this.safeVrLink && !!this.property?.vr_link;
+  }
+
+  get currentImage(): ImageSliderItem | null {
+    return this.propertyImages[this.currentImageIndex] ?? null;
+  }
+
+  selectImage(index: number): void {
+    if (index >= 0 && index < this.propertyImages.length) {
+      this.currentImageIndex = index;
+    }
+  }
+
+  showPreviousImage(): void {
+    if (this.propertyImages.length <= 1) {
+      return;
+    }
+
+    this.currentImageIndex =
+      this.currentImageIndex === 0
+        ? this.propertyImages.length - 1
+        : this.currentImageIndex - 1;
+  }
+
+  showNextImage(): void {
+    if (this.propertyImages.length <= 1) {
+      return;
+    }
+
+    this.currentImageIndex =
+      this.currentImageIndex === this.propertyImages.length - 1
+        ? 0
+        : this.currentImageIndex + 1;
   }
 }

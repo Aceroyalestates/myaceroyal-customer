@@ -1,5 +1,5 @@
-<main class="flex flex-col w-full">
-  <div class="flex gap-2 items-center mb-8">
+<main class="property-detail-page flex flex-col w-full">
+  <div class="property-detail-page__header flex gap-2 items-center mb-8">
     <app-back class="cursor-pointer"></app-back>
     <h1 class="!text-[#4F4F4F] text-[32px] font-medium">View Property</h1>
   </div>
@@ -14,7 +14,7 @@
   <div class="text-center py-20">
     <p class="text-red-500 mb-4">{{ error }}</p>
     <button
-      (click)="loadProperty(id!)"
+      (click)="loadProperty(slug!)"
       class="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80"
     >
       Retry
@@ -56,21 +56,91 @@
   </div> -->
   
 
-  <div class="mb-8 md:mb-16">
-    <app-image-slider
-      [images]="propertyImages"
-      [showIndicators]="true"
-      [showNavigation]="true"
-      [showImageCounter]="true"
-      [height]="sliderHeight"
-      [objectFit]="'cover'"
-      [borderRadius]="'8px'"
-      [enableKeyboardNavigation]="true"
-      [enableSwipeNavigation]="true"
-      (imageChange)="onImageChange($event)"
-      (imageClick)="onImageClick($event)"
-    ></app-image-slider>
+  <div class="property-gallery mb-8 md:mb-16">
+    <div class="property-gallery__thumbs" *ngIf="propertyImages.length > 1">
+      @for (image of propertyImages; track image.src; let index = $index) {
+      <button
+        type="button"
+        class="property-gallery__thumb"
+        [class.property-gallery__thumb--active]="index === currentImageIndex"
+        (click)="selectImage(index)"
+        [attr.aria-label]="'Show property image ' + (index + 1)"
+      >
+        <img [src]="image.src" [alt]="image.alt" />
+      </button>
+      }
+    </div>
+
+    <div class="property-gallery__stage">
+      @if (currentImage) {
+      <div class="property-gallery__counter">
+        {{ currentImageIndex + 1 }} / {{ propertyImages.length }}
+      </div>
+
+      @if (propertyImages.length > 1) {
+      <button
+        type="button"
+        class="property-gallery__nav property-gallery__nav--prev"
+        (click)="showPreviousImage()"
+        aria-label="Previous property image"
+      >
+        <span>&lsaquo;</span>
+      </button>
+
+      <button
+        type="button"
+        class="property-gallery__nav property-gallery__nav--next"
+        (click)="showNextImage()"
+        aria-label="Next property image"
+      >
+        <span>&rsaquo;</span>
+      </button>
+      }
+
+      <img
+        class="property-gallery__image"
+        [src]="currentImage.src"
+        [alt]="currentImage.alt"
+      />
+      } @else {
+      <div class="property-gallery__empty">
+        <p>No property images available.</p>
+      </div>
+      }
+    </div>
   </div>
+
+  @if (hasVirtualTour) {
+  <section class="property-tour mb-8 md:mb-16">
+    <div class="property-tour__header">
+      <div>
+        <h2 class="property-tour__title">360 Tour</h2>
+        <p class="property-tour__copy">
+          Explore the property in a more immersive panoramic view.
+        </p>
+      </div>
+      <a
+        class="property-tour__link"
+        [href]="property.vr_link!"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open Full Screen
+      </a>
+    </div>
+
+    <div class="property-tour__frame-wrap">
+      <iframe
+        class="property-tour__frame"
+        [src]="safeVrLink"
+        title="Property virtual tour"
+        loading="lazy"
+        allow="fullscreen; xr-spatial-tracking"
+        referrerpolicy="strict-origin-when-cross-origin"
+      ></iframe>
+    </div>
+  </section>
+  }
 } @if (property) {
   <div class="flex gap-8">
     <nz-tabset class="w-full" nzSize="large" [(nzSelectedIndex)]="selectedIndex">
@@ -211,269 +281,304 @@
 
         <p class="!text-medium">{{ selectedUnit?.property_installment_plans[0].initial_amount | currency:'₦ ':'symbol':'1.0-0' }}</p>
       </span>
-      <button
-        type="button"
-        class="flex-1 items-center gap-3 rounded-full bg-primary py-4 px-10 text-[20px] !text-white font-medium cursor-pointer !mb-8 whitespace-nowrap !mt-12"
-        (click)="showUnitModal()"
-      >
-        Make Purchase
-      </button>
-      <button
-        (click)="bookInspection()"
-        class="flex-1 items-center gap-3 rounded-full border border-primary !text-primary hover:bg-primary hover:!text-white py-3 px-10 text-[20px] font-medium cursor-pointer whitespace-nowrap"
-      >
-        Book Inspection
-      </button>
+      <div class="flex flex-col sm:flex-row gap-3 !mt-10">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-full bg-primary py-3 px-6 text-[15px] !text-white font-medium cursor-pointer whitespace-nowrap"
+          (click)="showUnitModal()"
+        >
+          Make Purchase
+        </button>
+        <button
+          (click)="bookInspection()"
+          class="inline-flex items-center justify-center rounded-full border border-primary !text-primary hover:bg-primary hover:!text-white py-3 px-6 text-[15px] font-medium cursor-pointer whitespace-nowrap"
+        >
+          Book Inspection
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- Unit Selection Modal -->
+  <!-- Purchase Modal -->
   <nz-modal
-      [(nzVisible)]="isUnitModalVisible"
-      nzTitle="Unit Selection"
-      (nzOnCancel)="handleCancel()"
-      (nzOnOk)="handleUnitOk()"
-      [nzOkLoading]="isLoading"
-    >
-      <div *nzModalContent>
-        
-        <div class="flex flex-col w-80">
-          <label for="unitNumber" class="mb-2 font-medium text-gray-500"
-            >Enter your preferred number of units</label
-          >
-          <nz-form-control nzErrorTip="Please select a unit type">
-            <nz-select
-              id="unitNumber"
-              [(ngModel)]="selectedUnitNumber"
-              class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              nzPlaceHolder="Select from available number of units"
-            >
-              @for (number of availableUnitNumber; track number) {
-                <nz-option [nzValue]="number" [nzLabel]="number"></nz-option>
-              }
-            </nz-select>
-          </nz-form-control>
-          
+    [(nzVisible)]="isUnitModalVisible"
+    nzTitle="Make Payment"
+    (nzOnCancel)="handleCancel()"
+    (nzOnOk)="handleUnitOk()"
+    [nzOkLoading]="isLoading"
+    [nzWidth]="720"
+    [nzBodyStyle]="{ 'max-height': '72vh', 'overflow-y': 'auto', 'padding': '0 24px 16px' }"
+  >
+    <div *nzModalContent>
+      <div class="purchase-modal">
+        <div class="purchase-modal__hero">
+          <div>
+            <p class="purchase-modal__eyebrow">Purchase Setup</p>
+            <h3 class="purchase-modal__title">{{ property.name }}</h3>
+            <p class="purchase-modal__subtitle">
+              Choose your quantity, payment plan, and settlement method before proceeding.
+            </p>
+          </div>
+          <div class="purchase-modal__hero-badge">
+            <span>{{ selectedUnit?.unit_type?.name || 'Unit' }}</span>
+            <strong>{{ unitPrice | currency:'₦ ':'symbol':'1.0-0' }}</strong>
+          </div>
         </div>
-      </div>
-      <div *nzModalFooter>
-        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handleUnitOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedUnitNumber">Continue</button>
-      </div>
-    </nz-modal>
 
-    <!-- Plan Selection Modal -->
-    <nz-modal
-      [(nzVisible)]="isPlanModalVisible"
-      [nzTitle]="'Plan Selection For ' + (selectedUnitNumber || 0) + ' Unit(s)'"
-      (nzOnCancel)="handleCancel()"
-      (nzOnOk)="handlePlanOk()"
-      [nzOkLoading]="isLoading"
-    >
-      <div *nzModalContent>
-        
-        <div class="flex flex-col w-full">
-          <label for="paymentPlan" class="mb-2 font-medium text-gray-500"
-            >Select your preferred payment plan</label
-          >
-          <nz-radio-group [(ngModel)]="selectedPlan" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
-            <div class="flex flex-col w-full">
-                <label nz-radio [nzValue]="'1'" class="flex !items-center !mb-4 !text-primary"> 
-                  <div class="flex !items-center !gap-8"> 
-                    <span class="!text-gray-500">Outright Payment</span>
-                  </div> 
+        <div class="purchase-modal__steps">
+          <div class="purchase-modal__step" [class.purchase-modal__step--active]="purchaseStep >= 0">
+            <span class="purchase-modal__step-index">1</span>
+            <div>
+              <p class="purchase-modal__step-title">Setup</p>
+              <p class="purchase-modal__step-copy">Quantity and plan</p>
+            </div>
+          </div>
+          <div class="purchase-modal__step-divider" [class.purchase-modal__step-divider--active]="purchaseStep >= 1"></div>
+          <div class="purchase-modal__step" [class.purchase-modal__step--active]="purchaseStep >= 1">
+            <span class="purchase-modal__step-index">2</span>
+            <div>
+              <p class="purchase-modal__step-title">Codes</p>
+              <p class="purchase-modal__step-copy">Realtor and coupon</p>
+            </div>
+          </div>
+          <div class="purchase-modal__step-divider" [class.purchase-modal__step-divider--active]="purchaseStep >= 2"></div>
+          <div class="purchase-modal__step" [class.purchase-modal__step--active]="purchaseStep >= 2">
+            <span class="purchase-modal__step-index">3</span>
+            <div>
+              <p class="purchase-modal__step-title">Payment</p>
+              <p class="purchase-modal__step-copy">Review and continue</p>
+            </div>
+          </div>
+        </div>
+
+        @if (purchaseStep === 0) {
+          <div class="purchase-modal__section-grid">
+            <div class="purchase-modal__section">
+              <label for="unitNumber" class="purchase-modal__label">
+                Enter number of {{ quantityLabel.toLowerCase() }}
+              </label>
+              <p class="purchase-modal__helper">
+                Select how many {{ quantityLabel.toLowerCase() }} you want to reserve in this purchase.
+              </p>
+              <nz-form-control>
+                <nz-select
+                  id="unitNumber"
+                  [(ngModel)]="selectedUnitNumber"
+                  (ngModelChange)="onPurchaseContextChange()"
+                  nzPlaceHolder="Select quantity"
+                  class="purchase-modal__control"
+                >
+                  @for (number of availableUnitNumber; track number) {
+                    <nz-option [nzValue]="number" [nzLabel]="number"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </div>
+
+            <div class="purchase-modal__section" *ngIf="hasInstallmentPlans">
+              <label class="purchase-modal__label">Payment Option</label>
+              <p class="purchase-modal__helper">
+                Pick one payment option for this purchase.
+              </p>
+              <nz-radio-group [(ngModel)]="selectedPlan" (ngModelChange)="onPurchaseContextChange()" class="purchase-modal__choices">
+                <label nz-radio [nzValue]="outrightPlanValue" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPlan === outrightPlanValue">
+                  Outright Payment
                 </label>
                 @for (plan of selectedUnit?.property_installment_plans; track plan.plan_id) {
-                  <label nz-radio [nzValue]="plan.plan_id" class="flex !items-center !mb-4"> 
-                    <div class="flex !items-center !gap-8"> 
-                      <span class="!text-gray-500">{{ plan.property_plan.title + ' Installments' }}</span>
-                    </div> 
-                </label>
-            }
+                  <label
+                    nz-radio
+                    [nzValue]="'' + plan.plan_id"
+                    class="purchase-modal__choice"
+                    [class.purchase-modal__choice--selected]="selectedPlan === '' + plan.plan_id"
+                  >
+                    {{ plan.property_plan.title }}
+                  </label>
+                }
+              </nz-radio-group>
             </div>
-          </nz-radio-group>
+          </div>
+        }
 
-          <div class="flex flex-col w-full mt-4" *ngIf="selectedPlan !== '1'">
-            <label for="enteredAmount" class="mb-2 font-medium text-gray-500">Enter amount you want to pay</label>
+        <div class="purchase-modal__summary">
+          <div class="purchase-modal__summary-grid">
+            <div class="purchase-modal__metric">
+              <p>Selected {{ quantityLabel }}</p>
+              <h3>{{ selectedQuantity || 0 }}</h3>
+            </div>
+            <div class="purchase-modal__metric">
+              <p>Amount</p>
+              <h3 class="purchase-modal__metric--primary">
+                {{ purchaseTotalAmount | currency:'₦ ':'symbol':'1.0-0' }}
+              </h3>
+            </div>
+            <div class="purchase-modal__metric" *ngIf="!isOutrightPayment && selectedInstallmentPlan">
+              <p>Initial Payment</p>
+              <h3>
+                {{ minimumInstallmentPayment | currency:'₦ ':'symbol':'1.0-0' }}
+              </h3>
+            </div>
+            <div class="purchase-modal__metric" *ngIf="couponAccepted">
+              <p>Discounted Total</p>
+              <h3>
+                {{ discountedPurchaseTotal | currency:'₦ ':'symbol':'1.0-0' }}
+              </h3>
+            </div>
+          </div>
+
+          <div class="purchase-modal__section purchase-modal__section--nested" *ngIf="purchaseStep === 0 && !isOutrightPayment && selectedInstallmentPlan">
+            <label for="enteredAmount" class="purchase-modal__label">
+              Desired Amount To Pay
+            </label>
+            <p class="purchase-modal__helper">
+              You can pay above the initial payment, but not below it.
+            </p>
             <nz-form-control>
               <input
                 nz-input
                 id="enteredAmount"
                 type="text"
                 [(ngModel)]="enteredAmount"
-                [placeholder]="'Minimum: ' + (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!)"
-                class="w-full"
-                [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', align: 'left' }"
+                [placeholder]="'Minimum: ₦ ' + minimumInstallmentPayment.toLocaleString()"
+                [currencyMask]="{ prefix: '₦ ', thousands: ',', decimal: '.', precision: 0, align: 'left' }"
+                class="purchase-modal__input"
               />
             </nz-form-control>
           </div>
+        </div>
 
-          <div class="flex flex-col w-full mt-6">
-            <label for="couponCode" class="mb-2 font-medium text-gray-500 !mt-6"
-              >Coupon Code (Optional)</label
-            >
-            <nz-form-control>
-              <input
-                nz-input
-                id="couponCode"
-                [(ngModel)]="couponCode"
-                (ngModelChange)="onCouponCodeChange($event)"
-                placeholder="Enter coupon code"
-                type="text"
-                class="w-full"
-                [nzSize]="'large'"
-              />
-            </nz-form-control>
-
-            <div class="mt-2">
-              <nz-spin *ngIf="couponLoading"></nz-spin>
-              <div *ngIf="couponError" class="text-red-500 text-sm mt-2">{{ couponError }}</div>
-              <div *ngIf="couponResult" class="mt-3 p-3 border border-gray-300 rounded">
-                <div class="flex justify-between items-center mb-2">
-                  <div>
-                    <div class="text-gray-700 font-medium">{{ couponResult.code + ' Discount' }}</div>
-                    <div class="text-primary text-sm">{{ couponResult.discount_type === 'percent' ? (couponResult.value + '% off') : (couponResult.value | currency:'₦ ') }}</div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <!-- <div class="text-gray-600">Discount:</div>
-                    <div class="text-primary font-semibold">{{ discountAmountNumber | currency:'₦ ':'symbol':'1.0-0' }}</div> -->
-                    <button nz-button nzType="default" (click)="acceptCoupon()" [disabled]="couponAccepted">{{ couponAccepted ? 'Applied' : 'Apply' }}</button>
-                  </div>
-                </div>
+        @if (purchaseStep === 1) {
+          <div class="purchase-modal__section-grid">
+            <div class="purchase-modal__section">
+              <label for="refCode" class="purchase-modal__label">
+                Realtor's Unique Code
+              </label>
+              <p class="purchase-modal__helper">
+                Add the realtor code if someone referred you to this property.
+              </p>
+              <nz-form-control>
+                <input
+                  nz-input
+                  id="refCode"
+                  [(ngModel)]="refCode"
+                  (ngModelChange)="onRefCodeChange($event)"
+                  placeholder="Enter realtor code if available"
+                  type="text"
+                  class="purchase-modal__input"
+                />
+              </nz-form-control>
+              <nz-spin *ngIf="realtorLoading" class="mt-2"></nz-spin>
+              <p *ngIf="realtorError" class="purchase-modal__error">{{ realtorError }}</p>
+              <div *ngIf="realtorResult" class="purchase-modal__status-card">
+                <p class="purchase-modal__status-title">{{ realtorResult.name }}</p>
+                <p class="purchase-modal__status-copy">{{ realtorResult.email }}</p>
+                <label class="purchase-modal__checkbox">
+                  <input type="checkbox" [(ngModel)]="realtorManage" />
+                  <span>Allow this realtor manage the property on my behalf</span>
+                </label>
               </div>
             </div>
-            <label for="refCode" class="mb-2 font-medium text-gray-500"
-              >Referral Code (Optional)</label
-            >
-            <nz-form-control>
-              <input
-                nz-input
-                id="refCode"
-                [(ngModel)]="refCode"
-                (ngModelChange)="onRefCodeChange($event)"
-                placeholder="Enter referral code"
-                type="text"
-                class="w-full"
-                [nzSize]="'large'"
-              />
-            </nz-form-control>
 
-            <div class="mt-2">
-              <nz-spin *ngIf="realtorLoading"></nz-spin>
-              <div *ngIf="realtorError" class="text-red-500 text-sm mt-2">{{ realtorError }}</div>
-              <div *ngIf="realtorResult" class="mt-3 p-3 border border-gray-300 rounded flex items-center justify-between">
-                <div>
-                  <div class="text-gray-700 font-medium">{{ realtorResult.name }}</div>
-                  <div class="text-gray-500 text-sm">{{ realtorResult.email }}</div>
-                </div>
-                <div>
-                  <button nz-button nzType="default" (click)="acceptRealtor()" [disabled]="realtorAccepted">
-                    {{ realtorAccepted ? 'Accepted' : 'Accept' }}
+            <div class="purchase-modal__section">
+              <label for="couponCode" class="purchase-modal__label">
+                Coupon Code
+              </label>
+              <p class="purchase-modal__helper">
+                Enter a coupon code to validate any discount on this purchase.
+              </p>
+              <nz-form-control>
+                <input
+                  nz-input
+                  id="couponCode"
+                  [(ngModel)]="couponCode"
+                  (ngModelChange)="onCouponCodeChange($event)"
+                  placeholder="Enter coupon code if available"
+                  type="text"
+                  class="purchase-modal__input"
+                />
+              </nz-form-control>
+              <nz-spin *ngIf="couponLoading" class="mt-2"></nz-spin>
+              <p *ngIf="couponError" class="purchase-modal__error">{{ couponError }}</p>
+              <div *ngIf="couponResult" class="purchase-modal__status-card">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="purchase-modal__status-title">{{ couponResult.code }}</p>
+                    <p class="purchase-modal__status-accent">
+                      {{ couponResult.discount_type === 'percent' ? (couponResult.value + '% off') : ((couponResult.value || 0) | currency:'₦ ':'symbol':'1.0-0') }}
+                    </p>
+                  </div>
+                  <button nz-button nzType="default" class="purchase-modal__apply-button" (click)="acceptCoupon()" [disabled]="couponAccepted">
+                    {{ couponAccepted ? 'Applied' : 'Apply' }}
                   </button>
                 </div>
+                <p class="purchase-modal__status-copy mt-2" *ngIf="discountAmountNumber !== null">
+                  Discount:
+                  <span class="purchase-modal__status-title">
+                    {{ discountAmountNumber | currency:'₦ ':'symbol':'1.0-0' }}
+                  </span>
+                </p>
               </div>
-              <!-- realtor manage switch shown when realtor accepted -->
-              <div *ngIf="realtorResult && realtorAccepted" class="mt-3 flex items-center justify-between">
-                <div class="text-gray-700">Let this realtor manage the property?</div>
-                <nz-switch [(ngModel)]="realtorManage"></nz-switch>
-              </div>
             </div>
-
           </div>
-          <!-- Total Amount and Initial Amount -->
-          <div class="flex w-full mt-6 justify-between gap-6">
-            <div class="flex flex-col w-full">
-              <p class="text-gray-500 text-sm">Total Amount</p>
-              <h2 class="!text-gray-600 text-normal text-[20px]" [class.line-through]="couponAccepted">
-                  {{ (selectedUnit?.price * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0' }}
-              </h2>
-            </div>
-            <div *ngIf="selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0 && selectedPlan !== '1'" class="flex flex-col w-full">
-              <p class="text-gray-500 text-sm">Initial Amount</p>
-              <h2 class="!text-gray-600 text-normal text-[20px]">
-                  {{
-                    (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-                  }}
-              </h2>
-            </div>
-            <div class="flex flex-col w-full" *ngIf="couponAccepted">
-              <p class="text-gray-500 text-sm">Final Amount</p>
-              <h2 class="!text-gray-600 text-normal text-[20px]">
-                  {{
-                    (finalAmount) | currency:'₦ ':'symbol':'1.0-0'
-                  }}
-              </h2>
-            </div>
-            
+        }
 
+        @if (purchaseStep === 2) {
+          <div class="purchase-modal__section-grid">
+            <div class="purchase-modal__section">
+              <label class="purchase-modal__label">Payment Method</label>
+              <p class="purchase-modal__helper">
+                This is the final step before payment is initiated.
+              </p>
+              <nz-radio-group [(ngModel)]="selectedPaymentMethod" class="purchase-modal__choices">
+                <label nz-radio [nzValue]="2" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPaymentMethod === 2" *ngIf="canUsePaystack">
+                  Pay with Paystack
+                </label>
+                <label nz-radio [nzValue]="3" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPaymentMethod === 3">
+                  Bank Draft
+                </label>
+                <label nz-radio [nzValue]="1" class="purchase-modal__choice" [class.purchase-modal__choice--selected]="selectedPaymentMethod === 1">
+                  Bank Transfer
+                </label>
+              </nz-radio-group>
+            </div>
           </div>
-
-        </div>
+        }
       </div>
-      <div *nzModalFooter>
-        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePlanOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedPlan || (selectedPlan !== '1' && !enteredAmount)">Continue</button>
-      </div>
-    </nz-modal>
-
-    <!-- Payment Method Modal -->
-    <nz-modal
-      [(nzVisible)]="isPaymentMethodModalVisible"
-      nzTitle="Payment Method"
-      [nzOkLoading]="isLoading"
-    >
-      <div *nzModalContent>
-        
-        <div class="flex flex-col w-80">
-          <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
-          <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
-            @if(selectedPlan === '1') {
-              {{
-                finalAmount || totalAmount | currency:'₦ ':'symbol':'1.0-0'
-              }}
-            } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
-              {{
-                enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-              }}
-            }
-              
-          </h2>
-
-          <nz-radio-group [(ngModel)]="selectedPaymentMethod" class="!mt-6 flex flex-col !items-center !gap-6 !text-gray-500">
-            <label nz-radio [nzValue]="1" class="flex !items-center !mb-4 !text-primary"> 
-              <div class="flex !items-center !gap-8"> 
-                <div class="p-2 bg-red-100 rounded-full">
-                  <app-icon name="home" class="!text-primary" />
-                </div> 
-                <span class="!text-gray-500">Bank Transfer </span>
-              </div> 
-            </label>
-            <!-- only show paystack if amount is 100000000 or less -->
-            <label nz-radio [nzValue]="2" class="flex !items-center !mb-4" *ngIf="(selectedPlan === '1' && (finalAmount || totalAmount) <= 100000000) || (selectedPlan !== '1' && (enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!)) <= 100000000)"> 
-              <div class="flex !items-center !gap-8"> 
-                <div class="p-2 bg-red-100 rounded-full">
-                  <app-icon name="credit-card" class="!text-primary" />
-                </div> 
-                <span class="!text-gray-500">Pay with Paystack </span>
-              </div> 
-            </label>
-            <label nz-radio [nzValue]="3" class="flex !items-center !mb-4"> 
-              <div class="flex !items-center !gap-8"> 
-                <div class="p-2 bg-red-100 rounded-full">
-                  <app-icon name="credit-card" class="!text-primary" />
-                </div> 
-                <span class="!text-gray-500">Bank Draft </span>
-              </div> 
-            </label>
-          </nz-radio-group>
-          
-        </div>
-      </div>
-      <div *nzModalFooter>
-        <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentMethodOk()" [nzLoading]="isLoading" [disabled]="isLoading" [disabled]="!selectedPaymentMethod">Continue</button>
-      </div>
-    </nz-modal>
+    </div>
+    <div *nzModalFooter>
+      <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
+      <button
+        *ngIf="purchaseStep > 0"
+        class="!rounded !text-gray-500 hover:!border-primary"
+        nz-button
+        nzType="default"
+        (click)="goToPreviousPurchaseStep()"
+        [disabled]="isLoading"
+      >
+        Back
+      </button>
+      <button
+        *ngIf="!isOnPurchaseReviewStep"
+        class="!rounded !bg-primary !border-none !text-white disabled:opacity-50"
+        nz-button
+        nzType="primary"
+        (click)="goToNextPurchaseStep()"
+        [disabled]="isLoading"
+      >
+        Next
+      </button>
+      <button
+        *ngIf="isOnPurchaseReviewStep"
+        class="!rounded !bg-primary !border-none !text-white disabled:opacity-50"
+        nz-button
+        nzType="primary"
+        (click)="handleUnitOk()"
+        [nzLoading]="isLoading"
+        [disabled]="isLoading || !selectedPaymentMethod"
+      >
+        Continue
+      </button>
+    </div>
+  </nz-modal>
 
     <!-- Bank Transfer Modal -->
     <nz-modal
@@ -487,15 +592,7 @@
 
         <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
         <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
-          @if(selectedPlan === '1') {
-              {{
-                finalAmount || totalAmount | currency:'₦ ':'symbol':'1.0-0'
-              }}
-            } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
-              {{
-                enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-              }}
-            }
+          {{ payableAmount | currency:'₦ ':'symbol':'1.0-0' }}
         </h2>
 
         <p class="!text-gray-500 text-sm">Kindly make bank transfer to any of the bank account details below, Kindly note that after making payment, we would have to verify your payment before your transaction will be considered successful.</p>
@@ -639,15 +736,7 @@
         
         <h1 for="paymentMethod" class="!mb-2 !text-gray-500">Amount</h1>
         <h2 class="!text-gray-600 text-normal text-[20px] whitespace-nowrap !mb-6">
-          @if(selectedPlan === '1') {
-              {{
-                finalAmount || totalAmount | currency:'₦ ':'symbol':'1.0-0'
-              }}
-            } @else if(selectedUnit?.property_installment_plans && selectedUnit?.property_installment_plans.length > 0) {
-              {{
-                enteredAmount || (selectedUnit?.property_installment_plans[0].initial_amount * selectedUnitNumber!) | currency:'₦ ':'symbol':'1.0-0'
-              }}
-            }
+          {{ payableAmount | currency:'₦ ':'symbol':'1.0-0' }}
         </h2>
 
         <p class="!text-gray-500 text-sm">Kindly note that we would need to verify and make sure that the cheque has been cleared before this can be referred to as a successful transaction.</p>
@@ -662,7 +751,7 @@
       </div>
     </nz-modal>
 
-    <!-- Payment Success Modal -->
+    <!-- Offline Proof Submission Modal -->
     <nz-modal
       [(nzVisible)]="isPaymentSuccessModalVisible"
       nzTitle=""
@@ -673,10 +762,13 @@
       <div *nzModalContent>
         <div class="flex justify-center my-6 bg-red-50 p-2 rounded-full w-fit mx-auto">
           <div class="flex justify-center items-center bg-red-100 p-4 rounded-full">
-            <app-icon name="check" class="!text-primary !text-2xl"></app-icon>
+            <app-icon name="info" class="!text-primary !text-2xl"></app-icon>
           </div>
         </div>
-        <h1 class="!text-gray-600 justify-center text-center text-lg font-semibold !my-4">SUCCESS</h1>
+        <h1 class="!text-gray-600 justify-center text-center text-lg font-semibold !my-4">Submit Payment Proof</h1>
+        <p class="!text-gray-500 text-sm text-center !mb-5">
+          Your payment will remain pending until the proof is reviewed and confirmed.
+        </p>
         <div class="relative flex items-center justify-center cursor-pointer border border-gray-400 w-full rounded-lg hover:bg-gray-100 !px-4 !mb-4">
           <input
               type="file"
@@ -696,12 +788,14 @@
 
         <div class="flex items-center gap-4">
           <app-icon name="info" class="!text-gray-400 !text-xl"></app-icon>
-          <p class="!text-gray-500 text-sm">Please kindly note that you need to fill our purchase form before your property allocation can be completed.</p>
+          <p class="!text-gray-500 text-sm">
+            Please note that offline payments are only treated as successful after verification. Property allocation continues after the purchase form and payment review are completed.
+          </p>
         </div>
       </div>
       <div *nzModalFooter>
         <button class="!rounded !text-gray-500 hover:!border-primary" nz-button nzType="default" (click)="handleCancel()" [disabled]="isLoading">Cancel</button>
-        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Continue</button>
+        <button class="!rounded !bg-primary !border-none !text-white disabled:opacity-50" nz-button nzType="primary" (click)="handlePaymentSuccessOk()" [nzLoading]="isLoading" [disabled]="isLoading || !selectedFile">Submit for Review</button>
       </div>
     </nz-modal>
 

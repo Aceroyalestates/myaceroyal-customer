@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { SharedModule } from 'src/app/shared/shared.module';
@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { Property, PropertyFilters, PropertyType } from 'src/app/core/models/properties';
 import { PaginationData } from 'src/app/shared/components/pagination/pagination.component';
 import { PropertiesService } from 'src/app/core/services/properties.service';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-explore',
@@ -15,6 +17,11 @@ import { PropertiesService } from 'src/app/core/services/properties.service';
   styleUrl: './explore.component.css'
 })
 export class ExploreComponent {
+  private readonly minimumSearchLength = 4;
+  private readonly searchDebounceMs = 600;
+  private readonly searchInput$ = new Subject<string>();
+  private readonly subscriptions = new Subscription();
+
   properties: Property[] = [];
   propertyTypes: PropertyType[] = [];
   loading = false;
@@ -35,7 +42,7 @@ export class ExploreComponent {
 
   emptyArray: any[] = new Array(12).fill('');
 
-  getRowLink = (row: Property) => `/main/explore/view/${row.id}`;
+  getRowLink = (row: Property) => `/main/explore/view/${row.slug}`;
   selectedproperty = signal<Property[]>([]);
 
   constructor(
@@ -48,8 +55,40 @@ export class ExploreComponent {
   }
 
   ngOnInit(): void {
+    const searchSub = this.searchInput$
+      .pipe(
+        map((query) => query.trim()),
+        debounceTime(this.searchDebounceMs),
+        distinctUntilChanged()
+      )
+      .subscribe((query) => {
+        const hasActiveSearch = !!this.filters.search;
+
+        if (query.length >= this.minimumSearchLength) {
+          this.filters = {
+            ...this.filters,
+            search: query,
+          };
+          this.loadProperties(1, this.pageSize);
+          return;
+        }
+
+        if (hasActiveSearch) {
+          this.filters = {
+            ...this.filters,
+            search: undefined,
+          };
+          this.loadProperties(1, this.pageSize);
+        }
+      });
+
+    this.subscriptions.add(searchSub);
     this.loadPropertyTypes();
     this.loadProperties();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   onImageError(event: Event): void {
@@ -97,11 +136,7 @@ export class ExploreComponent {
 
   onSearch(query: string): void {
     this.searchQuery = query;
-    this.filters = {
-      ...this.filters,
-      search: query.trim(),
-    };
-    this.loadProperties(1, this.pageSize);
+    this.searchInput$.next(query);
   }
 
   applyFilters(): void {
@@ -155,8 +190,8 @@ export class ExploreComponent {
     return Number.isFinite(parsedValue) ? parsedValue : undefined;
   }
 
-  handleViewProperty(id: string | number) {
-    this.router.navigateByUrl(`/main/explore/view/${id}`);
+  handleViewProperty(slug: string) {
+    this.router.navigateByUrl(`/main/explore/view/${slug}`);
   }
 
   handleSelectedData(selected: Property[]) {
@@ -168,7 +203,7 @@ export class ExploreComponent {
     console.log('Table action:', event.action, 'on row:', event.row);
     switch (event.action) {
       case 'view':
-        this.handleViewProperty(event.row.id);
+        this.handleViewProperty(event.row.slug);
         break;
       default:
         console.log('Unknown action:', event.action);
@@ -177,6 +212,6 @@ export class ExploreComponent {
 
   onRowClick(row: Property): void {
     console.log('Row clicked:', row);
-    this.handleViewProperty(row.id);
+    this.handleViewProperty(row.slug);
   }
 }

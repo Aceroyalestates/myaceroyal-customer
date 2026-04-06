@@ -1,5 +1,3 @@
-import { e } from "node_modules/@angular/material/ripple.d-BxTUZJt7";
-
 export interface PaymentSchedulesResponse {
   success: boolean;
   message: string;
@@ -107,7 +105,7 @@ export interface PaymentData {
             duration_months: number;
             initial_amount: number;
             total_price: number;
-        };
+        } | null;
     };
 }
 
@@ -127,6 +125,7 @@ export interface ValidateCouponResponse {
       is_active: boolean;
   } | null;
   discount: number | null;
+  discounted_total?: number | null;
 }
 
 export interface RealtorByRefCodeResponse {
@@ -174,8 +173,8 @@ export interface SettingsResponse {
 
 
 export interface StartOfflinePurchasePayload {
-  unit_id: number;
-  plan_id?: number;
+  unit_id: string;
+  plan_id?: string;
   quantity: number;
   amount_paid: number;
   proof_url: string;
@@ -210,8 +209,8 @@ export interface ContinueOfflinePurchaseResponse {
 }
 
 export interface StartOnlinePurchasePayload {
-  unit_id: number;
-  plan_id?: number;
+  unit_id: string;
+  plan_id?: string;
   quantity: number;
   amount_paid: number;
   referral_code?: string;
@@ -387,7 +386,7 @@ export interface PaymentHistoryItem {
   method: string;
   status: 'paid' | 'pending' | string; // Use union type for known statuses
   payment_type: 'installment' | 'outright' | string;
-  payment_reference: string;
+  payment_reference: string | null;
   gateway_reference: string | null;
   proof_url: string | null;
   applied_to: AppliedTo;
@@ -396,7 +395,7 @@ export interface PaymentHistoryItem {
   paid_at: string | null; // ISO 8601 string date
   approved_at: string | null; // ISO 8601 string date
   updated_at: string; // ISO 8601 string date
-  purchase: Purchase;
+  purchase: PurchaseData;
 }
 
 
@@ -406,12 +405,12 @@ export interface PaymentHistoryItem {
  * Represents the pagination details.
  */
 export interface Pagination {
-  currentPage: number;
-  perPage: number;
-  totalItems: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+  current_page: number;
+  per_page: number;
+  total_items: number;
+  total_pages: number;
+  has_next_page: boolean;
+  has_previous_page: boolean;
 }
 
 /**
@@ -429,15 +428,21 @@ export interface Summary {
   total_payments: number;
   total_amount: number;
   status_breakdown: {
-    pending: StatusDetail;
-    paid: StatusDetail;
     [key: string]: StatusDetail; // Allow for other statuses dynamically
   };
   method_breakdown: {
-    bank_transfer: StatusDetail;
-    paystack: StatusDetail;
     [key: string]: StatusDetail; // Allow for other methods dynamically
   };
+}
+
+export interface PaymentHistoryFilters {
+  status?: 'pending' | 'paid' | 'approved' | 'failed' | 'cancelled' | 'processing' | '';
+  method?: 'paystack' | 'bank_transfer' | 'bank_deposit' | '';
+  purchase_id?: string;
+  from_date?: string;
+  to_date?: string;
+  sort_by?: 'created_at' | 'amount' | 'status' | 'method' | 'paid_at' | 'approved_at';
+  sort_order?: 'ASC' | 'DESC';
 }
 
 
@@ -453,4 +458,3 @@ export interface PaymentHistoryResponse {
   pagination: Pagination;
   summary: Summary;
 }
-

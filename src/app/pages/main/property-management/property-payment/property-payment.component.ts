@@ -1,15 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { PropertiesService } from 'src/app/core/services/properties.service';
 import { SharedModule } from 'src/app/shared/shared.module';
-import { NzImage, NzImageModule, NzImageService } from 'ng-zorro-antd/image';
-import { NzCarouselModule } from 'ng-zorro-antd/carousel';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ContinueOfflinePurchasePayload, ContinueOnlinePurchasePayload, DefaultBankAccount, StartOnlinePurchasePayload } from 'src/app/core/models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOnlinePurchasePayload, DefaultBankAccount } from 'src/app/core/models/payment';
 import { FormsModule } from '@angular/forms';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -21,16 +19,14 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ImageService } from 'src/app/core/services/image.service';
 import { ImageUploadApiResponse } from 'src/app/core/models/images';
-import { ImageSliderComponent, ImageSliderItem } from 'src/app/shared/components/image-slider/image-slider.component';
+import { Property } from 'src/app/core/models/properties';
+import type { ImageSliderItem } from 'src/app/shared/components/image-slider/image-slider.component';
 
 @Component({
   selector: 'app-property-payment',
   imports: [
     CommonModule,
     SharedModule,
-    RouterLink,
-    NzImageModule,
-    NzCarouselModule,
     NzModalModule,
     FormsModule,
     NgxCurrencyDirective,
@@ -39,8 +35,7 @@ import { ImageSliderComponent, ImageSliderItem } from 'src/app/shared/components
     NzSelectModule,
     NzButtonModule,
     NzRadioModule,
-    NzTabsModule,
-    ImageSliderComponent
+    NzTabsModule
   ],
   templateUrl: './property-payment.component.html',
   styleUrl: './property-payment.component.css'
@@ -49,7 +44,6 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   id: string | null = null;
   private destroy$ = new Subject<void>();
   propertyPurchaseDetails: any = null;
-  images: NzImage[] = [];
   isPaymentMethodModalVisible = false;
   enteredAmount: number | null = null;
   currentSchedule: any = null;
@@ -64,9 +58,10 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   defaultBankAccounts: DefaultBankAccount[] = [];
   schedules: any[] = [];
   property: any = null;
+  propertyDetails: Property | null = null;
   purchaseSummary: any = null;
   propertyImages: ImageSliderItem[] = [];
-  sliderHeight = '300px';
+  currentImageIndex = 0;
 
 
   constructor(
@@ -74,7 +69,6 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     private router: Router,
     private paymentService: PaymentService,
     private propertyService: PropertiesService,
-    private nzImageService: NzImageService,
     private notificationService: NzNotificationService,
         private message: NzMessageService,
         private imageService: ImageService
@@ -83,28 +77,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id');
     this.getPurchaseDetails(this.id!);
-    this.getUserSchedules(this.id!);
     this.getDefaultBankAccounts();
-    
-    // Set initial slider height based on screen size
-    this.updateSliderHeight();
-    
-    // Listen for window resize events
-    window.addEventListener('resize', this.updateSliderHeight.bind(this));
-  }
-
-  updateSliderHeight(): void {
-    // 300px on mobile (< 768px), 550px from tablet and above
-    this.sliderHeight = window.innerWidth >= 768 ? '550px' : '300px';
-  }
-
-  onImageChange(index: number): void {
-    console.log('Image changed to index:', index);
-  }
-
-  onImageClick(image: ImageSliderItem): void {
-    console.log('Image clicked:', image);
-    // You can implement a lightbox or modal here if needed
   }
 
   showPaymentMethodModal(schedule: any): void {
@@ -188,11 +161,30 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
       next: (response) => {
         console.log('Purchase details:', response);
         this.propertyPurchaseDetails = response.data;
-        this.images = response.data.unit.property.property_images.map((img: any) => ({ src: img.image_url }));
+        this.loadPropertyDetails(response.data.unit.property.id);
         this.preparePropertyImages();
+        if (this.shouldLoadSchedules) {
+          this.getUserSchedules(purchaseId);
+        } else {
+          this.schedules = [];
+          this.isLoading = false;
+        }
       },
       error: (error) => {
         console.error('Error fetching purchase details:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadPropertyDetails(propertyId: string): void {
+    this.propertyService.getPropertyById(propertyId).subscribe({
+      next: (property) => {
+        this.propertyDetails = property;
+      },
+      error: (error) => {
+        console.error('Error fetching full property details:', error);
+        this.propertyDetails = null;
       }
     });
   }
@@ -209,21 +201,47 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error fetching payment schedules:', error);
+        this.schedules = [];
         this.isLoading = false;
       }
     });
   }
 
-  getProperty(propertyId: string) {
-    this.propertyService.getPropertyById(propertyId).subscribe({
-      next: (response: any) => {
-        console.log('Property details:', response);
-        this.property = response;
-      },
-      error: (error: any) => {
-        console.error('Error fetching property details:', error);
-      }
-    }); 
+  get shouldLoadSchedules(): boolean {
+    return !!this.propertyPurchaseDetails?.plan_id;
+  }
+
+  get paymentTypeLabel(): string {
+    if (!this.propertyPurchaseDetails) {
+      return 'N/A';
+    }
+
+    return this.propertyPurchaseDetails.plan_id ? 'Installment' : 'Outright';
+  }
+
+  get paymentModeLabel(): string {
+    return this.formatPaymentMethod(this.propertyPurchaseDetails?.payment_method);
+  }
+
+  get isOfflinePaymentMode(): boolean {
+    const method = this.propertyPurchaseDetails?.payment_method;
+    return method === 'bank_transfer' || method === 'cheque' || method === 'bank_draft' || method === 'bank_deposit';
+  }
+
+  get isPendingPaystackPayment(): boolean {
+    return this.propertyPurchaseDetails?.payment_method === 'paystack' && this.propertyPurchaseDetails?.status === 'in-progress';
+  }
+
+  formatPaymentMethod(method: string | null | undefined): string {
+    if (!method) {
+      return 'N/A';
+    }
+
+    if (method === 'cheque') {
+      return 'Bank Draft';
+    }
+
+    return method.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   startOnlinePurchase(): void {
@@ -278,7 +296,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
           next: (res) => {
             this.isLoading = false;
             console.log('Offline purchase initiated successfully:', res);
-            this.notificationService.success('Success', 'Payment initiated. Awaiting approval.');
+            this.notificationService.info('Payment in review', 'Transaction submitted and currently under finance review.');
             // Close all modals and reset state as needed
             this.handleCancel();
             // navigate to subscription page
@@ -388,6 +406,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     private preparePropertyImages(): void {
     if (!this.propertyPurchaseDetails || !this.propertyPurchaseDetails.unit || !this.propertyPurchaseDetails.unit.property) {
       this.propertyImages = [];
+      this.currentImageIndex = 0;
       return;
     }
 
@@ -419,10 +438,39 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
         }
       ];
     }
+    this.currentImageIndex = 0;
   }
 
-  onClickImage(): void {
-    this.nzImageService.preview(this.images, { nzZoom: 1.5, nzRotate: 0 });
+  get currentImage(): ImageSliderItem | null {
+    return this.propertyImages[this.currentImageIndex] ?? null;
+  }
+
+  selectImage(index: number): void {
+    if (index >= 0 && index < this.propertyImages.length) {
+      this.currentImageIndex = index;
+    }
+  }
+
+  showPreviousImage(): void {
+    if (this.propertyImages.length <= 1) {
+      return;
+    }
+
+    this.currentImageIndex =
+      this.currentImageIndex === 0
+        ? this.propertyImages.length - 1
+        : this.currentImageIndex - 1;
+  }
+
+  showNextImage(): void {
+    if (this.propertyImages.length <= 1) {
+      return;
+    }
+
+    this.currentImageIndex =
+      this.currentImageIndex === this.propertyImages.length - 1
+        ? 0
+        : this.currentImageIndex + 1;
   }
 
     ngOnDestroy(): void {

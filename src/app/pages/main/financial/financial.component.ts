@@ -1,76 +1,85 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { PaymentData, PaymentScheduleDashboard, PaymentSchedulesResponse, PaymentSummary } from 'src/app/core/models/payment';
+import { PaymentHistoryFilters, PaymentHistoryItem, PaymentSummary } from 'src/app/core/models/payment';
 import { PaymentService } from 'src/app/core/services/payment.service';
 import { SharedModule } from 'src/app/shared/shared.module';
+
+type PaymentSortBy = NonNullable<PaymentHistoryFilters['sort_by']>;
 
 @Component({
   selector: 'app-financial',
   imports: [
-    CommonModule, 
-    SharedModule, 
-    NzTabsModule,
-    NzTableModule
+    CommonModule,
+    FormsModule,
+    SharedModule,
+    NzTableModule,
+    NzSelectModule,
+    NzInputModule,
+    NzButtonModule,
+    NzPaginationModule
   ],
   templateUrl: './financial.component.html',
   styleUrl: './financial.component.css'
 })
 export class FinancialComponent {
-stats: { title: string; value: string }[] = [
-      { title: 'Total Amount Paid', value: '₦20,000,000' },
-      { title: 'Total Installment Amount', value: 'N/A' },
-      { title: 'Next installment', value: 'N/A' },
-    ];
+  readonly statusOptions = ['pending', 'paid', 'approved', 'failed', 'cancelled', 'processing'];
+  readonly methodOptions = ['paystack', 'bank_transfer', 'bank_deposit'];
+  readonly sortByOptions: PaymentSortBy[] = [
+    'created_at',
+    'amount',
+    'status',
+    'method',
+    'paid_at',
+    'approved_at'
+  ];
 
-  paymentScheduleDashboard: PaymentScheduleDashboard | null = null;
   paymentSummary: PaymentSummary | null = null;
-  paymentHistory: PaymentData[] = [];
-  pendingPayments: PaymentData[] = [];
-  completedPayments: PaymentData[] = [];
-  isLoading: boolean = false;
+  paymentHistory: PaymentHistoryItem[] = [];
+  isLoading = false;
 
-  constructor(private paymentService: PaymentService) { }
+  filters: PaymentHistoryFilters = {
+    status: '',
+    method: '',
+    purchase_id: '',
+    from_date: '',
+    to_date: '',
+    sort_by: 'created_at',
+    sort_order: 'DESC'
+  };
+
+  pageIndex = 1;
+  pageSize = 10;
+  totalItems = 0;
+
+  constructor(private paymentService: PaymentService) {}
 
   ngOnInit(): void {
-    this.loadPaymentSchedules();
-    this.getPaymentHistory();
+    this.loadPaymentHistory();
   }
 
-  pay(): void {
-    // Implement payment logic here
-    console.log('Payment initiated');
-  }
-
-  downloadReceipt(paymentId: string): void {
-    // Implement receipt download logic here
-    console.log(`Downloading receipt for payment ID: ${paymentId}`);
-  }
-
-
-  loadPaymentSchedules(): void {
+  loadPaymentHistory(page: number = this.pageIndex): void {
     this.isLoading = true;
-    this.paymentService.getPaymentSchedules().subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        this.paymentScheduleDashboard = response.dashboard;
-      },
-      error: (error) => {
-        this.isLoading = false;
-        console.error('Error loading payment schedules:', error);
-      }
-    });
-  }
+    this.pageIndex = page;
 
-  getPaymentHistory(): void {
-    this.isLoading = true;
-    this.paymentService.getPaymentHistory().subscribe({
+    this.paymentService.getPaymentHistory(
+      this.pageIndex,
+      this.pageSize,
+      this.filters.sort_by || 'created_at',
+      this.filters.sort_order || 'DESC',
+      this.filters
+    ).subscribe({
       next: (response) => {
         this.paymentHistory = response.data;
         this.paymentSummary = response.summary;
-        this.pendingPayments = this.paymentHistory.filter(payment => payment.status === 'pending');
-        this.completedPayments = this.paymentHistory.filter(payment => payment.status === 'paid');
+        this.pageIndex = response.pagination.current_page;
+        this.pageSize = response.pagination.per_page;
+        this.totalItems = response.pagination.total_items;
         this.isLoading = false;
       },
       error: (error) => {
@@ -79,5 +88,50 @@ stats: { title: string; value: string }[] = [
       }
     });
   }
-    
+
+  applyFilters(): void {
+    this.loadPaymentHistory(1);
   }
+
+  resetFilters(): void {
+    this.filters = {
+      status: '',
+      method: '',
+      purchase_id: '',
+      from_date: '',
+      to_date: '',
+      sort_by: 'created_at',
+      sort_order: 'DESC'
+    };
+    this.loadPaymentHistory(1);
+  }
+
+  onPageIndexChange(page: number): void {
+    this.loadPaymentHistory(page);
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.loadPaymentHistory(1);
+  }
+
+  get statusKeys(): string[] {
+    return Object.keys(this.paymentSummary?.status_breakdown || {});
+  }
+
+  get methodKeys(): string[] {
+    return Object.keys(this.paymentSummary?.method_breakdown || {});
+  }
+
+  formatLabel(value: string): string {
+    return value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  openProof(url: string | null): void {
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
