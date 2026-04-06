@@ -1,6 +1,6 @@
-<div class="w-full bg-white rounded-lg shadow-sm" [ngClass]="{ 'dark:bg-[#222] dark:text-[#fafafa]': isDarkMode }">
+<div class="table-shell w-full bg-white rounded-lg shadow-sm">
   <!-- Search and Filter Bar -->
-  <div *ngIf="showSearch || showFilters" class="p-4 border-b border-gray-200" [ngClass]="{ 'dark:bg-[#222] dark:border-[#444] dark:text-[#fafafa]': isDarkMode }">
+  <div *ngIf="showSearch || showFilters" class="table-shell__toolbar p-4 border-b border-gray-200">
     <div class="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 lg:items-center lg:justify-between">
 
       <!-- Search Section -->
@@ -38,7 +38,7 @@
           nzType="link"
           nzSize="small"
           (click)="clearAllFilters()"
-          class="text-gray-500 hover:text-gray-700">
+          class="table-shell__clear text-gray-500 hover:text-gray-700">
           <span nz-icon nzType="close"></span>
           Clear Filters
         </button>
@@ -48,7 +48,7 @@
       <div class="flex items-center space-x-2">
         <!-- Bulk Actions -->
         <div *ngIf="showSelection && selectedRows.length > 0" class="flex items-center space-x-2">
-          <span class="text-sm text-gray-600">{{ selectedRows.length }} selected</span>
+          <span class="table-shell__meta text-sm text-gray-600">{{ selectedRows.length }} selected</span>
           <nz-divider nzType="vertical"></nz-divider>
         </div>
       </div>
@@ -68,7 +68,7 @@
 
         <!-- Table Header -->
         <thead>
-          <tr class="bg-gray-50">
+          <tr class="table-shell__head-row bg-gray-50">
             <!-- Selection Column -->
             <th
               *ngIf="showSelection"
@@ -83,7 +83,7 @@
             <!-- Data Columns -->
             <th
               *ngFor="let column of columns"
-              [class]="'border-b border-gray-200 px-4 py-3 text-left font-medium text-gray-900 ' +
+              [class]="'table-shell__th border-b border-gray-200 px-4 py-3 text-left font-medium text-gray-900 ' +
                        (column.sortable ? 'cursor-pointer hover:bg-gray-100 ' : '') +
                        (column.align === 'center' ? 'text-center ' : '') +
                        (column.align === 'right' ? 'text-right ' : '')"
@@ -114,7 +114,7 @@
             <!-- Actions Column -->
             <th
               *ngIf="actions.length > 0"
-              class="border-b border-gray-200 px-4 py-3 text-center font-medium text-gray-900 w-20">
+              class="table-shell__th border-b border-gray-200 px-4 py-3 text-center font-medium text-gray-900 w-20">
               Actions
             </th>
           </tr>
@@ -124,7 +124,7 @@
         <tbody>
           <tr
             *ngFor="let row of displayData; trackBy: trackByFn; let i = index"
-            [class]="'border-b border-gray-100 transition-colors ' +
+            [class]="'table-shell__row border-b border-gray-100 transition-colors ' +
                      (enableRowClick ? 'cursor-pointer hover:bg-gray-50 ' : '') +
                      (isRowSelected(row) ? 'bg-blue-50 ' : '')"
             (click)="onRowClick(row)">
@@ -167,7 +167,7 @@
                 <!-- Default Cell -->
                 <ng-template #defaultCell>
                   <span
-                    [class]="'text-gray-900 ' +
+                    [class]="'table-shell__cell-text text-gray-900 ' +
                              (column.type === 'number' ? 'font-mono ' : '')"
                     [title]="formatCellValue(getCellValue(row, column), column)">
                     {{ formatCellValue(getCellValue(row, column), column) }}
@@ -205,7 +205,7 @@
           <!-- Empty State -->
           <tr *ngIf="displayData.length === 0 && !loading">
             <td [colSpan]="columns.length + (showSelection ? 1 : 0) + (actions.length > 0 ? 1 : 0)"
-                class="text-center py-12">
+                class="table-shell__empty text-center py-12">
               <nz-empty [nzNotFoundContent]="emptyText" class="text-gray-500"></nz-empty>
             </td>
           </tr>
@@ -215,11 +215,11 @@
   </div>
 
   <!-- Pagination -->
-  <div *ngIf="showPagination && total > 0" class="p-4 border-t border-gray-200" [ngClass]="{ 'dark:bg-[#222] dark:border-[#444] dark:text-[#fafafa]': isDarkMode }">
+  <div *ngIf="showPagination && total > 0" class="table-shell__pagination p-4 border-t border-gray-200">
     <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:items-center sm:justify-between">
       <!-- Page Size Selector -->
       <div class="flex items-center space-x-2">
-        <span class="text-sm text-gray-600">Show</span>
+        <span class="table-shell__meta text-sm text-gray-600">Show</span>
         <nz-select
           [ngModel]="currentPageSize"
           (ngModelChange)="onPageSizeChange($event)"
@@ -230,11 +230,11 @@
             [nzLabel]="size.toString()">
           </nz-option>
         </nz-select>
-        <span class="text-sm text-gray-600">entries</span>
+        <span class="table-shell__meta text-sm text-gray-600">entries</span>
       </div>
 
       <!-- Pagination Info -->
-      <div class="text-sm text-gray-600">
+      <div class="table-shell__meta text-sm text-gray-600">
         Showing {{ (currentPage - 1) * currentPageSize + 1 }} to
         {{ Math.min(currentPage * currentPageSize, total) }} of {{ total }} entries
       </div>

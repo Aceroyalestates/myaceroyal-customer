@@ -1,7 +1,8 @@
-<main class="flex flex-col w-full">
-  <div class="flex flex-col gap-12">
-    <div class="flex gap-6">
-        <app-icon class="cursor-pointer" name="arrow-left"></app-icon> <h1 class="text-2xl font-bold !text-gray-600">Inspection</h1>
+<main class="inspection-page flex flex-col w-full">
+  <div class="inspection-page__content flex flex-col gap-12">
+    <div class="inspection-page__header flex gap-6">
+        <app-icon class="inspection-page__back cursor-pointer" name="arrow-left"></app-icon>
+        <h1 class="inspection-page__title text-2xl font-bold">Inspection</h1>
     </div>
     
     <!-- <div class="flex flex-col bg-primary rounded-lg p-6 gap-4 !text-white w-2/3">
@@ -33,10 +34,11 @@
     <button class="bg-primary !text-white py-3 !px-12 rounded-full w-fit cursor-pointer" (click)="bookInspection()">Book New Inspection</button>
 </div> -->
 
-    <h1 class="text-xl font-semibold !text-gray-600">Inspection Schedule</h1>
+    <h2 class="inspection-page__section-title text-xl font-semibold">Inspection Schedule</h2>
 
 
-    <app-table
+    <div class="inspection-page__table">
+      <app-table
       [data]="inspectionSchedules"
       [columns]="columns"
       [actions]="actions"
@@ -46,6 +48,7 @@
       (actionClick)="onTableAction($event)"
       (rowClick)="onRowClick($event)"
       class="w-full"
-    />
+      />
+    </div>
   </div>
 </main>
