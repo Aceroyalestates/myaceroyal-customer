@@ -142,7 +142,7 @@ export class AuthService {
    */
   login(credentials: ILoginCredentials): Observable<ILoginResponse> {
     return this.httpService
-      .post<ILoginResponse>('auth/login', credentials)
+      .post<ILoginResponse>('auth/customer/login', credentials)
       .pipe(
         tap((response) => {
           if (response.token && response.user) {
@@ -154,7 +154,7 @@ export class AuthService {
   }
 
   register(payload: IRegisterPayload): Observable<IRegisterResponse> {
-    return this.httpService.post<IRegisterResponse>('auth/register', payload);
+    return this.httpService.post<IRegisterResponse>('auth/customer/register', payload);
   }
 
   verifyEmail(payload: IVerifyEmailPayload): Observable<IVerifyEmailResponse> {
