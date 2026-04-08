@@ -1,10 +1,23 @@
 <main class="payments-page flex flex-col w-full">
   <div class="payments-page__header flex items-center gap-4">
-    <app-icon class="payments-page__back cursor-pointer" name="arrow-left"></app-icon>
+    <app-icon class="payments-page__back cursor-pointer" name="arrow-left" (click)="back()"></app-icon>
     <h1 class="payments-page__title text-2xl font-bold">Payments</h1>
   </div>
 
-  <div class="payments-summary" *ngIf="paymentSummary as summary">
+  <div class="payments-view-switch">
+    @for (view of paymentViews; track view.key) {
+      <button
+        type="button"
+        class="payments-view-switch__button"
+        [class.payments-view-switch__button--active]="activeView === view.key"
+        (click)="setActiveView(view.key)"
+      >
+        {{ view.label }}
+      </button>
+    }
+  </div>
+
+  <div class="payments-summary" *ngIf="activeView === 'history' && paymentSummary as summary">
     <div class="payments-summary__card">
       <p>Total Payments</p>
       <h2>{{ summary.total_payments }}</h2>
@@ -19,7 +32,7 @@
     </div>
   </div>
 
-  <div class="payments-breakdown" *ngIf="paymentSummary as summary">
+  <div class="payments-breakdown" *ngIf="activeView === 'history' && paymentSummary as summary">
     <div class="payments-breakdown__group" *ngIf="statusKeys.length > 0">
       <p class="payments-breakdown__title">Status Breakdown</p>
       <div class="payments-breakdown__chips">
@@ -43,7 +56,7 @@
     </div>
   </div>
 
-  <section class="payments-filters">
+  <section class="payments-filters" *ngIf="activeView === 'history'">
     <div class="payments-filters__grid">
       <div class="payments-filters__field">
         <label>Status</label>
@@ -102,7 +115,16 @@
     </div>
   </section>
 
-  <section class="payments-table-wrap">
+  <section class="payments-summary payments-summary--schedules" *ngIf="activeView === 'schedules' && scheduleDashboard">
+    @for (card of scheduleSummaryCards; track card.label) {
+      <div class="payments-summary__card">
+        <p>{{ card.label }}</p>
+        <h2>{{ card.value }}</h2>
+      </div>
+    }
+  </section>
+
+  <section class="payments-table-wrap" *ngIf="activeView === 'history'">
     <nz-table
       nzSize="middle"
       [nzData]="paymentHistory"
@@ -128,7 +150,7 @@
         @for (data of paymentHistory; track data.id) {
           <tr>
             <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
-            <td>{{ data.purchase.unit.type || 'N/A' }}</td>
+            <td>{{ formatUnitType(data.purchase.unit.type) }}</td>
             <td>{{ formatLabel(data.payment_type) }}</td>
             <td>{{ formatLabel(data.method) }}</td>
             <td>
@@ -160,7 +182,49 @@
     </div>
   </section>
 
-  <div class="payments-pagination">
+  <section class="payments-table-wrap" *ngIf="activeView === 'schedules'">
+    <nz-table
+      nzSize="middle"
+      [nzData]="recentSchedules"
+      [nzShowPagination]="false"
+      [nzLoading]="isLoading"
+      nzWidthMode="full"
+      class="payments-table"
+    >
+      <thead>
+        <tr>
+          <th>Installment</th>
+          <th>Amount Due</th>
+          <th>Amount Paid</th>
+          <th>Remaining</th>
+          <th>Due Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (schedule of recentSchedules; track schedule.id) {
+          <tr>
+            <td>{{ schedule.installment_number }}</td>
+            <td>{{ schedule.amount_due | currency:'₦ ':'symbol':'1.0-0' }}</td>
+            <td>{{ schedule.amount_paid | currency:'₦ ':'symbol':'1.0-0' }}</td>
+            <td>{{ getScheduleRemainingAmount(schedule) | currency:'₦ ':'symbol':'1.0-0' }}</td>
+            <td>{{ schedule.due_date | date:'mediumDate' }}</td>
+            <td>
+              <span [class]="getScheduleStatusClass(schedule.status)">
+                {{ formatLabel(schedule.status) }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+
+    <div class="payments-empty" *ngIf="!isLoading && recentSchedules.length === 0">
+      No payment schedules found.
+    </div>
+  </section>
+
+  <div class="payments-pagination" *ngIf="activeView === 'history'">
     <div class="text-gray-500 text-sm">
       Showing {{ paymentHistory.length ? ((pageIndex - 1) * pageSize) + 1 : 0 }}
       to {{ ((pageIndex - 1) * pageSize) + paymentHistory.length }} of {{ totalItems }} payments

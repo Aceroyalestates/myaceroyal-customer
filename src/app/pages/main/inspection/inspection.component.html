@@ -4,51 +4,192 @@
         <app-icon class="inspection-page__back cursor-pointer" name="arrow-left"></app-icon>
         <h1 class="inspection-page__title text-2xl font-bold">Inspection</h1>
     </div>
-    
-    <!-- <div class="flex flex-col bg-primary rounded-lg p-6 gap-4 !text-white w-2/3">
-        <h1 class="!text-white"> Upcoming Inspection(s) </h1>
-         <div class="flex gap-8">
-            @for(inspection of [
-                { date: '12-07-2023', time: '10:00 AM', property: 'Luxury Apartment Complex' },
-                { date: '14-07-2023', time: '02:00 PM', property: 'Modern Villa' },
-                { date: '16-07-2023', time: '11:30 AM', property: 'Cozy Cottage' }
-            ]; track inspection) {
-                <div class="flex flex-col gap-2">
-                    <div class="flex gap-4">
-                        <app-icon name="home"></app-icon>
-                        <p>{{inspection.property}}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <app-icon name="calendar"></app-icon>
-                        <p>{{inspection.date}}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <app-icon name="clock"></app-icon>
-                        <p>{{inspection.time}}</p>
-                    </div>
-                </div>
+    <div class="inspection-page__toolbar">
+      <h2 class="inspection-page__section-title text-xl font-semibold">Inspection Schedule</h2>
+      <app-button
+        [buttonText]="showFilters ? 'Hide Filters' : 'Filter'"
+        variant="secondary"
+        (onButtonClick)="toggleFilters()"
+      ></app-button>
+    </div>
+
+    <div class="inspection-page__filters" *ngIf="showFilters">
+      <div class="inspection-page__filter-grid">
+        <div class="inspection-page__field">
+          <label>Status</label>
+          <nz-select [(ngModel)]="filters.status" nzAllowClear nzPlaceHolder="All statuses">
+            @for (status of statusOptions; track status) {
+              <nz-option [nzValue]="status" [nzLabel]="status | titlecase"></nz-option>
             }
-         </div>   
-    </div> -->
-<!-- <div class="flex justify-end !pr-8">
-    <button class="bg-primary !text-white py-3 !px-12 rounded-full w-fit cursor-pointer" (click)="bookInspection()">Book New Inspection</button>
-</div> -->
+          </nz-select>
+        </div>
 
-    <h2 class="inspection-page__section-title text-xl font-semibold">Inspection Schedule</h2>
+        <div class="inspection-page__field">
+          <label>From Date</label>
+          <input nz-input type="date" [(ngModel)]="filters.start_date" />
+        </div>
 
+        <div class="inspection-page__field">
+          <label>To Date</label>
+          <input nz-input type="date" [(ngModel)]="filters.end_date" />
+        </div>
+
+        <div class="inspection-page__field">
+          <label>Sort By</label>
+          <nz-select [(ngModel)]="filters.sortBy">
+            <nz-option nzValue="appointment_date" nzLabel="Appointment Date"></nz-option>
+            <nz-option nzValue="createdAt" nzLabel="Created At"></nz-option>
+            <nz-option nzValue="status" nzLabel="Status"></nz-option>
+          </nz-select>
+        </div>
+
+        <div class="inspection-page__field">
+          <label>Sort Order</label>
+          <nz-select [(ngModel)]="filters.sortOrder">
+            <nz-option nzValue="DESC" nzLabel="Descending"></nz-option>
+            <nz-option nzValue="ASC" nzLabel="Ascending"></nz-option>
+          </nz-select>
+        </div>
+      </div>
+
+      <div class="inspection-page__filter-actions">
+        <app-button
+          buttonText="Reset"
+          variant="secondary"
+          [disabled]="isLoading"
+          (onButtonClick)="resetFilters()"
+        ></app-button>
+        <app-button
+          buttonText="Apply Filters"
+          [disabled]="isLoading"
+          (onButtonClick)="applyFilters()"
+        ></app-button>
+        <app-button
+          buttonText="Book New Inspection"
+          variant="secondary"
+          (onButtonClick)="bookNewInspection()"
+        ></app-button>
+      </div>
+    </div>
 
     <div class="inspection-page__table">
-      <app-table
-      [data]="inspectionSchedules"
-      [columns]="columns"
-      [actions]="actions"
-      [loading]="isLoading"
-      [enableSorting]="true"
-      [enableSelection]="true"
-      (actionClick)="onTableAction($event)"
-      (rowClick)="onRowClick($event)"
-      class="w-full"
-      />
+      <nz-spin [nzSpinning]="isLoading">
+        <div class="inspection-page__table-wrap">
+          <table class="inspection-table">
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Date</th>
+                <th>Time Slot</th>
+                <th>Status</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (appointment of appointments; track appointment.id) {
+                <tr>
+                  <td>{{ getPropertyName(appointment) }}</td>
+                  <td>{{ formatAppointmentDate(appointment.appointment_date) }}</td>
+                  <td>{{ getAppointmentTime(appointment) }}</td>
+                  <td>
+                    <span class="inspection-status" [class]="'inspection-status--' + appointment.status">
+                      {{ appointment.status | titlecase }}
+                    </span>
+                  </td>
+                  <td>{{ appointment.special_requirements || 'No special requirements' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (!appointments.length && !isLoading) {
+          <div class="inspection-page__empty">
+            <nz-empty nzNotFoundImage="simple" nzNotFoundContent="No inspection appointments found."></nz-empty>
+          </div>
+        }
+
+        @if (total > 0) {
+          <div class="inspection-page__pagination">
+            <nz-pagination
+              [nzPageIndex]="page"
+              [nzPageSize]="limit"
+              [nzTotal]="total"
+              [nzShowSizeChanger]="true"
+              [nzPageSizeOptions]="[10, 20, 50]"
+              [nzResponsive]="true"
+              (nzPageIndexChange)="onPageIndexChange($event)"
+              (nzPageSizeChange)="onPageSizeChange($event)"
+            ></nz-pagination>
+          </div>
+        }
+      </nz-spin>
     </div>
   </div>
 </main>
+
+@if (isBookInspectionModalOpen) {
+  <div class="inspection-booking-modal">
+    <button
+      type="button"
+      class="inspection-booking-modal__backdrop"
+      (click)="closeBookInspectionModal()"
+      aria-label="Close property picker"
+    ></button>
+
+    <div class="inspection-booking-modal__panel">
+      <div class="inspection-booking-modal__header">
+        <div>
+          <h2>Select Property</h2>
+          <p>Choose the property you want to book an inspection for.</p>
+        </div>
+        <button
+          type="button"
+          class="inspection-booking-modal__close"
+          (click)="closeBookInspectionModal()"
+          aria-label="Close property picker"
+        >
+          <app-icon name="x" [size]="18"></app-icon>
+        </button>
+      </div>
+
+      <div class="inspection-booking-modal__body">
+        @if (isLoadingProperties) {
+          <div class="inspection-booking-modal__loading">
+            <nz-spin nzSimple></nz-spin>
+            <span>Loading your properties...</span>
+          </div>
+        } @else if (availableProperties.length > 0) {
+          <label class="inspection-booking-modal__field">
+            <span>Property</span>
+            <select [(ngModel)]="selectedPropertyId">
+              <option value="" disabled>Select a property</option>
+              @for (property of availableProperties; track property.id) {
+                <option [value]="property.id">
+                  {{ property.name }}{{ property.subtitle ? ' · ' + property.subtitle : '' }}
+                </option>
+              }
+            </select>
+          </label>
+        } @else {
+          <p class="inspection-booking-modal__empty">
+            No properties are available for inspection booking yet.
+          </p>
+        }
+      </div>
+
+      <div class="inspection-booking-modal__actions">
+        <app-button
+          buttonText="Cancel"
+          variant="secondary"
+          (onButtonClick)="closeBookInspectionModal()"
+        ></app-button>
+        <app-button
+          buttonText="Continue"
+          [disabled]="!selectedPropertyId || isLoadingProperties"
+          (onButtonClick)="confirmBookInspection()"
+        ></app-button>
+      </div>
+    </div>
+  </div>
+}

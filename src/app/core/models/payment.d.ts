@@ -23,6 +23,27 @@ export interface PaymentSchedule {
   updatedAt: string;
 }
 
+export interface PurchasePaymentScheduleFilters {
+  status?: 'pending' | 'partial' | 'paid' | 'overdue' | '';
+  sortBy?: 'installment_number' | 'due_date' | 'amount_due' | 'amount_paid' | 'status';
+  sortOrder?: 'ASC' | 'DESC';
+  includePayments?: boolean;
+}
+
+export interface PaymentScheduleListResponse {
+  success: boolean;
+  message: string;
+  data: PaymentSchedule[];
+  property?: Record<string, unknown>;
+  summary?: Record<string, unknown>;
+}
+
+export interface PaymentScheduleResponse {
+  success: boolean;
+  message: string;
+  data: PaymentSchedule;
+}
+
 export interface PaymentScheduleDashboard {
   totalPurchases: number;
   totalSchedules: number;
@@ -317,6 +338,24 @@ export interface PurchaseFormResponse {
       purchase_amount: string;
     };
   };  
+}
+
+export interface PurchaseFormSubmitResponse {
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
+
+export interface PropertyFormStatisticsFilters {
+  userId?: string;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface PropertyFormStatisticsResponse {
+  success: boolean;
+  message: string;
+  data: Record<string, unknown>;
 }
 
 // --- Nested Interfaces for Data Item ---

@@ -1,31 +1,61 @@
-<div class="min-h-screen p-6 bg-gray-50">
-  <div class="max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">Frequently Asked Questions</h1>
-      <button nz-button nzType="default" (click)="loadFaqs()" [disabled]="isLoading">Refresh</button>
+<main class="faq-page">
+  <div class="faq-page__container">
+    <div class="faq-page__header">
+      <h1>Frequently Asked Questions</h1>
+      <p>Browse common answers, including property-linked FAQs where available.</p>
     </div>
 
-    <nz-spin [nzSpinning]="isLoading">
-      <ng-container *ngIf="faqs?.length; else empty">
-        <nz-collapse nzBordered="false">
-          <nz-collapse-panel *ngFor="let f of faqs" [nzHeader]="f.question" [nzActive]="false">
-            <div class="text-sm text-gray-700">{{ f.answer }}</div>
-            <div class="mt-3 text-xs text-gray-400">Category: {{ f.category }} · Updated: {{ f.updatedAt | date:'medium' }}</div>
-          </nz-collapse-panel>
-        </nz-collapse>
+    <div class="faq-toolbar">
+      <div class="faq-toolbar__search">
+        <input
+          nz-input
+          [(ngModel)]="search"
+          (ngModelChange)="onSearchInput($event)"
+          (keyup.enter)="onSearch()"
+          placeholder="Search FAQs"
+          aria-label="Search FAQs"
+        />
+      </div>
+      <div class="faq-toolbar__actions">
+        <button nz-button nzType="default" (click)="clearSearch()" [disabled]="isLoading">Reset</button>
+        <button nz-button nzType="primary" (click)="onSearch()" [disabled]="isLoading">Search</button>
+      </div>
+    </div>
 
-        <!-- simple pagination controls (server-side) -->
-        <div class="mt-6 flex justify-center">
-          <button nz-button nzType="default" (click)="loadFaqs(1)" class="mr-2">First</button>
-          <button nz-button nzType="default" (click)="loadFaqs(1)">Page 1</button>
-        </div>
-      </ng-container>
+    <div class="faq-surface">
+      <nz-spin [nzSpinning]="isLoading">
+        <ng-container *ngIf="faqs?.length; else empty">
+          <nz-collapse nzBordered="false" class="faq-collapse">
+            <nz-collapse-panel *ngFor="let f of faqs" [nzHeader]="f.question" [nzActive]="false">
+              <div class="faq-answer">{{ f.answer }}</div>
+              <div class="faq-meta">
+                <span *ngIf="f.category">Category: {{ f.category }}</span>
+                <span *ngIf="getPropertyLabel(f)">Property: {{ getPropertyLabel(f) }}</span>
+                <span *ngIf="f.updatedAt || f.updated_at">Updated: {{ (f.updatedAt || f.updated_at) | date:'medium' }}</span>
+              </div>
+            </nz-collapse-panel>
+          </nz-collapse>
 
-      <ng-template #empty>
-        <div class="py-12">
-          <nz-empty nzNotFoundImage="simple"></nz-empty>
-        </div>
-      </ng-template>
-    </nz-spin>
+          <div class="faq-pagination">
+            <nz-pagination
+              [nzPageIndex]="page"
+              [nzPageSize]="limit"
+              [nzTotal]="total"
+              [nzShowSizeChanger]="true"
+              [nzPageSizeOptions]="[10, 20, 50]"
+              [nzResponsive]="true"
+              (nzPageIndexChange)="onPageIndexChange($event)"
+              (nzPageSizeChange)="onPageSizeChange($event)"
+            ></nz-pagination>
+          </div>
+        </ng-container>
+
+        <ng-template #empty>
+          <div class="faq-empty">
+            <nz-empty nzNotFoundImage="simple"></nz-empty>
+          </div>
+        </ng-template>
+      </nz-spin>
+    </div>
   </div>
-</div>
+</main>

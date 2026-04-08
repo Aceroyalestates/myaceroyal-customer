@@ -6,6 +6,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { NotificationService } from 'src/app/core/services/notification.service';
 import { ThemeService } from 'src/app/core/services/theme.service';
 import { SharedModule } from '../../shared/shared.module';
 
@@ -44,9 +45,11 @@ export class MainComponent {
   theme: 'light' | 'dark' = 'light';
   loggedInUser: any = null;
   firstName = '';
+  unreadNotifications = 0;
 
   constructor(
     private readonly authService: AuthService,
+    private readonly notificationService: NotificationService,
     private readonly themeService: ThemeService,
     private readonly router: Router,
   ) {
@@ -55,6 +58,12 @@ export class MainComponent {
     this.syncCurrentUser(this.authService.getCurrentUser());
     this.authService.currentUser$.subscribe((user) => {
       this.syncCurrentUser(user);
+    });
+    this.notificationService.notificationSummary$.subscribe((summary) => {
+      this.unreadNotifications = summary?.unread ?? 0;
+    });
+    this.notificationService.getNotificationSummary().subscribe({
+      error: (error) => console.error(error),
     });
   }
 

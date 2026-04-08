@@ -7,7 +7,7 @@ import { PropertiesService } from 'src/app/core/services/properties.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ContinueOfflinePurchasePayload, ContinueOnlinePurchasePayload, DefaultBankAccount } from 'src/app/core/models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOnlinePurchasePayload, DefaultBankAccount, PaymentData } from 'src/app/core/models/payment';
 import { FormsModule } from '@angular/forms';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -60,6 +60,8 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   property: any = null;
   propertyDetails: Property | null = null;
   purchaseSummary: any = null;
+  paymentHistory: PaymentData[] = [];
+  isLoadingPaymentHistory = false;
   propertyImages: ImageSliderItem[] = [];
   currentImageIndex = 0;
 
@@ -82,7 +84,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
 
   showPaymentMethodModal(schedule: any): void {
     this.currentSchedule = schedule;
-    this.finalAmount = schedule.status === 'partial' ? (schedule.amount_due - schedule.amount_paid) : schedule.amount_due;
+    this.finalAmount = this.getScheduleOutstandingAmount(schedule);
     console.log('Selected schedule for payment:', schedule);
     this.isPaymentMethodModalVisible = true;
   }
@@ -162,6 +164,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
         console.log('Purchase details:', response);
         this.propertyPurchaseDetails = response.data;
         this.loadPropertyDetails(response.data.unit.property.id);
+        this.getPurchasePayments(purchaseId);
         this.preparePropertyImages();
         if (this.shouldLoadSchedules) {
           this.getUserSchedules(purchaseId);
@@ -207,6 +210,21 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     });
   }
 
+  getPurchasePayments(purchaseId: string): void {
+    this.isLoadingPaymentHistory = true;
+    this.paymentService.getPaymentHistory(1, 10, 'created_at', 'DESC', { purchase_id: purchaseId }).subscribe({
+      next: (response) => {
+        this.paymentHistory = response?.data || [];
+        this.isLoadingPaymentHistory = false;
+      },
+      error: (error) => {
+        console.error('Error fetching purchase payment history:', error);
+        this.paymentHistory = [];
+        this.isLoadingPaymentHistory = false;
+      }
+    });
+  }
+
   get shouldLoadSchedules(): boolean {
     return !!this.propertyPurchaseDetails?.plan_id;
   }
@@ -223,6 +241,54 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     return this.formatPaymentMethod(this.propertyPurchaseDetails?.payment_method);
   }
 
+  get unitTypeLabel(): string {
+    const rawValue = this.propertyPurchaseDetails?.unit?.unit_type?.name || this.propertyPurchaseDetails?.unit?.name;
+    return this.formatDisplayValue(rawValue);
+  }
+
+  get unitPrice(): number {
+    return Number(this.propertyPurchaseDetails?.unit?.price || 0);
+  }
+
+  get purchaseStatusLabel(): string {
+    return this.formatDisplayValue(this.propertyPurchaseDetails?.status);
+  }
+
+  get purchaseStatusClass(): string {
+    const status = this.propertyPurchaseDetails?.status;
+    if (status === 'completed') {
+      return 'status-pill status-pill--success';
+    }
+    if (status === 'cancelled' || status === 'failed') {
+      return 'status-pill status-pill--danger';
+    }
+    return 'status-pill status-pill--warning';
+  }
+
+  get hasPaymentHistory(): boolean {
+    return this.paymentHistory.length > 0;
+  }
+
+  get hasInstallmentSchedule(): boolean {
+    return this.shouldLoadSchedules && this.schedules.length > 0;
+  }
+
+  get purchaseBalanceDue(): number {
+    return Number(this.propertyPurchaseDetails?.balance_due || this.purchaseSummary?.remainingBalance || 0);
+  }
+
+  get totalAmountPaid(): number {
+    if (this.purchaseSummary?.totalAmountPaid != null) {
+      return Number(this.purchaseSummary.totalAmountPaid);
+    }
+
+    if (this.paymentHistory.length > 0) {
+      return this.paymentHistory.reduce((total, payment) => total + Number(payment.amount || 0), 0);
+    }
+
+    return Number(this.propertyPurchaseDetails?.total_price || 0) - this.purchaseBalanceDue;
+  }
+
   get isOfflinePaymentMode(): boolean {
     const method = this.propertyPurchaseDetails?.payment_method;
     return method === 'bank_transfer' || method === 'cheque' || method === 'bank_draft' || method === 'bank_deposit';
@@ -230,6 +296,141 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
 
   get isPendingPaystackPayment(): boolean {
     return this.propertyPurchaseDetails?.payment_method === 'paystack' && this.propertyPurchaseDetails?.status === 'in-progress';
+  }
+
+  get outstandingAmount(): number {
+    const balanceDue = Number(this.propertyPurchaseDetails?.balance_due || 0);
+    if (balanceDue > 0) {
+      return balanceDue;
+    }
+
+    return Number(
+      this.propertyPurchaseDetails?.initial_payment_due
+      || this.propertyPurchaseDetails?.total_price
+      || 0
+    );
+  }
+
+  get payableSchedules(): any[] {
+    return [...this.schedules]
+      .filter((schedule) => ['pending', 'partial', 'overdue'].includes(schedule.status))
+      .sort((left, right) => {
+        const statusRank = (status: string) => status === 'overdue' ? 0 : status === 'partial' ? 1 : 2;
+        const statusDifference = statusRank(left.status) - statusRank(right.status);
+        if (statusDifference !== 0) {
+          return statusDifference;
+        }
+
+        return new Date(left.due_date).getTime() - new Date(right.due_date).getTime();
+      });
+  }
+
+  get nextPayableSchedule(): any | null {
+    return this.payableSchedules[0] ?? null;
+  }
+
+  get hasPaymentAction(): boolean {
+    return !!this.nextPayableSchedule || this.isPendingPaystackPayment || this.isOfflinePaymentInReview;
+  }
+
+  get paymentActionTitle(): string {
+    if (this.isOfflinePaymentInReview) {
+      return 'Finance Review In Progress';
+    }
+
+    if (this.nextPayableSchedule?.status === 'overdue') {
+      return 'Overdue Installment Payment';
+    }
+
+    if (this.nextPayableSchedule) {
+      return 'Next Installment Payment';
+    }
+
+    if (this.isPendingPaystackPayment) {
+      return 'Resume Pending Payment';
+    }
+
+    return 'Payment Management';
+  }
+
+  get paymentActionAmount(): number {
+    if (this.nextPayableSchedule) {
+      return this.getScheduleOutstandingAmount(this.nextPayableSchedule);
+    }
+
+    return this.outstandingAmount;
+  }
+
+  get paymentActionDescription(): string {
+    if (this.isOfflinePaymentInReview) {
+      return `Your ${this.paymentModeLabel.toLowerCase()} payment is currently under finance review. You can still check payment history or schedules for this property here.`;
+    }
+
+    if (this.nextPayableSchedule) {
+      return `Installment ${this.nextPayableSchedule.installment_number} is ${this.formatDisplayValue(this.nextPayableSchedule.status)}. You can continue payment for this property from here.`;
+    }
+
+    if (this.isPendingPaystackPayment) {
+      return 'Your Paystack checkout was started but not completed. You can restart payment for this property from here.';
+    }
+
+    return 'Manage payment actions for this property from here.';
+  }
+
+  get paymentActionStatusLabel(): string {
+    if (this.isOfflinePaymentInReview) {
+      return 'Under Review';
+    }
+
+    if (this.nextPayableSchedule?.status === 'overdue') {
+      return 'Overdue';
+    }
+
+    if (this.nextPayableSchedule) {
+      return this.formatDisplayValue(this.nextPayableSchedule.status);
+    }
+
+    if (this.isPendingPaystackPayment) {
+      return 'Pending';
+    }
+
+    return this.paymentTypeLabel;
+  }
+
+  get paymentActionStatusClass(): string {
+    if (this.isOfflinePaymentInReview) {
+      return 'payment-action-card__badge payment-action-card__badge--warning';
+    }
+
+    if (this.nextPayableSchedule?.status === 'overdue') {
+      return 'payment-action-card__badge payment-action-card__badge--danger';
+    }
+
+    if (this.nextPayableSchedule || this.isPendingPaystackPayment) {
+      return 'payment-action-card__badge payment-action-card__badge--warning';
+    }
+
+    return 'payment-action-card__badge';
+  }
+
+  get paymentActionButtonLabel(): string {
+    if (this.nextPayableSchedule) {
+      return 'Make Payment';
+    }
+
+    if (this.isPendingPaystackPayment) {
+      return 'Resume Paystack';
+    }
+
+    return 'View Payments';
+  }
+
+  get showSecondaryPaymentsButton(): boolean {
+    return this.paymentActionButtonLabel !== 'View Payments';
+  }
+
+  get isOfflinePaymentInReview(): boolean {
+    return this.isOfflinePaymentMode && this.propertyPurchaseDetails?.status === 'in-progress' && !this.nextPayableSchedule;
   }
 
   formatPaymentMethod(method: string | null | undefined): string {
@@ -242,6 +443,22 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     }
 
     return method.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  formatDisplayValue(value: string | null | undefined): string {
+    if (!value) {
+      return 'N/A';
+    }
+
+    if (value === 'cheque') {
+      return 'Bank Draft';
+    }
+
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   startOnlinePurchase(): void {
@@ -376,10 +593,11 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   }
 
   uploadProof(): void {
-      if (!this.selectedFile) {
-        this.message.error('Please select a file to upload as proof of payment.');
-        return;
-      }
+    if (!this.selectedFile) {
+      this.message.error('Please select a file to upload as proof of payment.');
+      return;
+    }
+
       this.isLoading = true;
   
       this.imageService.uploadImage(this.selectedFile).subscribe({
@@ -401,7 +619,55 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         }
       });
+  }
+
+  getScheduleOutstandingAmount(schedule: any): number {
+    if (!schedule) {
+      return 0;
     }
+
+    const amountDue = Number(schedule.amount_due || 0);
+    const amountPaid = Number(schedule.amount_paid || 0);
+
+    if (schedule.status === 'partial' || schedule.status === 'overdue') {
+      return Math.max(amountDue - amountPaid, 0);
+    }
+
+    return amountDue;
+  }
+
+  openPrimaryPaymentAction(): void {
+    if (this.nextPayableSchedule) {
+      this.showPaymentMethodModal(this.nextPayableSchedule);
+      return;
+    }
+
+    if (this.isPendingPaystackPayment && this.id) {
+      this.currentSchedule = {
+        purchase_id: this.id,
+        amount_due: this.outstandingAmount,
+        amount_paid: this.totalAmountPaid,
+        status: this.purchaseBalanceDue > 0 ? 'partial' : 'pending',
+      };
+      this.finalAmount = this.outstandingAmount;
+      this.selectedPaymentMethod = 2;
+      this.startOnlinePurchase();
+      return;
+    }
+
+    this.goToPaymentsPage();
+  }
+
+  goToPaymentsPage(): void {
+    this.router.navigate(['/main/financial-transactions']);
+  }
+
+  scrollToScheduleSection(): void {
+    document.getElementById('payment-schedule-section')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
 
     private preparePropertyImages(): void {
     if (!this.propertyPurchaseDetails || !this.propertyPurchaseDetails.unit || !this.propertyPurchaseDetails.unit.property) {

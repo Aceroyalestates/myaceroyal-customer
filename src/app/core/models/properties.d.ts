@@ -189,14 +189,16 @@ export interface Appointment {
   email: string;
   phone_number: string;
   property_id: string;
-  appointment_type: 'inspection' | 'viewing' | 'consultation';
+  appointment_type: 'inspection' | 'viewing' | 'consultancy' | 'documentation';
   appointment_date: string;
-  appointment_time: string;
-  time_period: 'AM' | 'PM';
+  appointment_time?: string;
+  time_period?: 'AM' | 'PM';
   special_requirements?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  created_at: string;
-  updated_at: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'rescheduled';
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
   property?: Property;
 }
 
@@ -207,6 +209,7 @@ export interface AppointmentCreateRequest {
   property_id: string;
   appointment_type: string;
   appointment_date: string;
+  appointment_time?: string;
   special_requirements?: string;
 }
 
@@ -216,7 +219,12 @@ export interface AppointmentResponse extends IResponse {
 
 export interface AppointmentsResponse extends IResponse {
   data: Appointment[];
-  pagination?: Pagination;
+  pagination?: Pagination & {
+    current_page?: number;
+    per_page?: number;
+    total_items?: number;
+    total_pages?: number;
+  };
 }
 
 export interface AvailableSlot {
@@ -236,9 +244,15 @@ export interface AvailableSlotsResponse extends IResponse {
 }
 
 export interface AppointmentSearchParams {
-  q?: string; // General search query (full name, confirmation code, property name)
-  email?: string; // Exact email address
-  phone?: string; // Phone number (partial matches supported)
+  q?: string;
+  email?: string;
+  phone?: string;
+  status?: 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'rescheduled';
+  appointment_type?: 'inspection' | 'viewing' | 'consultancy' | 'documentation';
+  start_date?: string;
+  end_date?: string;
+  sortBy?: 'appointment_date' | 'createdAt' | 'status';
+  sortOrder?: 'ASC' | 'DESC';
   page?: number;
   limit?: number;
 }

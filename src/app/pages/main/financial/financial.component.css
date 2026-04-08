@@ -13,10 +13,42 @@
   color: var(--text-secondary);
 }
 
+.payments-view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface-bg);
+  box-shadow: var(--shadow-elevated);
+}
+
+.payments-view-switch__button {
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.payments-view-switch__button--active {
+  background: #e41c24;
+  color: #ffffff;
+}
+
 .payments-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.payments-summary--schedules {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .payments-summary__card {
@@ -205,6 +237,17 @@
 @media (max-width: 767px) {
   .payments-page {
     padding-top: 8px;
+  }
+
+  .payments-view-switch {
+    width: 100%;
+    overflow-x: auto;
+    padding: 6px;
+  }
+
+  .payments-view-switch__button {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .payments-summary,

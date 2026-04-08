@@ -20,12 +20,253 @@
   color: var(--text-secondary);
 }
 
+.inspection-page__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .inspection-page__table {
   border: 1px solid var(--border-color);
   border-radius: 24px;
   background: var(--surface-bg);
   box-shadow: var(--shadow-elevated);
   overflow: hidden;
+}
+
+.inspection-page__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  background: var(--surface-bg);
+  box-shadow: var(--shadow-elevated);
+}
+
+.inspection-page__filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.inspection-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inspection-page__field label {
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.inspection-page__filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.inspection-page__filter-actions app-button {
+  display: inline-flex;
+}
+
+.inspection-page__table-wrap {
+  overflow-x: auto;
+}
+
+.inspection-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.inspection-table th,
+.inspection-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  vertical-align: top;
+}
+
+.inspection-table th {
+  color: var(--text-secondary);
+  background: var(--table-header-bg);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inspection-table td {
+  color: var(--text-color);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.inspection-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.inspection-status--pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.inspection-status--confirmed {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.inspection-status--completed {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.inspection-status--cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+}
+
+.inspection-status--rescheduled {
+  background: rgba(168, 85, 247, 0.12);
+  color: #9333ea;
+}
+
+.inspection-page__empty {
+  padding: 32px 16px;
+}
+
+.inspection-page__pagination {
+  display: flex;
+  justify-content: center;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.inspection-booking-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.inspection-booking-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.56);
+  backdrop-filter: blur(3px);
+}
+
+.inspection-booking-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  background: var(--surface-bg);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+}
+
+.inspection-booking-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.inspection-booking-modal__header h2 {
+  margin: 0 0 6px;
+  color: var(--text-color);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.inspection-booking-modal__header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.inspection-booking-modal__close {
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--surface-bg-muted);
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.inspection-booking-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inspection-booking-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inspection-booking-modal__field span {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.inspection-booking-modal__field select {
+  width: 100%;
+  min-height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+  padding: 0 14px;
+  outline: none;
+}
+
+.inspection-booking-modal__loading,
+.inspection-booking-modal__empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.inspection-booking-modal__empty {
+  padding: 12px 0;
+}
+
+.inspection-booking-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 :host-context(.dark) .inspection-page__table {
@@ -39,6 +280,14 @@
 
   .inspection-page__content {
     gap: 24px;
+  }
+
+  .inspection-page__toolbar {
+    align-items: flex-start;
+  }
+
+  .inspection-page__filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -57,5 +306,41 @@
 
   .inspection-page__section-title {
     font-size: 20px;
+  }
+
+  .inspection-page__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inspection-page__filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inspection-page__filter-actions {
+    justify-content: stretch;
+  }
+
+  .inspection-page__filter-actions app-button {
+    flex: 1 1 100%;
+  }
+
+  .inspection-booking-modal {
+    align-items: flex-end;
+    padding: 16px;
+  }
+
+  .inspection-booking-modal__panel {
+    width: 100%;
+    border-radius: 24px 24px 20px 20px;
+    padding: 20px;
+  }
+
+  .inspection-booking-modal__actions {
+    justify-content: stretch;
+  }
+
+  .inspection-booking-modal__actions app-button {
+    flex: 1 1 100%;
   }
 }

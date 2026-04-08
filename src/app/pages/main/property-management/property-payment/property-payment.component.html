@@ -73,107 +73,220 @@
       </div>
     </div>
 
-    <div class="flex flex-col gap-2">
-        <h3 class="text-xl font-semibold !text-gray-600">{{ propertyPurchaseDetails.unit.property.name }}</h3>
-        <h1 class="text-2xl !font-bold !text-gray-600">{{ propertyPurchaseDetails.initial_payment_due | currency: '₦ ' }}</h1>
+    <div class="property-payment-page__headline">
+        <h3 class="property-payment-page__title">{{ propertyPurchaseDetails.unit.property.name }}</h3>
+        <h1 class="property-payment-page__amount">{{ propertyPurchaseDetails.initial_payment_due | currency: '₦ ' }}</h1>
     </div>
     <div class="flex flex-col lg:flex-row gap-6 items-start">
-      <div class="flex flex-col gap-3 px-4 py-6 bg-primary rounded-lg !text-white w-full lg:w-fit min-w-[320px]">
-          <div class="flex justify-between">
-              <div class="flex gap-2 items-center">
-                  <app-icon class="" name="tag"></app-icon>
-                  <p class="text-sm"> Number of Units </p>
+      <div class="purchase-summary-card">
+          <div class="purchase-summary-card__row">
+              <div class="purchase-summary-card__label-group">
+                  <app-icon name="box" [size]="18"></app-icon>
+                  <p>Number of Units</p>
               </div>
-              <p>{{ propertyPurchaseDetails.quantity }}</p>
+              <p class="purchase-summary-card__value">{{ propertyPurchaseDetails.quantity }}</p>
           </div>
-          <div class="flex gap-20 justify-between">
-              <div class="flex gap-2 items-center">
-                  <app-icon class="" name="credit-card"></app-icon>
-                  <p class="text-sm"> Payment Type </p>
+          <div class="purchase-summary-card__row">
+              <div class="purchase-summary-card__label-group">
+                  <app-icon name="layers" [size]="18"></app-icon>
+                  <p>Payment Type</p>
               </div>
-              <p class="text-sm">{{ paymentTypeLabel }}</p>
+              <p class="purchase-summary-card__value">{{ paymentTypeLabel }}</p>
           </div>
-          <div class="flex gap-20 justify-between">
-              <div class="flex gap-2 items-center">
-                  <app-icon class="" name="wallet"></app-icon>
-                  <p class="text-sm"> Payment Mode </p>
+          <div class="purchase-summary-card__row">
+              <div class="purchase-summary-card__label-group">
+                  <app-icon name="dollar-sign" [size]="18"></app-icon>
+                  <p>Payment Mode</p>
               </div>
-              <div class="flex items-center gap-2 text-sm">
-                  <app-icon class="!text-sm" name="wallet"></app-icon>
-                  <p class="text-sm">{{ paymentModeLabel }}</p>
-              </div>
+              <p class="purchase-summary-card__value">{{ paymentModeLabel }}</p>
           </div>
-          <div class="flex justify-between">
-              <div class="flex gap-2 items-center">
-                  <app-icon class="" name="circle"></app-icon>
-                  <p class="text-sm"> Payment Status </p>
+          <div class="purchase-summary-card__row">
+              <div class="purchase-summary-card__label-group">
+                  <app-icon name="activity" [size]="18"></app-icon>
+                  <p>Payment Status</p>
               </div>
-              <p class="text-sm !text-white-400 !font-normal bg-red-500 rounded-full !px-4">{{ propertyPurchaseDetails.status }}</p>
+              <p class="purchase-summary-card__status-pill">{{ propertyPurchaseDetails.status }}</p>
           </div>
       </div>
 
       <div class="flex w-full lg:flex-1 flex-col gap-4">
-        <div
-          *ngIf="isOfflinePaymentMode"
-          class="flex w-full items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 min-h-[160px]"
-        >
-          <app-icon name="info" class="!text-amber-500 !text-lg"></app-icon>
-          <div>
-            <h2 class="!mb-1 !text-gray-600 text-base font-semibold">Finance Review In Progress</h2>
-            <p class="!mb-0 !text-gray-500 text-sm">
-              This {{ paymentModeLabel.toLowerCase() }} transaction is still being reviewed by the finance team. You can reach out to admin or your realtor for more details.
-            </p>
+        <section class="payment-action-card" *ngIf="hasPaymentAction || shouldLoadSchedules || hasPaymentHistory">
+          <div class="payment-action-card__header">
+            <div>
+              <h2>Payment Actions</h2>
+              <p>Manage payments and review payment activity for this property from one place.</p>
+            </div>
+            <span [class]="paymentActionStatusClass">{{ paymentActionStatusLabel }}</span>
           </div>
+
+          <div class="payment-action-card__body" *ngIf="hasPaymentAction">
+            <div class="payment-action-card__hero">
+              <div class="payment-action-card__copy">
+                <span class="payment-action-card__eyebrow">Payment Focus</span>
+                <h3>{{ paymentActionTitle }}</h3>
+                <p class="payment-action-card__description">{{ paymentActionDescription }}</p>
+              </div>
+
+              <div class="payment-action-card__amount-block">
+                <span>Amount</span>
+                <strong>{{ paymentActionAmount | currency:'₦ ' }}</strong>
+              </div>
+            </div>
+
+            <div class="payment-action-card__meta" *ngIf="nextPayableSchedule">
+              <span>Due Date: {{ nextPayableSchedule.due_date | date:'mediumDate' }}</span>
+              <span>Status: {{ formatDisplayValue(nextPayableSchedule.status) }}</span>
+            </div>
+          </div>
+
+          <div class="payment-action-card__buttons">
+            <app-button
+              *ngIf="hasPaymentAction"
+              [buttonText]="paymentActionButtonLabel"
+              (onButtonClick)="openPrimaryPaymentAction()"
+            ></app-button>
+            <app-button
+              *ngIf="shouldLoadSchedules && schedules.length > 0"
+              buttonText="View Schedule"
+              variant="secondary"
+              (onButtonClick)="scrollToScheduleSection()"
+            ></app-button>
+            <app-button
+              *ngIf="showSecondaryPaymentsButton"
+              buttonText="View Payments"
+              variant="secondary"
+              (onButtonClick)="goToPaymentsPage()"
+            ></app-button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="portfolio-detail-grid">
+      <section class="portfolio-detail-card">
+        <div class="portfolio-detail-card__header">
+          <h2>Purchase Overview</h2>
+          <span [class]="purchaseStatusClass">{{ purchaseStatusLabel }}</span>
         </div>
 
-        <div
-          *ngIf="isPendingPaystackPayment"
-          class="flex w-full items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 min-h-[160px]"
-        >
-          <app-icon name="info" class="!text-primary !text-lg"></app-icon>
-          <div>
-            <h2 class="!mb-1 !text-gray-600 text-base font-semibold">Incomplete Paystack Checkout</h2>
-            <p class="!mb-0 !text-gray-500 text-sm">
-              This Paystack transaction is still in payment because the checkout was initiated but not completed. The process may have been abandoned or cancelled.
-            </p>
+        <div class="portfolio-detail-card__grid">
+          <div class="portfolio-detail-card__item">
+            <span>Unit Type</span>
+            <strong>{{ unitTypeLabel }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Quantity</span>
+            <strong>{{ propertyPurchaseDetails.quantity }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Portfolio Value</span>
+            <strong>{{ propertyPurchaseDetails.total_price | currency:'₦ ' }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Unit Price</span>
+            <strong>{{ unitPrice | currency:'₦ ' }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Initial Payment Due</span>
+            <strong>{{ propertyPurchaseDetails.initial_payment_due | currency:'₦ ' }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Balance Due</span>
+            <strong>{{ purchaseBalanceDue | currency:'₦ ' }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Total Paid</span>
+            <strong>{{ totalAmountPaid | currency:'₦ ' }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Payment Type</span>
+            <strong>{{ paymentTypeLabel }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Payment Mode</span>
+            <strong>{{ paymentModeLabel }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Purchase Date</span>
+            <strong>{{ propertyPurchaseDetails.start_date | date:'mediumDate' }}</strong>
+          </div>
+          <div class="portfolio-detail-card__item">
+            <span>Paid At</span>
+            <strong>{{ propertyPurchaseDetails.paid_at ? (propertyPurchaseDetails.paid_at | date:'mediumDate') : 'Pending' }}</strong>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section class="portfolio-detail-card" *ngIf="hasPaymentHistory || isLoadingPaymentHistory">
+        <div class="portfolio-detail-card__header">
+          <h2>Payment Activity</h2>
+          <span class="portfolio-detail-card__caption">{{ paymentHistory.length }} record{{ paymentHistory.length === 1 ? '' : 's' }}</span>
+        </div>
+
+        <div class="portfolio-detail-card__list" *ngIf="isLoadingPaymentHistory">
+          <p class="portfolio-detail-card__empty">Loading payment activity...</p>
+        </div>
+
+        <div class="portfolio-detail-card__list" *ngIf="!isLoadingPaymentHistory">
+          <article class="payment-history-item" *ngFor="let payment of paymentHistory">
+            <div class="payment-history-item__top">
+              <div>
+                <h3>{{ payment.amount | currency:'₦ ' }}</h3>
+                <p>{{ formatPaymentMethod(payment.method) }} · {{ formatDisplayValue(payment.payment_type) }}</p>
+              </div>
+              <span
+                class="status-pill"
+                [class.status-pill--success]="payment.status === 'paid' || payment.status === 'approved'"
+                [class.status-pill--warning]="payment.status === 'pending' || payment.status === 'processing'"
+                [class.status-pill--danger]="payment.status === 'failed' || payment.status === 'cancelled'"
+              >
+                {{ formatDisplayValue(payment.status) }}
+              </span>
+            </div>
+
+            <div class="payment-history-item__meta">
+              <span>Created: {{ payment.created_at | date:'medium' }}</span>
+              <span *ngIf="payment.paid_at">Paid: {{ payment.paid_at | date:'mediumDate' }}</span>
+              <span *ngIf="payment.proof_url">Proof uploaded</span>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
 
     <div
       *ngIf="propertyDetails"
-      class="flex w-full flex-col gap-6 rounded-2xl border border-gray-200 bg-white px-5 py-5 md:px-6"
+      class="property-details-card"
     >
-      <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <div class="flex flex-col gap-1">
-          <p class="text-sm !text-gray-400">Property Type</p>
-          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.property_type.name || 'N/A' }}</h3>
+      <div class="property-details-card__grid">
+        <div class="property-details-card__item">
+          <p class="property-details-card__label">Property Type</p>
+          <h3 class="property-details-card__value">{{ propertyDetails.property_type.name || 'N/A' }}</h3>
         </div>
-        <div class="flex flex-col gap-1">
-          <p class="text-sm !text-gray-400">Location</p>
-          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.location || 'N/A' }}</h3>
+        <div class="property-details-card__item">
+          <p class="property-details-card__label">Location</p>
+          <h3 class="property-details-card__value">{{ propertyDetails.location || 'N/A' }}</h3>
         </div>
-        <div class="flex flex-col gap-1">
-          <p class="text-sm !text-gray-400">Address</p>
-          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.address || 'N/A' }}</h3>
+        <div class="property-details-card__item">
+          <p class="property-details-card__label">Address</p>
+          <h3 class="property-details-card__value">{{ propertyDetails.address || 'N/A' }}</h3>
         </div>
-        <div class="flex flex-col gap-1">
-          <p class="text-sm !text-gray-400">Availability</p>
-          <h3 class="text-base font-semibold !text-gray-600">{{ propertyDetails.is_available ? 'Available' : 'Unavailable' }}</h3>
+        <div class="property-details-card__item">
+          <p class="property-details-card__label">Availability</p>
+          <h3 class="property-details-card__value">{{ propertyDetails.is_available ? 'Available' : 'Unavailable' }}</h3>
         </div>
       </div>
 
-      <div class="flex flex-col gap-2" *ngIf="propertyDetails.description">
-        <p class="text-sm !text-gray-400">Description</p>
-        <p class="text-sm leading-6 !text-gray-500">{{ propertyDetails.description }}</p>
+      <div class="property-details-card__section" *ngIf="propertyDetails.description">
+        <p class="property-details-card__label">Description</p>
+        <p class="property-details-card__description">{{ propertyDetails.description }}</p>
       </div>
 
-      <div class="flex flex-col gap-3" *ngIf="propertyDetails.property_features.length > 0">
-        <p class="text-sm !text-gray-400">Property Features</p>
-        <div class="flex flex-wrap gap-3">
+      <div class="property-details-card__section" *ngIf="propertyDetails.property_features.length > 0">
+        <p class="property-details-card__label">Property Features</p>
+        <div class="property-details-card__features">
           @for (feature of propertyDetails.property_features; track feature.feature_id) {
-            <span class="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm !text-primary">
+            <span class="property-details-card__feature">
               <app-icon name="airdrop" [size]="14"></app-icon>
               <span>{{ feature.feature.name }}</span>
             </span>
@@ -209,7 +322,7 @@
 
     <!-- <h1 class="text-xl font-semibold !text-primary border-b-2 border-primary w-fit cursor-pointer">Request Realtor Change</h1> -->
 
-    <div class="flex justify-between items-center w-full md:w-2/3" *ngIf="shouldLoadSchedules && schedules.length > 0">
+    <div id="payment-schedule-section" class="flex justify-between items-center w-full md:w-2/3" *ngIf="shouldLoadSchedules && schedules.length > 0">
         <h1 class="text-xl font-semibold !text-gray-600">Payment Schedule</h1>
     </div>
 
@@ -229,7 +342,7 @@
                         <app-icon class="!text-gray-400" name="credit-card"></app-icon>
                         Amount Due
                     </div>
-                    <p class="!text-gray-500 !font-semibold">{{ schedule.amount_due - schedule.amount_paid | currency: '₦' }}</p>
+                    <p class="!text-gray-500 !font-semibold">{{ getScheduleOutstandingAmount(schedule) | currency: '₦' }}</p>
                 </div>
                 <div class="flex justify-between items-center" *ngIf="schedule.amount_paid > 0 && schedule.status === 'partial'">
                     <div class="flex gap-2 items-center !text-gray-500">
@@ -246,16 +359,26 @@
                     <p class="!text-gray-500 !font-semibold"> {{ schedule.due_date | date:'dd/MM/yyyy' }} </p>
                 </div>
 
-                @if(schedule.status === 'pending' || schedule.status === 'partial') {
-                    <button
-                     class="!mt-4 !bg-primary !text-white !px-6 !py-2 !rounded-full w-fit cursor-pointer"
-                     (click)="showPaymentMethodModal(schedule)"
-                     >Make Payment</button>
+                @if(schedule.status === 'pending' || schedule.status === 'partial' || schedule.status === 'overdue') {
+                    <app-button
+                      class="!mt-4"
+                      buttonText="Make Payment"
+                      (onButtonClick)="showPaymentMethodModal(schedule)"
+                    ></app-button>
                 }
             </div>
             <!-- naira symbol -->
              <!-- <h1> ₦ </h1> -->
         }
+    </div>
+
+    <div class="portfolio-detail-card portfolio-detail-card--compact" *ngIf="shouldLoadSchedules && schedules.length === 0 && !isLoading">
+      <div class="portfolio-detail-card__header">
+        <h2>Installment Schedule</h2>
+      </div>
+      <p class="portfolio-detail-card__empty">
+        No installment schedules are available for this property yet.
+      </p>
     </div>
 
    </div>
