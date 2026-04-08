@@ -246,6 +246,10 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     return this.formatDisplayValue(rawValue);
   }
 
+  get unitPrice(): number {
+    return Number(this.propertyPurchaseDetails?.unit?.price || 0);
+  }
+
   get purchaseStatusLabel(): string {
     return this.formatDisplayValue(this.propertyPurchaseDetails?.status);
   }

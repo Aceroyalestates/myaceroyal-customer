@@ -4,9 +4,16 @@
         <app-icon class="inspection-page__back cursor-pointer" name="arrow-left"></app-icon>
         <h1 class="inspection-page__title text-2xl font-bold">Inspection</h1>
     </div>
-    <h2 class="inspection-page__section-title text-xl font-semibold">Inspection Schedule</h2>
+    <div class="inspection-page__toolbar">
+      <h2 class="inspection-page__section-title text-xl font-semibold">Inspection Schedule</h2>
+      <app-button
+        [buttonText]="showFilters ? 'Hide Filters' : 'Filter'"
+        variant="secondary"
+        (onButtonClick)="toggleFilters()"
+      ></app-button>
+    </div>
 
-    <div class="inspection-page__filters">
+    <div class="inspection-page__filters" *ngIf="showFilters">
       <div class="inspection-page__filter-grid">
         <div class="inspection-page__field">
           <label>Status</label>
@@ -46,9 +53,22 @@
       </div>
 
       <div class="inspection-page__filter-actions">
-        <button nz-button nzType="default" (click)="resetFilters()" [disabled]="isLoading">Reset</button>
-        <button nz-button nzType="primary" (click)="applyFilters()" [disabled]="isLoading">Apply Filters</button>
-        <button nz-button nzType="default" (click)="bookNewInspection()">Book New Inspection</button>
+        <app-button
+          buttonText="Reset"
+          variant="secondary"
+          [disabled]="isLoading"
+          (onButtonClick)="resetFilters()"
+        ></app-button>
+        <app-button
+          buttonText="Apply Filters"
+          [disabled]="isLoading"
+          (onButtonClick)="applyFilters()"
+        ></app-button>
+        <app-button
+          buttonText="Book New Inspection"
+          variant="secondary"
+          (onButtonClick)="bookNewInspection()"
+        ></app-button>
       </div>
     </div>
 
@@ -107,3 +127,69 @@
     </div>
   </div>
 </main>
+
+@if (isBookInspectionModalOpen) {
+  <div class="inspection-booking-modal">
+    <button
+      type="button"
+      class="inspection-booking-modal__backdrop"
+      (click)="closeBookInspectionModal()"
+      aria-label="Close property picker"
+    ></button>
+
+    <div class="inspection-booking-modal__panel">
+      <div class="inspection-booking-modal__header">
+        <div>
+          <h2>Select Property</h2>
+          <p>Choose the property you want to book an inspection for.</p>
+        </div>
+        <button
+          type="button"
+          class="inspection-booking-modal__close"
+          (click)="closeBookInspectionModal()"
+          aria-label="Close property picker"
+        >
+          <app-icon name="x" [size]="18"></app-icon>
+        </button>
+      </div>
+
+      <div class="inspection-booking-modal__body">
+        @if (isLoadingProperties) {
+          <div class="inspection-booking-modal__loading">
+            <nz-spin nzSimple></nz-spin>
+            <span>Loading your properties...</span>
+          </div>
+        } @else if (availableProperties.length > 0) {
+          <label class="inspection-booking-modal__field">
+            <span>Property</span>
+            <select [(ngModel)]="selectedPropertyId">
+              <option value="" disabled>Select a property</option>
+              @for (property of availableProperties; track property.id) {
+                <option [value]="property.id">
+                  {{ property.name }}{{ property.subtitle ? ' · ' + property.subtitle : '' }}
+                </option>
+              }
+            </select>
+          </label>
+        } @else {
+          <p class="inspection-booking-modal__empty">
+            No properties are available for inspection booking yet.
+          </p>
+        }
+      </div>
+
+      <div class="inspection-booking-modal__actions">
+        <app-button
+          buttonText="Cancel"
+          variant="secondary"
+          (onButtonClick)="closeBookInspectionModal()"
+        ></app-button>
+        <app-button
+          buttonText="Continue"
+          [disabled]="!selectedPropertyId || isLoadingProperties"
+          (onButtonClick)="confirmBookInspection()"
+        ></app-button>
+      </div>
+    </div>
+  </div>
+}
