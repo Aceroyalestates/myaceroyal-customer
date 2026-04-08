@@ -150,7 +150,7 @@
         @for (data of paymentHistory; track data.id) {
           <tr>
             <td class="whitespace-nowrap">{{ data.purchase.property.name }}</td>
-            <td>{{ data.purchase.unit.type || 'N/A' }}</td>
+            <td>{{ formatUnitType(data.purchase.unit.type) }}</td>
             <td>{{ formatLabel(data.payment_type) }}</td>
             <td>{{ formatLabel(data.method) }}</td>
             <td>

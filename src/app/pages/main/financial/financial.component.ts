@@ -172,6 +172,18 @@ export class FinancialComponent {
     return value.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
+  formatUnitType(value: string | null | undefined): string {
+    if (!value) {
+      return 'N/A';
+    }
+
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
   openProof(url: string | null): void {
     if (!url) {
       return;

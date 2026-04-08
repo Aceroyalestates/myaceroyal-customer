@@ -219,6 +219,141 @@
   text-transform: capitalize;
 }
 
+.payment-action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  padding: 22px 24px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 22px;
+  background: var(--surface-bg, #ffffff);
+  box-shadow: var(--shadow-elevated, 0 16px 36px rgba(15, 23, 42, 0.08));
+}
+
+.payment-action-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.payment-action-card__header h2 {
+  margin: 0 0 6px;
+  color: var(--text-color, #1f2937);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.payment-action-card__header p {
+  margin: 0;
+  color: var(--text-muted, #6b7280);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.payment-action-card__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(228, 28, 36, 0.08);
+  color: var(--primary-color, #e41c24);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.payment-action-card__badge--warning {
+  background: rgba(228, 28, 36, 0.1);
+  color: var(--primary-color, #e41c24);
+}
+
+.payment-action-card__badge--danger {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+}
+
+.payment-action-card__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 220px);
+  gap: 18px;
+  align-items: start;
+}
+
+.payment-action-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.payment-action-card__eyebrow {
+  color: var(--text-muted, #6b7280);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.payment-action-card__copy h3 {
+  margin: 0;
+  color: var(--text-color, #1f2937);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.payment-action-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-action-card__amount-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 18px;
+  background: var(--surface-bg-muted, #f8fafc);
+}
+
+.payment-action-card__amount-block span {
+  color: var(--text-muted, #6b7280);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payment-action-card__amount-block strong {
+  color: var(--text-color, #1f2937);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.payment-action-card__description,
+.payment-action-card__meta {
+  color: var(--text-secondary, #4b5563);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.payment-action-card__meta {
+  display: flex;
+  gap: 12px 18px;
+  flex-wrap: wrap;
+}
+
+.payment-action-card__buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .portfolio-detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -415,6 +550,16 @@
 
   .portfolio-detail-card {
     padding: 20px;
+  }
+
+  .payment-action-card {
+    padding: 20px;
+  }
+
+  .payment-action-card__header,
+  .payment-action-card__hero {
+    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .property-details-card {

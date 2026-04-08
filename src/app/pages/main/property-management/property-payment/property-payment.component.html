@@ -110,31 +110,55 @@
       </div>
 
       <div class="flex w-full lg:flex-1 flex-col gap-4">
-        <div
-          *ngIf="isOfflinePaymentMode"
-          class="flex w-full items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 min-h-[160px]"
-        >
-          <app-icon name="info" class="!text-amber-500 !text-lg"></app-icon>
-          <div>
-            <h2 class="!mb-1 !text-gray-600 text-base font-semibold">Finance Review In Progress</h2>
-            <p class="!mb-0 !text-gray-500 text-sm">
-              This {{ paymentModeLabel.toLowerCase() }} transaction is still being reviewed by the finance team. You can reach out to admin or your realtor for more details.
-            </p>
+        <section class="payment-action-card" *ngIf="hasPaymentAction || shouldLoadSchedules || hasPaymentHistory">
+          <div class="payment-action-card__header">
+            <div>
+              <h2>Payment Actions</h2>
+              <p>Manage payments and review payment activity for this property from one place.</p>
+            </div>
+            <span [class]="paymentActionStatusClass">{{ paymentActionStatusLabel }}</span>
           </div>
-        </div>
 
-        <div
-          *ngIf="isPendingPaystackPayment"
-          class="flex w-full items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 min-h-[160px]"
-        >
-          <app-icon name="info" class="!text-primary !text-lg"></app-icon>
-          <div>
-            <h2 class="!mb-1 !text-gray-600 text-base font-semibold">Incomplete Paystack Checkout</h2>
-            <p class="!mb-0 !text-gray-500 text-sm">
-              This Paystack transaction is still in payment because the checkout was initiated but not completed. The process may have been abandoned or cancelled.
-            </p>
+          <div class="payment-action-card__body" *ngIf="hasPaymentAction">
+            <div class="payment-action-card__hero">
+              <div class="payment-action-card__copy">
+                <span class="payment-action-card__eyebrow">Payment Focus</span>
+                <h3>{{ paymentActionTitle }}</h3>
+                <p class="payment-action-card__description">{{ paymentActionDescription }}</p>
+              </div>
+
+              <div class="payment-action-card__amount-block">
+                <span>Amount</span>
+                <strong>{{ paymentActionAmount | currency:'₦ ' }}</strong>
+              </div>
+            </div>
+
+            <div class="payment-action-card__meta" *ngIf="nextPayableSchedule">
+              <span>Due Date: {{ nextPayableSchedule.due_date | date:'mediumDate' }}</span>
+              <span>Status: {{ formatDisplayValue(nextPayableSchedule.status) }}</span>
+            </div>
           </div>
-        </div>
+
+          <div class="payment-action-card__buttons">
+            <app-button
+              *ngIf="hasPaymentAction"
+              [buttonText]="paymentActionButtonLabel"
+              (onButtonClick)="openPrimaryPaymentAction()"
+            ></app-button>
+            <app-button
+              *ngIf="shouldLoadSchedules && schedules.length > 0"
+              buttonText="View Schedule"
+              variant="secondary"
+              (onButtonClick)="scrollToScheduleSection()"
+            ></app-button>
+            <app-button
+              *ngIf="showSecondaryPaymentsButton"
+              buttonText="View Payments"
+              variant="secondary"
+              (onButtonClick)="goToPaymentsPage()"
+            ></app-button>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -294,7 +318,7 @@
 
     <!-- <h1 class="text-xl font-semibold !text-primary border-b-2 border-primary w-fit cursor-pointer">Request Realtor Change</h1> -->
 
-    <div class="flex justify-between items-center w-full md:w-2/3" *ngIf="shouldLoadSchedules && schedules.length > 0">
+    <div id="payment-schedule-section" class="flex justify-between items-center w-full md:w-2/3" *ngIf="shouldLoadSchedules && schedules.length > 0">
         <h1 class="text-xl font-semibold !text-gray-600">Payment Schedule</h1>
     </div>
 
@@ -314,7 +338,7 @@
                         <app-icon class="!text-gray-400" name="credit-card"></app-icon>
                         Amount Due
                     </div>
-                    <p class="!text-gray-500 !font-semibold">{{ schedule.amount_due - schedule.amount_paid | currency: '₦' }}</p>
+                    <p class="!text-gray-500 !font-semibold">{{ getScheduleOutstandingAmount(schedule) | currency: '₦' }}</p>
                 </div>
                 <div class="flex justify-between items-center" *ngIf="schedule.amount_paid > 0 && schedule.status === 'partial'">
                     <div class="flex gap-2 items-center !text-gray-500">
@@ -331,11 +355,12 @@
                     <p class="!text-gray-500 !font-semibold"> {{ schedule.due_date | date:'dd/MM/yyyy' }} </p>
                 </div>
 
-                @if(schedule.status === 'pending' || schedule.status === 'partial') {
-                    <button
-                     class="!mt-4 !bg-primary !text-white !px-6 !py-2 !rounded-full w-fit cursor-pointer"
-                     (click)="showPaymentMethodModal(schedule)"
-                     >Make Payment</button>
+                @if(schedule.status === 'pending' || schedule.status === 'partial' || schedule.status === 'overdue') {
+                    <app-button
+                      class="!mt-4"
+                      buttonText="Make Payment"
+                      (onButtonClick)="showPaymentMethodModal(schedule)"
+                    ></app-button>
                 }
             </div>
             <!-- naira symbol -->

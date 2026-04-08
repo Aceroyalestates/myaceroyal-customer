@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, Observable } from 'rxjs';
-import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryFilters, PaymentHistoryResponse, PaymentSchedulesResponse, PropertyFormStatisticsFilters, PropertyFormStatisticsResponse, PurchaseFormPayload, PurchaseFormResponse, PurchaseFormSubmitResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryFilters, PaymentHistoryResponse, PaymentScheduleListResponse, PaymentScheduleResponse, PaymentSchedulesResponse, PropertyFormStatisticsFilters, PropertyFormStatisticsResponse, PurchaseFormPayload, PurchaseFormResponse, PurchaseFormSubmitResponse, PurchasePaymentScheduleFilters, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
 
 @Injectable({
   providedIn: 'root'
@@ -196,8 +196,47 @@ export class PaymentService {
       return this.httpService.get<any>(`purchases/${purchaseId}`);
     }
 
-    getUserPurchaseSchedules(purchaseId: string): Observable<any> {
-      return this.httpService.get<any>(`purchases/${purchaseId}/schedules`);
+    getUserPurchaseSchedules(
+      purchaseId: string,
+      filters?: PurchasePaymentScheduleFilters
+    ): Observable<PaymentScheduleListResponse> {
+      const params: Record<string, string> = {};
+
+      if (filters?.status) {
+        params['status'] = filters.status;
+      }
+      if (filters?.sortBy) {
+        params['sortBy'] = filters.sortBy;
+      }
+      if (filters?.sortOrder) {
+        params['sortOrder'] = filters.sortOrder;
+      }
+      if (filters?.includePayments !== undefined) {
+        params['includePayments'] = String(filters.includePayments);
+      }
+
+      return this.httpService.get<PaymentScheduleListResponse>(`purchases/${purchaseId}/schedules`, {
+        params
+      });
+    }
+
+    getOverduePurchaseSchedules(purchaseId: string): Observable<PaymentScheduleListResponse> {
+      return this.httpService.get<PaymentScheduleListResponse>(`purchases/${purchaseId}/schedules/overdue`);
+    }
+
+    getUpcomingPurchaseSchedules(
+      purchaseId: string,
+      daysAhead: number = 30
+    ): Observable<PaymentScheduleListResponse> {
+      return this.httpService.get<PaymentScheduleListResponse>(`purchases/${purchaseId}/schedules/upcoming`, {
+        params: {
+          daysAhead: String(daysAhead),
+        }
+      });
+    }
+
+    getPaymentScheduleById(scheduleId: string): Observable<PaymentScheduleResponse> {
+      return this.httpService.get<PaymentScheduleResponse>(`schedules/${scheduleId}`);
     }
 
 }
