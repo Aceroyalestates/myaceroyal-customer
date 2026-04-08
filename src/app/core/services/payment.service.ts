@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { map, Observable } from 'rxjs';
-import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryFilters, PaymentHistoryResponse, PaymentSchedulesResponse, PurchaseFormPayload, PurchaseFormResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOfflinePurchaseResponse, ContinueOnlinePurchasePayload, ContinueOnlinePurchaseResponse, DefaultBankAccount, PaymentHistoryFilters, PaymentHistoryResponse, PaymentSchedulesResponse, PropertyFormStatisticsFilters, PropertyFormStatisticsResponse, PurchaseFormPayload, PurchaseFormResponse, PurchaseFormSubmitResponse, RealtorByRefCodeResponse, SettingsResponse, StartOfflinePurchasePayload, StartOfflinePurchaseResponse, StartOnlinePurchasePayload, StartOnlinePurchaseResponse, ValidateCouponResponse } from '../models/payment';
 
 @Injectable({
   providedIn: 'root'
@@ -90,8 +90,12 @@ export class PaymentService {
       return this.httpService.post<ContinueOnlinePurchaseResponse>(`payments/online`, payload);
     }
 
-    submitPurchaseForm(payload: PurchaseFormPayload): Observable<PurchaseFormResponse> {
+    createPurchaseForm(payload: Partial<PurchaseFormPayload>): Observable<PurchaseFormResponse> {
       return this.httpService.post<PurchaseFormResponse>('property-forms', payload);
+    }
+
+    submitPurchaseForm(purchaseFormId: string): Observable<PurchaseFormSubmitResponse> {
+      return this.httpService.post<PurchaseFormSubmitResponse>(`property-forms/${purchaseFormId}/submit`, {});
     }
 
     getUserPayments(
@@ -143,6 +147,24 @@ export class PaymentService {
           limit: limit.toString(),
           sort_order: sortOrder
         }
+      });
+    }
+
+    getPropertyFormStatistics(filters?: PropertyFormStatisticsFilters): Observable<PropertyFormStatisticsResponse> {
+      const params: Record<string, string> = {};
+
+      if (filters?.userId) {
+        params['userId'] = filters.userId;
+      }
+      if (filters?.fromDate) {
+        params['fromDate'] = filters.fromDate;
+      }
+      if (filters?.toDate) {
+        params['toDate'] = filters.toDate;
+      }
+
+      return this.httpService.get<PropertyFormStatisticsResponse>('property-forms/statistics', {
+        params
       });
     }
 

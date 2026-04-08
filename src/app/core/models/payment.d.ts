@@ -319,6 +319,24 @@ export interface PurchaseFormResponse {
   };  
 }
 
+export interface PurchaseFormSubmitResponse {
+  success: boolean;
+  message: string;
+  data?: unknown;
+}
+
+export interface PropertyFormStatisticsFilters {
+  userId?: string;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface PropertyFormStatisticsResponse {
+  success: boolean;
+  message: string;
+  data: Record<string, unknown>;
+}
+
 // --- Nested Interfaces for Data Item ---
 
 /**

@@ -1,239 +1,125 @@
-<main class="my-properties-page flex flex-col w-full pt-6 md:pt-8">
-  <div class="flex flex-col gap-12">
-    <!-- <app-breadcrumb
-      [items]="[{ label: 'Property Management', url: '/property-management' }]"
-    ></app-breadcrumb> -->
-    <div class="my-properties-page__heading flex gap-6">
-        <app-icon class="cursor-pointer my-properties-page__back" name="arrow-left"></app-icon>
-        <h1 class="my-properties-page__title text-2xl font-bold">My Properties</h1>
+<main class="my-properties-page">
+  <div class="my-properties-page__shell">
+    <div class="my-properties-page__heading">
+      <app-icon class="cursor-pointer my-properties-page__back" name="arrow-left" (click)="back()"></app-icon>
+      <div class="my-properties-page__heading-copy">
+        <h1 class="my-properties-page__title">My Properties</h1>
+        <p class="my-properties-page__subtitle">
+          Track your full property portfolio, payment progress, form completion, and ownership details from one place.
+        </p>
+      </div>
     </div>
-    <!-- <div class="flex gap-4 justify-between">
-        
-        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-            <p class="text-[#4F4F4F] text-lg"> Pending Payments </p>
-            <p class="text-3xl">{{ paymentHistory?.summary.status_breakdown.pending.count | number: '2.0-0' }}</p>
+
+    <div class="my-properties-page__summary-grid">
+      <div class="portfolio-summary-card" *ngFor="let card of summaryCards">
+        <span class="portfolio-summary-card__label">{{ card.label }}</span>
+        <strong class="portfolio-summary-card__value">{{ card.value }}</strong>
+      </div>
+    </div>
+
+    <div class="my-properties-page__filters">
+      <button
+        type="button"
+        *ngFor="let filter of portfolioFilters"
+        class="portfolio-filter"
+        [class.portfolio-filter--active]="selectedFilter === filter.key"
+        (click)="setFilter(filter.key)"
+      >
+        <span>{{ filter.label }}</span>
+        <strong>{{ getFilterCount(filter.key) }}</strong>
+      </button>
+    </div>
+
+    <div class="my-properties-page__portfolio-grid">
+      <ng-container *ngIf="isLoading">
+        <div class="portfolio-card portfolio-card--skeleton" *ngFor="let item of emptyArray">
+          <div class="portfolio-card__media skeleton-block"></div>
+          <div class="portfolio-card__body">
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--short"></div>
+          </div>
         </div>
-        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-            <p class="text-[#4F4F4F] text-lg"> Total Payments </p>
-            <p class="text-3xl">{{ paymentHistory.summary.total_payments | number: '2.0-0' }}</p>
+      </ng-container>
+
+      <div class="my-properties-page__empty" *ngIf="!isLoading && filteredPortfolioItems.length === 0">
+        <p class="my-properties-page__empty-title">No properties found for this view.</p>
+        <p class="my-properties-page__empty-text">Change the filter to see more of your property portfolio.</p>
+      </div>
+
+      <article class="portfolio-card" *ngFor="let item of filteredPortfolioItems">
+        <div class="portfolio-card__media">
+          <img
+            *ngIf="getPropertyImage(item)"
+            class="portfolio-card__media-image"
+            [src]="getPropertyImage(item)"
+            [alt]="getPropertyName(item)"
+          />
+          <div *ngIf="!getPropertyImage(item)" class="portfolio-card__media-placeholder">
+            {{ getPropertyInitials(item) }}
+          </div>
+          <div class="portfolio-card__media-overlay"></div>
+
+          <div class="portfolio-card__chips">
+            <span [class]="getFormStatusClass(item)">{{ getFormStatus(item) }}</span>
+            <span [class]="getPaymentStatusClass(item)">{{ getPaymentStatus(item) }}</span>
+          </div>
+
+          <div class="portfolio-card__hero-copy">
+            <h2>{{ getPropertyName(item) }}</h2>
+            <p *ngIf="getPropertySubtitle(item)">{{ getPropertySubtitle(item) }}</p>
+          </div>
         </div>
-        <div class="flex flex-col gap-2 bg-gray-100 border border-gray-200 rounded p-4 w-full sm:w-1/3">
-            <p class="text-[#4F4F4F] text-lg"> Total Amounts </p>
-            <p class="text-3xl">{{ paymentHistory.summary.total_amount | currency:'NGN':'symbol':'1.0-0'  }}</p>
+
+        <div class="portfolio-card__body">
+          <div class="portfolio-card__price-row">
+            <div class="portfolio-card__price-block">
+              <span class="portfolio-card__meta-label">Portfolio Value</span>
+              <strong class="portfolio-card__price">{{ formatNaira(getPurchaseAmount(item)) }}</strong>
+            </div>
+            <div class="portfolio-card__price-block portfolio-card__price-side">
+              <span class="portfolio-card__meta-label">Initial Due</span>
+              <strong>{{ formatNaira(getInitialDueAmount(item)) }}</strong>
+            </div>
+          </div>
+
+          <div class="portfolio-card__meta-grid">
+            <div class="portfolio-card__meta-item">
+              <span class="portfolio-card__meta-label">Units</span>
+              <strong>{{ getQuantity(item) }}</strong>
+            </div>
+            <div class="portfolio-card__meta-item">
+              <span class="portfolio-card__meta-label">Unit Type</span>
+              <strong>{{ item.unit?.unit_type?.name || item.unit?.name || 'N/A' }}</strong>
+            </div>
+            <div class="portfolio-card__meta-item">
+              <span class="portfolio-card__meta-label">Payment Type</span>
+              <strong>{{ getPaymentType(item) }}</strong>
+            </div>
+            <div class="portfolio-card__meta-item">
+              <span class="portfolio-card__meta-label">Payment Mode</span>
+              <strong>{{ getPaymentMode(item) }}</strong>
+            </div>
+          </div>
+
+          <p class="portfolio-card__message">{{ getStatusMessage(item) }}</p>
+
+          <div class="portfolio-card__actions">
+            <app-button
+              buttonText="View Details"
+              variant="secondary"
+              (onButtonClick)="gotoPropertyDetails(item.purchaseId)"
+            ></app-button>
+
+            <app-button
+              *ngIf="needsFormCompletion(item)"
+              buttonText="Continue Form"
+              (onButtonClick)="gotoPurchaseForm(item.purchaseId, item.form)"
+            ></app-button>
+          </div>
         </div>
-        
-    </div> -->
-    <div class="flex">
-        <nz-tabset class="my-properties-page__tabs w-full">
-            <nz-tab nzTitle="Saved">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8">
-                    @if (isLoading) { @for (item of emptyArray; track $index) {
-                    <div class="h-fit flex relative rounded-lg w-full animate-pulse">
-                        <div class="bg-gray-200 w-full h-64 rounded-lg"></div>
-                    </div>
-                    }}
-                    <div class="flex justify-center" *ngIf="savedPayments && savedPayments.length === 0">
-                        <p class="my-properties-page__empty-text text-gray-500">No data found.</p>
-                    </div>
-                    <div *ngFor="let data of savedPayments"
-                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative "
-                        
-                        >
-                        <div class="absolute inset-0 bg-cover bg-center"
-                            [style.background-image]="'url(' + data.purchase.unit.property.property_images[0].image_url + ')'"
-                            >
-                        </div>
-                        <div class="relative z-10 px-4 pb-4 pt-12">
-                            <div class="flex flex-col bg-white bg-opacity-90 rounded-lg py-6 pl-6 pr-12 !font-semibold">
-                                    <div class="flex flex-col gap-4">
-                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.purchase.unit.property.name }}</h3>
-                                        <h2 class="!text-primary text-lg !font-semibold">{{ data.amount_paid | currency:'NGN':'symbol':'1.0-0' }}</h2>
-
-                                        <div class="flex flex-col gap-1">
-                                            <div class="flex justify-between !text-gray-400">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="tag"></app-icon>
-                                                    <p class="text-sm"> Units </p>
-                                                </div>
-                                                <p>{{ data.purchase.quantity }}</p>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="home"></app-icon>
-                                                    <p class="text-sm"> Location </p>
-                                                </div>
-                                                <p class="text-sm !text-gray-500">{{ data.purchase.unit.property.location }}</p>
-                                            </div>
-                                        </div>
-
-                                        <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer"
-                                        (click)="gotoPurchaseForm(data.purchase_id)">
-                                            Complete Form
-                                        </button>
-
-                                    </div>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <nz-pagination *ngIf="savedPagination && savedPagination.total > 10" [nzPageIndex]="savedPagination.page" [nzTotal]="savedPagination.total" [nzResponsive]="true" (nzPageIndexChange)="onSavedPageChange($event)" [nzShowTotal]="rangeTemplate"></nz-pagination>
-                    <ng-template #rangeTemplate let-range="range" let-total>
-                    {{ range[0] }}-{{ range[1] }} of {{ total }} items
-                    </ng-template>
-                </div>
-                
-            </nz-tab>
-            <nz-tab nzTitle="Fully Paid">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8">
-                    @if (isLoading) { @for (item of emptyArray; track $index) {
-                    <div class="h-fit flex relative rounded-lg w-full animate-pulse">
-                        <div class="bg-gray-200 w-full h-64 rounded-lg"></div>
-                    </div>
-                    }}
-                    <div class="flex justify-center" *ngIf="fullyPaidPayments && fullyPaidPayments.length === 0">
-                        <p class="my-properties-page__empty-text text-gray-500">No data found.</p>
-                    </div>
-                    <div *ngFor="let data of fullyPaidPayments"
-                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
-                        routerLink="view/{{ data.id }}"
-                        >
-                        <div class="absolute inset-0 bg-cover bg-center"
-                            [style.background-image]="'url(' + getPurchaseImage(data) + ')'"
-                            >
-                        </div>
-                        <div class="relative z-10 px-4 pb-4 pt-12">
-                            <div class="flex flex-col bg-white bg-opacity-90 rounded-lg py-6 pl-6 pr-12 !font-semibold">
-                                    <div class="flex flex-col gap-4">
-                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.unit.property.name }}</h3>
-                                        <h2 class="!text-primary text-lg !font-semibold">{{ data.total_price | currency:'NGN':'symbol':'1.0-0' }}</h2>
-                                        <div class="flex flex-col gap-1">
-                                            <div class="flex justify-between !text-gray-400">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="tag"></app-icon>
-                                                    <p class="text-sm"> Number of Units </p>
-                                                </div>
-                                                <p>{{ data.quatity }}</p>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="credit-card"></app-icon>
-                                                    <p class="text-sm"> Payment Type </p>
-                                                </div>
-                                                <p class="text-sm  !text-gray-500">{{ getPurchasePaymentType(data) }}</p>
-                                            </div>
-                                            <div class="flex justify-between payment-mode-row">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="payment-mode-row__label-icon !text-gray-400" name="wallet"></app-icon>
-                                                    <p class="text-sm"> Payment Mode </p>
-                                                </div>
-                                                <div class="flex items-center gap-2 text-sm !text-gray-500">
-                                                    <app-icon class="payment-mode-row__value-icon !text-gray-400 !text-sm" name="wallet"></app-icon>
-                                                    <p class="text-sm !text-gray-500">{{ getPurchasePaymentMode(data) }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="circle"></app-icon>
-                                                    <p class="text-sm"> Payment Status </p>
-                                                </div>
-                                                <p class="text-sm !text-yellow-400 !font-normal bg-green-50 border border-green-200 rounded-full !px-4"> Paid </p>
-                                            </div>
-                                        </div>
-
-                                        <!-- <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer">
-                                            Payment Schedule
-                                        </button> -->
-
-                                    </div>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <nz-pagination *ngIf="fullyPaidPagination && fullyPaidPagination.total > 10" [nzPageIndex]="fullyPaidPagination.page" [nzTotal]="fullyPaidPagination.total" [nzResponsive]="true" (nzPageIndexChange)="onFullyPaidPageChange($event)" [nzShowTotal]="rangeTemplate"></nz-pagination>
-                    <ng-template #rangeTemplate let-range="range" let-total>
-                    {{ range[0] }}-{{ range[1] }} of {{ total }} items
-                    </ng-template>
-                </div>
-            </nz-tab>
-            <nz-tab nzTitle="In Payment">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 pt-8">
-                    @if (isLoading) { @for (item of emptyArray; track $index) {
-                    <div class="h-fit flex relative rounded-lg w-full animate-pulse">
-                        <div class="bg-gray-200 w-full h-64 rounded-lg"></div>
-                    </div>
-                    }}
-                    <div class="flex justify-center" *ngIf="inPaymentProperties && inPaymentProperties.length === 0">
-                        <p class="my-properties-page__empty-text text-gray-500">No data found.</p>
-                    </div>
-                    <div *ngFor="let data of inPaymentProperties"
-                        class="bg-white rounded-lg shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-xl relative cursor-pointer"
-                        routerLink="view/{{ data.id }}"
-                        >
-                        <div class="absolute inset-0 bg-cover bg-center"
-                            [style.background-image]="'url(' + getPurchaseImage(data) + ')'"
-                            >
-                        </div>
-                        <div class="relative z-10 px-4 pb-4 pt-12">
-                            <div class="flex flex-col bg-white bg-opacity-90 rounded-lg py-6 pl-6 pr-12 !font-semibold">
-                                    <div class="flex flex-col gap-4">
-                                        <h3 class="mb-2 text-medium font-bold !text-gray-600">{{ data.unit.property.name }}</h3>
-                                        <h2 class="!text-primary text-lg !font-semibold">{{ data.initial_payment_due | currency:'NGN':'symbol':'1.0-0' }}</h2>
-                                        <div class="flex flex-col gap-1">
-                                            <div class="flex justify-between !text-gray-400">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="tag"></app-icon>
-                                                    <p class="text-sm"> Number of Units </p>
-                                                </div>
-                                                <p>{{ data.quantity }}</p>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="credit-card"></app-icon>
-                                                    <p class="text-sm"> Payment Type </p>
-                                                </div>
-                                                <p class="text-sm  !text-gray-500">{{ getPurchasePaymentType(data) }}</p>
-                                            </div>
-                                            <div class="flex justify-between payment-mode-row">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="payment-mode-row__label-icon !text-gray-400" name="wallet"></app-icon>
-                                                    <p class="text-sm"> Payment Mode </p>
-                                                </div>
-                                                <div class="flex items-center gap-2 text-sm !text-gray-500">
-                                                    <app-icon class="payment-mode-row__value-icon !text-gray-400 !text-sm" name="wallet"></app-icon>
-                                                    <p class="text-sm !text-gray-500">{{ getPurchasePaymentMode(data) }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex justify-between">
-                                                <div class="flex gap-2 items-center !text-gray-500">
-                                                    <app-icon class="!text-gray-400" name="circle"></app-icon>
-                                                    <p class="text-sm"> Payment Status </p>
-                                                </div>
-                                                <p class="text-sm !text-yellow-400 !font-normal bg-yellow-50 border border-yellow-200 rounded-full !px-4"> {{ data.status }} </p>
-                                            </div>
-                                            <p
-                                              *ngIf="isPendingPaystackPurchase(data)"
-                                              class="rounded-xl bg-red-50 px-3 py-2 text-xs !font-normal !text-red-500"
-                                            >
-                                              Paystack checkout was started but not completed. The payment may have been abandoned or cancelled.
-                                            </p>
-                                        </div>
-
-                                        <!-- <button class="mt-4 py-2 px-8 bg-primary w-fit !text-white rounded-full hover:bg-primary-dark cursor-pointer">
-                                            Payment Schedule
-                                        </button> -->
-
-                                    </div>
-                                
-                            </div>
-                        </div>
-                    </div>
-                    <!-- <nz-pagination *ngIf="inProgressPagination && inProgressPagination.total > 10" [nzPageIndex]="inProgressPagination.page" [nzTotal]="inProgressPagination.total" [nzResponsive]="true" (nzPageIndexChange)="onInProgressPageChange($event)" [nzShowTotal]="rangeTemplate"></nz-pagination>
-                    <ng-template #rangeTemplate let-range="range" let-total>
-                    {{ range[0] }}-{{ range[1] }} of {{ total }} items
-                    </ng-template> -->
-                </div>
-            </nz-tab>
-        </nz-tabset>
+      </article>
     </div>
   </div>
 </main>
