@@ -1,61 +1,144 @@
-<div class="min-h-screen p-6 bg-gray-50">
-  <div class="max-w-4xl mx-auto">
-    <div class="flex items-center justify-between mb-4">
-      <h1 class="text-2xl font-semibold">Notifications</h1>
-      <div class="flex items-center gap-2">
-        <button nz-button nzType="default" (click)="getNotifications()" [disabled]="isLoading">Refresh</button>
-        <button class="!bg-primary !border-none" nz-button nzType="primary" (click)="markAllAsRead()" [disabled]="isLoading || notifications.length === 0">Mark all read</button>
-      </div>
+<div class="notification-page">
+  <div class="notification-page__header">
+    <div>
+      <h1 class="notification-page__title">Notifications</h1>
+      <p class="notification-page__subtitle">Track payment reminders, subscription form updates, and account alerts from one place.</p>
     </div>
 
-    <nz-spin [nzSpinning]="isLoading">
-      <ng-container *ngIf="notifications?.length; else emptyState">
-        <nz-list nzBordered>
-          <nz-list-item *ngFor="let n of notifications" class="py-4">
-            <div class="flex items-start gap-4 w-full">
-              <div class="flex-shrink-0">
-                <div [ngClass]="{'bg-red-100': !n.is_read, 'bg-gray-100': n.is_read }" class="h-10 w-10 rounded-full flex items-center justify-center">
-                  <i nz-icon nzType="bell" class="text-blue-600"></i>
+    <div class="notification-page__actions">
+      <app-button
+        buttonText="Refresh"
+        variant="secondary"
+        [disabled]="isLoading"
+        (onButtonClick)="refreshNotifications()"
+      ></app-button>
+      <app-button
+        buttonText="Mark All Read"
+        [disabled]="isMarkingAllRead || notifications.length === 0 || unreadNotifications === 0"
+        [loading]="isMarkingAllRead"
+        (onButtonClick)="markAllAsRead()"
+      ></app-button>
+    </div>
+  </div>
+
+  <div class="notification-summary" *ngIf="!isSummaryLoading">
+    <div class="notification-summary__card">
+      <span class="notification-summary__label">Total Notifications</span>
+      <strong class="notification-summary__value">{{ summary.total }}</strong>
+    </div>
+    <div class="notification-summary__card">
+      <span class="notification-summary__label">Unread</span>
+      <strong class="notification-summary__value notification-summary__value--alert">{{ summary.unread }}</strong>
+    </div>
+    <div class="notification-summary__card">
+      <span class="notification-summary__label">Read</span>
+      <strong class="notification-summary__value">{{ summary.read }}</strong>
+    </div>
+    <div class="notification-summary__card">
+      <span class="notification-summary__label">Upcoming Payments</span>
+      <strong class="notification-summary__value">{{ getTypeCount('upcoming_payment') }}</strong>
+    </div>
+  </div>
+
+  <div class="notification-filters">
+    <label class="notification-filters__field">
+      <span>Status</span>
+      <select [(ngModel)]="isReadFilter" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let option of readOptions" [ngValue]="option.value">{{ option.label }}</option>
+      </select>
+    </label>
+
+    <label class="notification-filters__field">
+      <span>Type</span>
+      <select [(ngModel)]="typeFilter" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let option of typeOptions" [ngValue]="option.value">{{ option.label }}</option>
+      </select>
+    </label>
+  </div>
+
+  <nz-spin [nzSpinning]="isLoading">
+    <ng-container *ngIf="notifications.length; else emptyState">
+      <div class="notification-list">
+        <article
+          *ngFor="let notification of notifications"
+          class="notification-card"
+          [class.notification-card--unread]="!notification.is_read"
+        >
+          <div class="notification-card__icon">
+            <app-icon [name]="'bell'" [size]="18"></app-icon>
+          </div>
+
+          <div class="notification-card__content">
+            <div class="notification-card__top">
+              <div class="notification-card__heading">
+                <div class="notification-card__meta">
+                  <span [class]="getTypeClass(notification.type)">{{ getTypeLabel(notification.type) }}</span>
+                  <span class="notification-card__state" [class.notification-card__state--unread]="!notification.is_read">
+                    {{ notification.is_read ? 'Read' : 'Unread' }}
+                  </span>
                 </div>
+                <h2>{{ notification.title }}</h2>
+                <p>{{ notification.message }}</p>
+                <div class="notification-card__timestamp">{{ notification.createdAt | date:'medium' }}</div>
               </div>
 
-              <div class="flex-1">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h3 class="font-medium text-gray-900">{{ n.title }}</h3>
-                    <p class="text-sm text-gray-600">{{ n.message }}</p>
-                    <div class="text-xs text-gray-400 mt-1">{{ n.createdAt | date:'medium' }}</div>
-                  </div>
+              <div class="notification-card__actions">
+                <button
+                  type="button"
+                  class="notification-card__text-action"
+                  *ngIf="notification.action_link"
+                  (click)="openAction(notification)"
+                >
+                  Open
+                </button>
 
-                  <div class="flex items-center gap-2">
-                    <!-- <button nz-button nzType="link" (click)="openAction(n)" [disabled]="!n.action_link">Open</button> -->
+                <button
+                  type="button"
+                  class="notification-card__text-action"
+                  *ngIf="!notification.is_read"
+                  (click)="markAsRead(notification.id)"
+                  [disabled]="isItemLoading(notification.id)"
+                >
+                  {{ isItemLoading(notification.id) ? 'Updating...' : 'Mark Read' }}
+                </button>
 
-                    <button nz-button nzType="default" *ngIf="!n.is_read" (click)="markAsRead(n.id)" [disabled]="isItemLoading(n.id)">
-                      <span *ngIf="!isItemLoading(n.id)">Mark read</span>
-                      <nz-spin class="!text-primary" *ngIf="isItemLoading(n.id)" nzSimple></nz-spin>
-                    </button>
-
-                    <nz-popconfirm nzTitle="Are you sure?" (nzOnConfirm)="deleteNotification(n.id)">
-                      <button nz-button nzType="text" class="text-red-500">Delete</button>
-                    </nz-popconfirm>
-                  </div>
-                </div>
-
-                <div class="mt-2 text-xs text-gray-500">
-                  <span *ngIf="n.meta">Amount: ₦{{ n.meta?.amount_due | number }}</span>
-                  <span *ngIf="n.meta"> · Priority: {{ n.meta?.priority }}</span>
-                </div>
+                <nz-popconfirm nzTitle="Delete this notification?" (nzOnConfirm)="deleteNotification(notification.id)">
+                  <button
+                    type="button"
+                    class="notification-card__text-action notification-card__text-action--danger"
+                    [disabled]="isItemLoading(notification.id)"
+                  >
+                    Delete
+                  </button>
+                </nz-popconfirm>
               </div>
             </div>
-          </nz-list-item>
-        </nz-list>
-      </ng-container>
 
-      <ng-template #emptyState>
-        <div class="py-12">
-          <nz-empty nzNotFoundImage="simple"></nz-empty>
-        </div>
-      </ng-template>
-    </nz-spin>
-  </div>
+            <div class="notification-card__details" *ngIf="notification.meta">
+              <span *ngIf="hasMetaValue(notification, 'amount_due')">Amount: ₦{{ getMetaValue(notification, 'amount_due') | number }}</span>
+              <span *ngIf="hasMetaValue(notification, 'priority')">Priority: {{ getMetaValue(notification, 'priority') }}</span>
+              <span *ngIf="hasMetaValue(notification, 'schedule_id')">Schedule Ref: {{ getMetaValue(notification, 'schedule_id') }}</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="notification-pagination" *ngIf="total > limit">
+        <nz-pagination
+          [nzPageIndex]="page"
+          [nzPageSize]="limit"
+          [nzTotal]="total"
+          [nzShowSizeChanger]="false"
+          [nzShowQuickJumper]="true"
+          (nzPageIndexChange)="onPageIndexChange($event)"
+        ></nz-pagination>
+      </div>
+    </ng-container>
+
+    <ng-template #emptyState>
+      <div class="notification-empty">
+        <nz-empty nzNotFoundImage="simple" nzNotFoundContent="No notifications found"></nz-empty>
+      </div>
+    </ng-template>
+  </nz-spin>
 </div>

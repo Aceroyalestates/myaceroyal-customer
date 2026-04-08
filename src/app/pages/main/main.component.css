@@ -280,6 +280,30 @@ h6 {
   color: #facc15;
 }
 
+.app-header__notifications {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-header__notifications-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e41c24;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(228, 28, 36, 0.24);
+}
+
 :host-context(.dark) .text-small,
 :host-context(.dark) .text-normal,
 :host-context(.dark) .app-header h2,

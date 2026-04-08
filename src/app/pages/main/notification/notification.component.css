@@ -1,0 +1,335 @@
+.notification-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 8px 24px;
+}
+
+.notification-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.notification-page__title {
+  margin: 0 0 6px;
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--text-color);
+}
+
+.notification-page__subtitle {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.notification-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.notification-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.notification-summary__card,
+.notification-filters,
+.notification-card {
+  background: var(--surface-bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+}
+
+.notification-summary__card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notification-summary__label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.notification-summary__value {
+  font-size: 1.85rem;
+  line-height: 1;
+  color: var(--text-color);
+}
+
+.notification-summary__value--alert {
+  color: var(--primary);
+}
+
+.notification-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 240px));
+  gap: 16px;
+  padding: 20px;
+}
+
+.notification-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notification-filters__field span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.notification-filters__field select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-color);
+  padding: 0 14px;
+  outline: none;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notification-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 22px;
+}
+
+.notification-card--unread {
+  border-color: rgba(228, 28, 36, 0.28);
+  box-shadow: 0 14px 40px rgba(228, 28, 36, 0.08);
+}
+
+.notification-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(228, 28, 36, 0.1);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.notification-card__heading {
+  min-width: 0;
+}
+
+.notification-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.notification-card__type,
+.notification-card__state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.notification-card__type {
+  background: rgba(228, 28, 36, 0.08);
+  color: var(--primary);
+}
+
+.notification-card__type--subscription_form {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+.notification-card__type--upcoming_payment {
+  background: rgba(245, 158, 11, 0.14);
+  color: #d97706;
+}
+
+.notification-card__type--admin_alert {
+  background: rgba(139, 92, 246, 0.14);
+  color: #7c3aed;
+}
+
+.notification-card__type--other {
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+}
+
+.notification-card__state {
+  background: rgba(148, 163, 184, 0.16);
+  color: var(--text-muted);
+}
+
+.notification-card__state--unread {
+  background: rgba(228, 28, 36, 0.12);
+  color: var(--primary);
+}
+
+.notification-card__heading h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: var(--text-color);
+}
+
+.notification-card__heading p,
+.notification-card__timestamp,
+.notification-card__details {
+  color: var(--text-muted);
+}
+
+.notification-card__heading p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.notification-card__timestamp {
+  margin-top: 10px;
+  font-size: 0.88rem;
+}
+
+.notification-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.notification-card__text-action {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notification-card__text-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.notification-card__text-action--danger {
+  color: #dc2626;
+}
+
+.notification-card__details {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+
+.notification-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+.notification-empty {
+  padding: 40px 0 24px;
+}
+
+:host-context(.dark) .notification-card__type--subscription_form {
+  background: rgba(96, 165, 250, 0.14);
+  color: #93c5fd;
+}
+
+:host-context(.dark) .notification-card__type--upcoming_payment {
+  background: rgba(251, 191, 36, 0.16);
+  color: #fcd34d;
+}
+
+:host-context(.dark) .notification-card__type--admin_alert {
+  background: rgba(167, 139, 250, 0.16);
+  color: #c4b5fd;
+}
+
+:host-context(.dark) .notification-card__type--other {
+  background: rgba(148, 163, 184, 0.18);
+  color: #cbd5e1;
+}
+
+@media (max-width: 991px) {
+  .notification-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .notification-card__top {
+    flex-direction: column;
+  }
+
+  .notification-card__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 767px) {
+  .notification-page {
+    padding: 12px 0 20px;
+  }
+
+  .notification-page__header {
+    flex-direction: column;
+  }
+
+  .notification-page__actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .notification-page__actions app-button {
+    flex: 1;
+  }
+
+  .notification-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-card {
+    padding: 18px;
+  }
+}

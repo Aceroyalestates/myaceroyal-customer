@@ -1,36 +1,72 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NotificationService } from 'src/app/core/services/notification.service';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
+import { NzNotificationService as NzNotifService } from 'ng-zorro-antd/notification';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
-import { NzListModule } from 'ng-zorro-antd/list';
-import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzNotificationService as NzNotifService } from 'ng-zorro-antd/notification';
-import { Router } from '@angular/router';
+import { NotificationService, NotificationSummaryData, NotificationType } from 'src/app/core/services/notification.service';
+
+interface NotificationItem {
+  id: string;
+  type: NotificationType | string;
+  title: string;
+  message: string;
+  action_link?: string | null;
+  is_read: boolean;
+  meta?: Record<string, any> | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 @Component({
   selector: 'app-notification',
   imports: [
     SharedModule,
     CommonModule,
-    NzButtonModule,
+    FormsModule,
     NzPopconfirmModule,
-    NzListModule,
     NzEmptyModule,
-    NzIconModule,
-    NzSpinModule
+    NzSpinModule,
+    NzPaginationModule,
   ],
   templateUrl: './notification.component.html',
   styleUrl: './notification.component.css'
 })
-export class NotificationComponent {
+export class NotificationComponent implements OnInit {
+  readonly typeOptions: Array<{ label: string; value: NotificationType | '' }> = [
+    { label: 'All Types', value: '' },
+    { label: 'Subscription Form', value: 'subscription_form' },
+    { label: 'Upcoming Payment', value: 'upcoming_payment' },
+    { label: 'Admin Alert', value: 'admin_alert' },
+    { label: 'Other', value: 'other' },
+  ];
+
+  readonly readOptions: Array<{ label: string; value: '' | 'true' | 'false' }> = [
+    { label: 'All Statuses', value: '' },
+    { label: 'Unread', value: 'false' },
+    { label: 'Read', value: 'true' },
+  ];
 
   isLoading = false;
-  notifications: any[] = [];
+  isSummaryLoading = false;
+  isMarkingAllRead = false;
+  notifications: NotificationItem[] = [];
   loadingIds: Set<string> = new Set();
+  summary: NotificationSummaryData = {
+    total: 0,
+    unread: 0,
+    read: 0,
+    typeBreakdown: {},
+  };
+  page = 1;
+  limit = 10;
+  total = 0;
+  isReadFilter: '' | 'true' | 'false' = '';
+  typeFilter: NotificationType | '' = '';
 
   constructor(
     private notificationService: NotificationService,
@@ -39,32 +75,27 @@ export class NotificationComponent {
   ) {}
 
   ngOnInit(): void {
+    this.loadSummary();
     this.getNotifications();
   }
 
-  getNotifications(): void {
+  getNotifications(page: number = this.page): void {
     this.isLoading = true;
+    this.page = page;
 
-    this.notificationService.getNotifications().subscribe({
+    this.notificationService.getNotifications({
+      page: this.page,
+      limit: this.limit,
+      is_read: this.parseReadFilter(),
+      type: this.typeFilter,
+    }).subscribe({
       next: (response: any) => {
         this.notifications = response.data || [];
+        const pagination = response.pagination ?? {};
+        this.page = pagination.current_page ?? pagination.page ?? this.page;
+        this.limit = pagination.per_page ?? pagination.limit ?? this.limit;
+        this.total = pagination.total_items ?? pagination.total ?? this.notifications.length;
         this.isLoading = false;
-        this.notifications.push({
-      "id": "123e4567-e89b-12d3-a456-426614174000",
-      "user_id": "987fcdeb-51d2-4a8c-b456-426614174000",
-      "type": "upcoming_payment",
-      "title": "Payment Due Soon",
-      "message": "Your payment installment #3 of ₦500,000 is due in 3 days.",
-      "action_link": "/dashboard/schedules/123",
-      "is_read": false,
-      "meta": {
-        "schedule_id": "456e7890-e89b-12d3-a456-426614174000",
-        "amount_due": 500000,
-        "priority": "medium"
-      },
-      "createdAt": "2025-01-15T10:30:00Z",
-      "updatedAt": "2025-01-15T10:30:00Z"
-    })
       },
       error: (error: any) => {
         console.error(error);
@@ -82,6 +113,10 @@ export class NotificationComponent {
         const n = this.notifications.find((x) => x.id === notificationId);
         if (n) n.is_read = true;
         this.loadingIds.delete(notificationId);
+        this.loadSummary();
+        if (this.isReadFilter === 'false') {
+          this.getNotifications(this.page);
+        }
         this.nzNotif.success('Updated', 'Notification marked as read');
       },
       error: (err: any) => {
@@ -99,6 +134,12 @@ export class NotificationComponent {
       next: () => {
         this.notifications = this.notifications.filter((n) => n.id !== notificationId);
         this.loadingIds.delete(notificationId);
+        this.total = Math.max(0, this.total - 1);
+        if (!this.notifications.length && this.page > 1) {
+          this.page -= 1;
+          this.getNotifications(this.page);
+        }
+        this.loadSummary();
         this.nzNotif.success('Deleted', 'Notification removed');
       },
       error: (err: any) => {
@@ -111,16 +152,20 @@ export class NotificationComponent {
 
   markAllAsRead(): void {
     if (!this.notifications?.length) return;
-    this.isLoading = true;
+    this.isMarkingAllRead = true;
     this.notificationService.markAllAsRead().subscribe({
       next: () => {
         this.notifications.forEach(n => n.is_read = true);
-        this.isLoading = false;
+        this.isMarkingAllRead = false;
+        this.loadSummary();
+        if (this.isReadFilter === 'false') {
+          this.getNotifications(1);
+        }
         this.nzNotif.success('Updated', 'All notifications marked as read');
       },
       error: (err: any) => {
         console.error(err);
-        this.isLoading = false;
+        this.isMarkingAllRead = false;
         this.nzNotif.error('Error', 'Failed to mark all notifications as read');
       }
     });
@@ -138,4 +183,83 @@ export class NotificationComponent {
     return this.loadingIds.has(id);
   }
 
+  onFilterChange(): void {
+    this.getNotifications(1);
+  }
+
+  refreshNotifications(): void {
+    this.loadSummary();
+    this.getNotifications(1);
+  }
+
+  get unreadNotifications(): number {
+    return this.summary.unread;
+  }
+
+  get typeSummaryCards(): Array<{ label: string; value: number }> {
+    return [
+      { label: 'Subscription Forms', value: this.getTypeCount('subscription_form') },
+      { label: 'Upcoming Payments', value: this.getTypeCount('upcoming_payment') },
+      { label: 'Admin Alerts', value: this.getTypeCount('admin_alert') },
+      { label: 'Other', value: this.getTypeCount('other') },
+    ];
+  }
+
+  getTypeLabel(type: string): string {
+    switch (type) {
+      case 'subscription_form':
+        return 'Subscription Form';
+      case 'upcoming_payment':
+        return 'Upcoming Payment';
+      case 'admin_alert':
+        return 'Admin Alert';
+      default:
+        return 'Other';
+    }
+  }
+
+  getTypeClass(type: string): string {
+    return `notification-card__type notification-card__type--${type || 'other'}`;
+  }
+
+  hasMetaValue(notification: NotificationItem, key: string): boolean {
+    const value = notification.meta?.[key];
+    return value !== null && value !== undefined && value !== '';
+  }
+
+  getMetaValue(notification: NotificationItem, key: string): string | number | null {
+    const value = notification.meta?.[key];
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    return typeof value === 'number' || typeof value === 'string' ? value : String(value);
+  }
+
+  onPageIndexChange(page: number): void {
+    this.getNotifications(page);
+  }
+
+  private loadSummary(): void {
+    this.isSummaryLoading = true;
+    this.notificationService.getNotificationSummary(true).subscribe({
+      next: () => {
+        this.summary = this.notificationService.getCurrentSummary();
+        this.isSummaryLoading = false;
+      },
+      error: (error: any) => {
+        console.error(error);
+        this.isSummaryLoading = false;
+      }
+    });
+  }
+
+  private parseReadFilter(): boolean | '' {
+    if (this.isReadFilter === '') return '';
+    return this.isReadFilter === 'true';
+  }
+
+  getTypeCount(type: NotificationType): number {
+    return Number(this.summary.typeBreakdown?.[type] ?? 0);
+  }
 }
