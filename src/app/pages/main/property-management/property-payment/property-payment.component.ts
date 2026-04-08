@@ -7,7 +7,7 @@ import { PropertiesService } from 'src/app/core/services/properties.service';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzNotificationService } from 'ng-zorro-antd/notification';
-import { ContinueOfflinePurchasePayload, ContinueOnlinePurchasePayload, DefaultBankAccount } from 'src/app/core/models/payment';
+import { ContinueOfflinePurchasePayload, ContinueOnlinePurchasePayload, DefaultBankAccount, PaymentData } from 'src/app/core/models/payment';
 import { FormsModule } from '@angular/forms';
 import { NgxCurrencyDirective } from 'ngx-currency';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -60,6 +60,8 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
   property: any = null;
   propertyDetails: Property | null = null;
   purchaseSummary: any = null;
+  paymentHistory: PaymentData[] = [];
+  isLoadingPaymentHistory = false;
   propertyImages: ImageSliderItem[] = [];
   currentImageIndex = 0;
 
@@ -162,6 +164,7 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
         console.log('Purchase details:', response);
         this.propertyPurchaseDetails = response.data;
         this.loadPropertyDetails(response.data.unit.property.id);
+        this.getPurchasePayments(purchaseId);
         this.preparePropertyImages();
         if (this.shouldLoadSchedules) {
           this.getUserSchedules(purchaseId);
@@ -207,6 +210,21 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     });
   }
 
+  getPurchasePayments(purchaseId: string): void {
+    this.isLoadingPaymentHistory = true;
+    this.paymentService.getPaymentHistory(1, 10, 'created_at', 'DESC', { purchase_id: purchaseId }).subscribe({
+      next: (response) => {
+        this.paymentHistory = response?.data || [];
+        this.isLoadingPaymentHistory = false;
+      },
+      error: (error) => {
+        console.error('Error fetching purchase payment history:', error);
+        this.paymentHistory = [];
+        this.isLoadingPaymentHistory = false;
+      }
+    });
+  }
+
   get shouldLoadSchedules(): boolean {
     return !!this.propertyPurchaseDetails?.plan_id;
   }
@@ -221,6 +239,50 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
 
   get paymentModeLabel(): string {
     return this.formatPaymentMethod(this.propertyPurchaseDetails?.payment_method);
+  }
+
+  get unitTypeLabel(): string {
+    const rawValue = this.propertyPurchaseDetails?.unit?.unit_type?.name || this.propertyPurchaseDetails?.unit?.name;
+    return this.formatDisplayValue(rawValue);
+  }
+
+  get purchaseStatusLabel(): string {
+    return this.formatDisplayValue(this.propertyPurchaseDetails?.status);
+  }
+
+  get purchaseStatusClass(): string {
+    const status = this.propertyPurchaseDetails?.status;
+    if (status === 'completed') {
+      return 'status-pill status-pill--success';
+    }
+    if (status === 'cancelled' || status === 'failed') {
+      return 'status-pill status-pill--danger';
+    }
+    return 'status-pill status-pill--warning';
+  }
+
+  get hasPaymentHistory(): boolean {
+    return this.paymentHistory.length > 0;
+  }
+
+  get hasInstallmentSchedule(): boolean {
+    return this.shouldLoadSchedules && this.schedules.length > 0;
+  }
+
+  get purchaseBalanceDue(): number {
+    return Number(this.propertyPurchaseDetails?.balance_due || this.purchaseSummary?.remainingBalance || 0);
+  }
+
+  get totalAmountPaid(): number {
+    if (this.purchaseSummary?.totalAmountPaid != null) {
+      return Number(this.purchaseSummary.totalAmountPaid);
+    }
+
+    if (this.paymentHistory.length > 0) {
+      return this.paymentHistory.reduce((total, payment) => total + Number(payment.amount || 0), 0);
+    }
+
+    return Number(this.propertyPurchaseDetails?.total_price || 0) - this.purchaseBalanceDue;
   }
 
   get isOfflinePaymentMode(): boolean {
@@ -242,6 +304,22 @@ export class PropertyPaymentComponent implements OnInit, OnDestroy {
     }
 
     return method.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  formatDisplayValue(value: string | null | undefined): string {
+    if (!value) {
+      return 'N/A';
+    }
+
+    if (value === 'cheque') {
+      return 'Bank Draft';
+    }
+
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 
   startOnlinePurchase(): void {

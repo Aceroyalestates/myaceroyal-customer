@@ -8,27 +8,20 @@
           Track your full property portfolio, payment progress, form completion, and ownership details from one place.
         </p>
       </div>
+      <button type="button" class="property-filter-trigger" (click)="openFilters()">
+        <span class="property-filter-trigger__icon" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+        <span>{{ activeFilterLabel }}</span>
+      </button>
     </div>
 
     <div class="my-properties-page__summary-grid">
       <div class="portfolio-summary-card" *ngFor="let card of summaryCards">
         <span class="portfolio-summary-card__label">{{ card.label }}</span>
         <strong class="portfolio-summary-card__value">{{ card.value }}</strong>
-      </div>
-    </div>
-
-    <div class="my-properties-page__filters-wrap">
-      <div class="my-properties-page__filters">
-        <button
-          type="button"
-          *ngFor="let filter of portfolioFilters"
-          class="portfolio-filter"
-          [class.portfolio-filter--active]="selectedFilter === filter.key"
-          (click)="setFilter(filter.key)"
-        >
-          <span>{{ filter.label }}</span>
-          <strong>{{ getFilterCount(filter.key) }}</strong>
-        </button>
       </div>
     </div>
 
@@ -63,9 +56,9 @@
           </div>
           <div class="portfolio-card__media-overlay"></div>
 
-          <div class="portfolio-card__chips">
-            <span [class]="getFormStatusClass(item)">{{ getFormStatus(item) }}</span>
-            <span [class]="getPaymentStatusClass(item)">{{ getPaymentStatus(item) }}</span>
+          <div class="portfolio-card__chips" *ngIf="shouldShowFormChip() || shouldShowPaymentChip()">
+            <span *ngIf="shouldShowFormChip()" [class]="getFormStatusClass(item)">{{ getFormStatus(item) }}</span>
+            <span *ngIf="shouldShowPaymentChip()" [class]="getPaymentStatusClass(item)">{{ getPaymentStatus(item) }}</span>
           </div>
 
           <div class="portfolio-card__hero-copy">
@@ -80,32 +73,16 @@
               <span class="portfolio-card__meta-label">Portfolio Value</span>
               <strong class="portfolio-card__price">{{ formatNaira(getPurchaseAmount(item)) }}</strong>
             </div>
-            <div class="portfolio-card__price-block portfolio-card__price-side">
-              <span class="portfolio-card__meta-label">Initial Due</span>
-              <strong>{{ formatNaira(getInitialDueAmount(item)) }}</strong>
-            </div>
           </div>
 
           <div class="portfolio-card__meta-grid">
-            <div class="portfolio-card__meta-item">
-              <span class="portfolio-card__meta-label">Units</span>
-              <strong>{{ getQuantity(item) }}</strong>
-            </div>
-            <div class="portfolio-card__meta-item">
-              <span class="portfolio-card__meta-label">Unit Type</span>
-              <strong>{{ item.unit?.unit_type?.name || item.unit?.name || 'N/A' }}</strong>
-            </div>
-            <div class="portfolio-card__meta-item">
-              <span class="portfolio-card__meta-label">Payment Type</span>
-              <strong>{{ getPaymentType(item) }}</strong>
-            </div>
-            <div class="portfolio-card__meta-item">
-              <span class="portfolio-card__meta-label">Payment Mode</span>
-              <strong>{{ getPaymentMode(item) }}</strong>
+            <div class="portfolio-card__meta-item" *ngFor="let detail of getCardMetaItems(item)">
+              <span class="portfolio-card__meta-label">{{ detail.label }}</span>
+              <strong>{{ detail.value }}</strong>
             </div>
           </div>
 
-          <p class="portfolio-card__message">{{ getStatusMessage(item) }}</p>
+          <p class="portfolio-card__message" *ngIf="getStatusMessage(item)">{{ getStatusMessage(item) }}</p>
 
           <div class="portfolio-card__actions">
             <app-button
@@ -115,20 +92,28 @@
             ></app-button>
 
             <app-button
-              *ngIf="needsFormCompletion(item)"
-              buttonText="Continue Form"
+              *ngIf="shouldShowContinueForm(item)"
+              [buttonText]="getContinueFormLabel(item)"
               (onButtonClick)="gotoPurchaseForm(item.purchaseId, item.form)"
             ></app-button>
           </div>
         </div>
       </article>
     </div>
+
+    <div class="my-properties-page__load-more" *ngIf="!isLoading && hasMorePortfolioItems">
+      <app-button
+        [buttonText]="isLoadingMore ? 'Loading...' : 'Load More'"
+        [disabled]="isLoadingMore"
+        (onButtonClick)="loadMorePortfolio()"
+      ></app-button>
+    </div>
   </div>
 
   <button
     type="button"
     class="mobile-filter-fab"
-    (click)="openMobileFilters()"
+    (click)="openFilters()"
     [attr.aria-label]="'Open property filters'"
   >
     <span class="mobile-filter-fab__icon" aria-hidden="true">
@@ -139,24 +124,24 @@
     <span class="mobile-filter-fab__text">{{ activeFilterLabel }}</span>
   </button>
 
-  <div class="mobile-filter-sheet" *ngIf="mobileFilterSheetOpen">
-    <button type="button" class="mobile-filter-sheet__backdrop" (click)="closeMobileFilters()"></button>
-    <div class="mobile-filter-sheet__panel">
-      <div class="mobile-filter-sheet__handle"></div>
-      <div class="mobile-filter-sheet__header">
+  <div class="filter-sheet" *ngIf="filterSheetOpen">
+    <button type="button" class="filter-sheet__backdrop" (click)="closeFilters()"></button>
+    <div class="filter-sheet__panel">
+      <div class="filter-sheet__handle"></div>
+      <div class="filter-sheet__header">
         <div>
           <h3>Filter Properties</h3>
-          <p>Choose a portfolio view.</p>
+          <p>Choose how you want to view your portfolio.</p>
         </div>
-        <button type="button" class="mobile-filter-sheet__close" (click)="closeMobileFilters()">Close</button>
+        <button type="button" class="filter-sheet__close" (click)="closeFilters()">Close</button>
       </div>
 
-      <div class="mobile-filter-sheet__options">
+      <div class="filter-sheet__options">
         <button
           type="button"
           *ngFor="let filter of portfolioFilters"
-          class="mobile-filter-option"
-          [class.mobile-filter-option--active]="selectedFilter === filter.key"
+          class="filter-option"
+          [class.filter-option--active]="selectedFilter === filter.key"
           (click)="setFilter(filter.key)"
         >
           <span>{{ filter.label }}</span>
