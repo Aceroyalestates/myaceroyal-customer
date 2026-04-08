@@ -31,6 +31,7 @@ export class PropertyManagementComponent {
   propertyFormStats: Record<string, unknown> | null = null;
   emptyArray: any[] = new Array(8).fill('');
   selectedFilter: PortfolioFilter = 'all';
+  mobileFilterSheetOpen = false;
 
   readonly portfolioFilters: Array<{ key: PortfolioFilter; label: string }> = [
     { key: 'all', label: 'All Properties' },
@@ -56,6 +57,19 @@ export class PropertyManagementComponent {
 
   setFilter(filter: PortfolioFilter): void {
     this.selectedFilter = filter;
+    this.mobileFilterSheetOpen = false;
+  }
+
+  openMobileFilters(): void {
+    this.mobileFilterSheetOpen = true;
+  }
+
+  closeMobileFilters(): void {
+    this.mobileFilterSheetOpen = false;
+  }
+
+  get activeFilterLabel(): string {
+    return this.portfolioFilters.find((filter) => filter.key === this.selectedFilter)?.label || 'Filters';
   }
 
   loadPortfolio(): void {

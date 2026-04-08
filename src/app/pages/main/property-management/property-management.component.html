@@ -17,17 +17,19 @@
       </div>
     </div>
 
-    <div class="my-properties-page__filters">
-      <button
-        type="button"
-        *ngFor="let filter of portfolioFilters"
-        class="portfolio-filter"
-        [class.portfolio-filter--active]="selectedFilter === filter.key"
-        (click)="setFilter(filter.key)"
-      >
-        <span>{{ filter.label }}</span>
-        <strong>{{ getFilterCount(filter.key) }}</strong>
-      </button>
+    <div class="my-properties-page__filters-wrap">
+      <div class="my-properties-page__filters">
+        <button
+          type="button"
+          *ngFor="let filter of portfolioFilters"
+          class="portfolio-filter"
+          [class.portfolio-filter--active]="selectedFilter === filter.key"
+          (click)="setFilter(filter.key)"
+        >
+          <span>{{ filter.label }}</span>
+          <strong>{{ getFilterCount(filter.key) }}</strong>
+        </button>
+      </div>
     </div>
 
     <div class="my-properties-page__portfolio-grid">
@@ -120,6 +122,47 @@
           </div>
         </div>
       </article>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="mobile-filter-fab"
+    (click)="openMobileFilters()"
+    [attr.aria-label]="'Open property filters'"
+  >
+    <span class="mobile-filter-fab__icon" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+    </span>
+    <span class="mobile-filter-fab__text">{{ activeFilterLabel }}</span>
+  </button>
+
+  <div class="mobile-filter-sheet" *ngIf="mobileFilterSheetOpen">
+    <button type="button" class="mobile-filter-sheet__backdrop" (click)="closeMobileFilters()"></button>
+    <div class="mobile-filter-sheet__panel">
+      <div class="mobile-filter-sheet__handle"></div>
+      <div class="mobile-filter-sheet__header">
+        <div>
+          <h3>Filter Properties</h3>
+          <p>Choose a portfolio view.</p>
+        </div>
+        <button type="button" class="mobile-filter-sheet__close" (click)="closeMobileFilters()">Close</button>
+      </div>
+
+      <div class="mobile-filter-sheet__options">
+        <button
+          type="button"
+          *ngFor="let filter of portfolioFilters"
+          class="mobile-filter-option"
+          [class.mobile-filter-option--active]="selectedFilter === filter.key"
+          (click)="setFilter(filter.key)"
+        >
+          <span>{{ filter.label }}</span>
+          <strong>{{ getFilterCount(filter.key) }}</strong>
+        </button>
+      </div>
     </div>
   </div>
 </main>
